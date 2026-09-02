@@ -31,7 +31,8 @@ dist/            the built site (regenerated every build; safe to delete)
 Editing copy means editing `src/data.js` and rebuilding. Nothing in `dist/` is
 edited by hand.
 
-`preview.js` exists because there is nowhere to deploy this yet. It inlines the
+`preview.js` writes to `preview/`, deliberately outside `dist/` — `build.js` wipes
+`dist/` on every run, including the one `--serve` does on startup. It inlines the
 CSS, the JS and the logo, and rewires the internal links to swap sections in
 place, so all four pages travel as one file you can email or open from a
 `file://` URL. It is a review tool, not the site — real pages, real URLs and the

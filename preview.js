@@ -7,13 +7,14 @@
  *
  *   node preview.js
  *
- * Writes both flavours in a single run, because build() wipes dist/ and a
- * second invocation would delete the first one's output:
+ * Writes both flavours into preview/ — NOT dist/. build() wipes dist/ on
+ * every run, including the one `node build.js --serve` does on startup, so a
+ * bundle left in dist/ vanished the moment anyone looked at the site.
  *
- *   dist/preview.html        standalone — opens from a file:// URL, or sends
- *                            as an email attachment
- *   dist/preview.body.html   no <html>/<head> wrapper, for hosts that supply
- *                            their own document shell
+ *   preview/preview.html        standalone — opens from a file:// URL, or
+ *                               sends as an email attachment
+ *   preview/preview.body.html   no <html>/<head> wrapper, for hosts that
+ *                               supply their own document shell
  *
  * This is a review tool for sending the site to someone before there is
  * anywhere to deploy it. It is NOT the site: real pages, real URLs and the
@@ -28,6 +29,7 @@ const { build } = require('./build');
 
 const ROOT = __dirname;
 const DIST = path.join(ROOT, 'dist');
+const OUT = path.join(ROOT, 'preview');
 
 /* --------------------------------------------------------------- inputs */
 
@@ -208,11 +210,12 @@ ${js}
 
 /* ----------------------------------------------------------------- write */
 
-const bodyOut = path.join(DIST, 'preview.body.html');
+fs.mkdirSync(OUT, { recursive: true });
+const bodyOut = path.join(OUT, 'preview.body.html');
 fs.writeFileSync(bodyOut, `<title>Pookie Chicken</title>\n${bodyContent}\n`);
 
 {
-  const out = path.join(DIST, 'preview.html');
+  const out = path.join(OUT, 'preview.html');
   fs.writeFileSync(out, `<!doctype html>
 <html lang="${D.site.locale}">
 <head>
