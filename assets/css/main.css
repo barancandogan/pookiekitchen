@@ -340,17 +340,21 @@ a:hover { text-decoration-thickness: 2px; }
 .row__thumb--empty { background: none; }
 
 .row__thumb {
-  width: 140px; height: 105px; flex: none;
-  /* contain, not cover: these are studio plates on white, and their aspect
-     ratios run from 1.00 to 2.93. Cover would slice the ends off a long oval
-     plate. The box background is --surface, the same white the photographs
-     were shot on, so the letterboxing is invisible. */
-  object-fit: contain; background: var(--surface);
+  width: 180px; height: 120px; flex: none;
+  /* Every dish photograph is the same 3:2 canvas — the plate cut out and set
+     on pure white with one soft shadow — so a 3:2 box shows all of it with
+     nothing to letterbox. contain is belt and braces: if a photo ever arrives
+     in another proportion it is shrunk, never sliced. */
+  object-fit: contain; background: #FFFFFF;
   border-radius: var(--r-sm);
 }
 
 .row__name {
-  font-family: var(--display); font-size: var(--t-lg); font-weight: 600;
+  /* Anton has one weight: asking for 600 made the browser synthesise a bold,
+     which smears a condensed face into a puffy outline. 400, uppercase, the
+     same voice as every other heading on the site. */
+  font-family: var(--display); font-size: var(--t-lg); font-weight: 400;
+  text-transform: uppercase; letter-spacing: .02em;
   color: var(--brand);
   line-height: var(--lh-snug);
   /* block, not flex: as a flex container the dot became its own wrap item and
@@ -471,27 +475,37 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* ---------------------------------------------------------- home: cards */
 
+/* Two wide cards to a row, as in the mock-up: the photograph runs edge to edge
+   across the top, then one label, the name, a line, and price + link on the
+   same row. Every photograph is the same 3:2 cut-out-on-white canvas, so the
+   media block is pure white and needs no padding to look consistent. */
 .cards { margin-top: var(--s6); display: grid; gap: var(--s5);
-         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+         grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
 .card { background: var(--surface); border: 1px solid var(--rule);
-        border-radius: var(--r-lg); overflow: hidden;
+        border-radius: 12px; overflow: hidden;
         display: flex; flex-direction: column; }
-.card__media { aspect-ratio: 4 / 3; background: var(--surface);
-               display: grid; place-items: center; padding: var(--s3); }
-.card__media picture, .card__img { width: 100%; height: 100%; }
+.card__media { aspect-ratio: 3 / 2; background: #FFFFFF; border-bottom: 1px solid var(--sunken); }
+.card__media picture, .card__img { width: 100%; height: 100%; display: block; }
 .card__img { object-fit: contain; }
-.card__body { padding: var(--s3) var(--s4) var(--s5); display: grid; gap: var(--s2);
+.card__body { padding: var(--s4) var(--s5) var(--s5); display: grid; gap: var(--s2);
               align-content: start; flex: 1; }
-.card__name { font-size: 1.45rem; color: var(--brand); }
+.card__name { font-size: 1.75rem; color: var(--ink); margin-top: var(--s1); }
 .card__desc { font-size: var(--t-sm); color: var(--ink-2); }
 .card__row { display: flex; justify-content: space-between; align-items: baseline;
-             gap: var(--s3); margin-top: auto; padding-top: var(--s2); }
-.card__price { font-weight: 700; font-variant-numeric: tabular-nums lining; color: var(--ink); }
-.card__link { font-size: var(--t-sm); font-weight: 700; color: var(--brand); text-decoration: none; }
-.card__link:hover { text-decoration: underline; }
+             gap: var(--s3); margin-top: auto; padding-top: var(--s3); }
+/* The mock-up sets the price in the display face and the brand orange. --brand
+   is the text-safe orange (5.10:1 on white), so the price keeps its legibility
+   while taking the mock-up's colour. */
+.card__price { font-family: var(--display); font-size: 1.75rem; line-height: 1;
+               color: var(--brand); font-variant-numeric: lining-nums; }
+.card__link { font-size: var(--t-sm); font-weight: 700; color: var(--ink); text-decoration: none; }
+.card__link:hover { text-decoration: underline; color: var(--brand); }
 .pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em;
-        text-transform: uppercase; padding: 4px 10px; border-radius: 999px; }
-.pill--herb { background: var(--herb); color: #FFFFFF; justify-self: start; }   /* 6.41:1 */
+        text-transform: uppercase; padding: 4px 10px; border-radius: 999px; justify-self: start; }
+.pill--herb   { background: var(--herb); color: #FFFFFF; }            /* 6.41:1 */
+.pill--chilli { background: var(--sauce-chilli); color: #FFFFFF; }    /* 7.1:1 */
+.pill--plain  { background: var(--sunken); color: var(--ink-2); border: 1px solid var(--rule); }  /* 9.4:1 */
 
 .prices { margin-top: var(--s5); gap: var(--s2); }
 .prices__cell { border-radius: 999px; padding: var(--s2) var(--s4); flex-direction: row;
@@ -545,7 +559,7 @@ a:hover { text-decoration-thickness: 2px; }
   .brandmark img { width: 32px; height: 32px; }
   .head__in { gap: var(--s3); }
   .row { padding-inline: var(--s4); gap: var(--s3); }
-  .row__thumb { width: 80px; height: 62px; }
+  .row__thumb { width: 96px; height: 64px; }
   /* narrow screens cannot spare 96px of reserved whitespace */
   .row__thumb--empty { display: none; }
   .row__body { grid-template-columns: minmax(0, 1fr) auto; gap: var(--s1) var(--s3); }

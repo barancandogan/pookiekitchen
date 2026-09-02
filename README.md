@@ -94,23 +94,36 @@ Twelve of the fifteen photographs in the brand's Drive folder are wired in; the
 remaining three are marketing graphics (a banner, a price-tag advert, a neon
 sign mockup) rather than dishes.
 
-The sources are studio plates on a white backdrop, 1024–1472px, named
-`image (4).png` … `image (64).png`. Each was cropped to the plate itself — the
-white backdrop around it carries no information and only shrinks the dish in
-the thumbnail — then encoded at two widths in WebP with a JPEG fallback:
+The sources are studio plates on a near-white backdrop, 1024–1472px, named
+`image (4).png` … `image (64).png`. "Near-white" is the problem: each backdrop
+is a slightly different grey, with its own vignette and its own shadow, and
+inside a white thumbnail box that grey read as a leftover background. So every
+dish photograph is now brought to **one norm**:
+
+1. The food is segmented with ISNet (the `isnet-general-use` model, run
+   locally with onnxruntime — no credits, no upload).
+2. Inside the convex hull of the plate, every pixel within a few levels of the
+   backdrop colour is keyed to pure white; the plate's rim, its natural soft
+   shadow and the food are kept. A white plate keyed against white loses
+   nothing visible, which is why this is safe where a generic cut-out (which
+   removed most of the plates) was not.
+3. The result is centred on a 3:2 canvas, plate no wider than 88% of it, and
+   encoded at three widths in WebP with a JPEG fallback:
 
 ```
 assets/img/dish/<slug>-400.webp   <slug>-400.jpg      row thumbnails
-assets/img/dish/<slug>-800.webp   <slug>-800.jpg      2× displays
-assets/img/dish/feature-plate-900|1600.webp|jpg       the full-bleed band
+assets/img/dish/<slug>-800.webp   <slug>-800.jpg      2× thumbnails, cards
+assets/img/dish/<slug>-1200.webp  <slug>-1200.jpg     cards on 2× displays
+assets/img/dish/feature-plate-900|1600.webp|jpg       the hero poster (own crop)
 ```
 
-Cropping to the plate leaves aspect ratios between 1.00 (a round plate of
-wings) and 2.93 (a long oval). The thumbnail box is therefore a fixed
-140×105 with `object-fit: contain` and a `--surface` background — the same
-white the photographs were shot on, so the letterboxing is invisible and no
-plate is ever sliced. True intrinsic dimensions live in `photoDims` in
-`data.js` so the markup carries real `width`/`height`.
+Because every canvas is 3:2, the thumbnail box is 180×120 (96×64 on narrow
+screens) and the card media block is `aspect-ratio: 3 / 2`, both on pure
+white — nothing is letterboxed and no plate is ever sliced. `object-fit:
+contain` stays on as a guard for any future photo in another proportion.
+`photoDims` in `data.js` carries the 1200×800 intrinsic size so the markup has
+real `width`/`height`. The pipeline is `scratchpad/cutout/cut.py` (masks) and
+`cut2.py` (keying and composition); re-run both to regenerate every file.
 
 **Alignment is a chapter-level property.** Where any dish in a chapter has a
 photograph, the photo-less rows in that chapter reserve the same column, so

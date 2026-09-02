@@ -42,8 +42,8 @@ const css = fs.readFileSync(path.join(ROOT, 'assets/css/main.css'), 'utf8')
 
 /**
  * The bundle is one file with no origin to resolve /assets/ against, so every
- * photograph has to travel inside it. Only the narrow variant of each is
- * inlined — the bundle is for review on a screen, not for shipping — and the
+ * photograph has to travel inside it. Only one variant of each is inlined
+ * — the bundle is for review on a screen, not for shipping — and the
  * <picture>/srcset machinery is dropped with it, since there is now exactly
  * one source to choose from.
  */
@@ -61,7 +61,7 @@ function inlinePhotos(html) {
     const m = block.match(/\/assets\/img\/(dish|brand)\/([a-z0-9-]+)-\d+\./) || [];
     const dir = m[1], slug = m[2];
     if (!slug) return block;
-    const width = (slug === 'feature-plate' || dir === 'brand') ? 900 : 400;
+    const width = (slug === 'feature-plate' || dir === 'brand') ? 900 : 800;
     return img
       .replace(/\ssrcset="[^"]*"/, '')
       .replace(/\ssizes="[^"]*"/, '')

@@ -144,30 +144,34 @@ const brand = {
 /* --------------------------------------------------------- photo sizes */
 
 /**
- * Intrinsic pixel dimensions of each photograph AFTER cropping, so the markup
- * can carry true width/height attributes. The source shots are studio plates
- * on a white backdrop and each was cropped to the plate itself, so the aspect
- * ratios differ — 1.00 for a round plate of wings, 2.93 for a long oval. The
- * thumbnail box is a fixed size and the image is object-fit:contain inside it,
- * so a plate is never cropped and never distorted whatever its shape.
+ * Intrinsic pixel dimensions of each photograph, so the markup can carry true
+ * width/height attributes.
+ *
+ * Every dish photograph is now ONE norm: the plate cut out of its studio shot
+ * (the original backdrops were near-white but not white, and each carried its
+ * own shadow) and set on pure white, centred on a 3:2 canvas with the same
+ * soft shadow under every plate. So all of them are 1200 × 800 at the largest
+ * width, and a thumbnail box of the same proportion shows the whole plate with
+ * no letterboxing whatever the plate's shape. Only the hero poster keeps its
+ * own crop.
  *
  * Regenerate these alongside the files themselves; audit.js checks that every
- * referenced photo exists in both formats and both widths.
+ * referenced photo exists in both formats and every width.
  */
 const photoDims = {
-  'boneless-bbq': [1254, 914],
-  'boneless-mango-habanero': [1254, 914],
-  'boneless-peri-peri': [1254, 910],
-  'buffalo-wings': [1254, 904],
-  'cheesy-triple-blast': [1465, 500],
-  'creamy-curry': [1254, 1222],
+  'boneless-bbq': [1200, 800],
+  'boneless-mango-habanero': [1200, 800],
+  'boneless-peri-peri': [1200, 800],
+  'buffalo-wings': [1200, 800],
+  'cheesy-triple-blast': [1200, 800],
+  'creamy-curry': [1200, 800],
   'feature-plate': [1472, 704],
-  'korean-bbq-wings': [1228, 841],
-  'mediterranean-sirloin': [1201, 962],
-  'peri-peri-wings': [930, 739],
-  'roasted-pepper-sirloin': [847, 848],
-  'sweet-chilli': [1472, 704],
-  'teriyaki': [1254, 992],
+  'korean-bbq-wings': [1200, 800],
+  'mediterranean-sirloin': [1200, 800],
+  'peri-peri-wings': [1200, 800],
+  'roasted-pepper-sirloin': [1200, 800],
+  'sweet-chilli': [1200, 800],
+  'teriyaki': [1200, 800],
 };
 
 /* --------------------------------------------------------------- sauces */

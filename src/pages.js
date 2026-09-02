@@ -185,8 +185,21 @@ function bannerBlock() {
 }
 
 /**
- * Six dishes as cards. Each links to its chapter on the menu — there is no
- * ordering channel yet, so there is no "Order" button to promise one.
+ * The one label a card carries, in the order that matters to the person
+ * choosing: heat first, then whether the plate is a complete meal, else the
+ * chapter it belongs to. Never more than one — a card is not a spec sheet.
+ */
+function cardPill(ch, it) {
+  if (it.sauce === 'chilli') return '<span class="pill pill--chilli">Spicy</span>';
+  if (it.thirds) return '<span class="pill pill--herb">Complete plate</span>';
+  return `<span class="pill pill--plain">${esc(ch.name)}</span>`;
+}
+
+/**
+ * Six dishes as cards, after the client's mock-up: photograph across the top,
+ * one label, the name, a line of description, then the price and a link on
+ * the same row. Each links to its chapter on the menu — there is no ordering
+ * channel yet, so there is no "Order" button to promise one.
  */
 function teaserCards() {
   const wanted = D.copy.teaser;
@@ -196,14 +209,14 @@ function teaserCards() {
   }
   found.sort((a, b) => wanted.indexOf(a.it.photo) - wanted.indexOf(b.it.photo));
   return found.map(({ ch, it }) => `<article class="card">
-  <div class="card__media">${dishPhoto(it.photo, '(max-width: 640px) 100vw, 320px', [400, 800], 'card__img')}</div>
+  <div class="card__media">${dishPhoto(it.photo, '(max-width: 720px) 100vw, 580px', [400, 800, 1200], 'card__img')}</div>
   <div class="card__body">
-    ${it.thirds ? '<span class="pill pill--herb">Complete plate</span>' : ''}
+    ${cardPill(ch, it)}
     <h3 class="card__name">${esc(it.name)}</h3>
     ${when(it.desc, () => `<p class="card__desc">${esc(it.desc)}</p>`)}
     <div class="card__row">
       <span class="card__price">${it.priceConfirmed === false ? '—' : money(it.price)}</span>
-      <a class="card__link" href="/menu/#ch-${ch.id}">See on the menu →</a>
+      <a class="card__link" href="/menu/#ch-${ch.id}">On the menu <span aria-hidden="true">→</span></a>
     </div>
   </div>
 </article>`).join('\n');

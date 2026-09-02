@@ -170,11 +170,12 @@ if (unconfirmedPhotos.length) {
   warn('photos', `${unconfirmedPhotos.length} photo(s) matched to a dish by eye, shown but unconfirmed: ${unconfirmedPhotos.join(', ')}`);
 }
 
-// Every photo referenced must actually exist, in both formats and both widths.
+// Every photo referenced must actually exist, in both formats and every width
+// the markup can ask for (the home-page cards go up to 1200).
 for (const ch of D.menu) {
   for (const it of ch.items) {
     if (!it.photo) continue;
-    for (const w of [400, 800]) {
+    for (const w of [400, 800, 1200]) {
       for (const ext of ['webp', 'jpg']) {
         const f = path.join(DIST, 'assets/img/dish', `${it.photo}-${w}.${ext}`);
         if (!fs.existsSync(f)) err('photos', `missing ${it.photo}-${w}.${ext} for ${it.name}`);
