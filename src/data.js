@@ -417,7 +417,8 @@ const copy = {
  */
 const hero = {
   poster: 'feature-plate',
-  clips: [],            // e.g. ['sweet-chilli', 'buffalo-wings', 'mediterranean-sirloin', 'creamy-curry']
+  clips: ['brand-5'],   // the brand's own footage: pan, plate, fork, cut — 8.3 s
+                        // add generated clips here as they land, e.g. 'sweet-chilli'
 };
 
 /* ------------------------------------------------------------- derived */

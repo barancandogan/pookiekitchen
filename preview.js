@@ -65,6 +65,22 @@ function inlinePhotos(html) {
       .replace(/\ssrc="[^"]*"/, ` src="${dataUri(`${slug}-${width}.webp`)}"`);
   });
 }
+/**
+ * Hero clips travel inside the bundle too, as data URIs. A 720p clip capped at
+ * 2.5 Mb/s is ~2 MB, so a handful stays well inside what a page can carry;
+ * the size is printed so nobody is surprised.
+ */
+function inlineClips(html) {
+  for (const slug of D.hero.clips) {
+    const rel = `/assets/video/${slug}-720.mp4`;
+    const abs = path.join(ROOT, 'assets/video', `${slug}-720.mp4`);
+    if (!fs.existsSync(abs)) continue;
+    const uri = 'data:video/mp4;base64,' + fs.readFileSync(abs).toString('base64');
+    html = html.split(rel).join(uri);
+  }
+  return html;
+}
+
 const logo = fs.readFileSync(path.join(ROOT, 'assets/img/logo-mark.svg'), 'utf8')
   .replace(/<\?xml[^>]*\?>\s*/, '');
 
@@ -103,7 +119,7 @@ const actionbar = (first.match(/<div class="actionbar">[\s\S]*?<\/div>\s*<\/div>
 const sections = ROUTES.map(r => {
   const html = fs.readFileSync(fileFor(r.path), 'utf8');
   return `<main id="main" class="pv-page" data-page="${r.id}"${
-    r.id === 'home' ? '' : ' hidden'}>${inlinePhotos(mainOf(html))}</main>`;
+    r.id === 'home' ? '' : ' hidden'}>${inlineClips(inlinePhotos(mainOf(html)))}</main>`;
 }).join('\n');
 
 const nav = ROUTES.map(r =>
