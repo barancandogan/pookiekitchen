@@ -338,14 +338,19 @@ EOF
 git clone git@github-pookie:barancandogan/pookiekitchen.git /srv/pookiekitchen
 chmod +x /srv/pookiekitchen/deploy.sh
 
-# 4. nginx
+# 4. nginx. The vhost is HTTP-only on purpose — see the comment at the top
+#    of deploy/nginx.conf. Never reload without nginx -t passing first:
+#    other sites share this server and a broken config takes them down too.
 cp /srv/pookiekitchen/deploy/nginx.conf /etc/nginx/sites-available/pookie
 ln -s /etc/nginx/sites-available/pookie /etc/nginx/sites-enabled/pookie
 mkdir -p /var/www/pookie
 nginx -t && systemctl reload nginx
 
-# 5. TLS — certbot rewrites the vhost to add the certificate and the
-#    http→https redirect, so it must run after step 4.
+# 5. TLS. certbot rewrites the vhost in place: it adds listen 443 ssl, the
+#    certificate paths and the SSL includes to the block from step 4, and
+#    writes a separate port-80 server that redirects to https. So it must
+#    run after step 4, and every directive in the vhost is carried over
+#    without being written twice.
 certbot --nginx -d pookie.nileapps.co.uk
 
 # 6. First deploy
@@ -354,6 +359,17 @@ certbot --nginx -d pookie.nileapps.co.uk
 
 Node 18+ must be on the server. The Regnum site on the same host already
 needs it, so it is almost certainly there — `node --version` to confirm.
+
+### Before the vhost exists
+
+A subdomain that resolves to the server but has no matching `server_name`
+falls through to whatever nginx has as its default server — on this box, some
+other site entirely. Seeing an unrelated app at `pookie.nileapps.co.uk` before
+step 4 is therefore the **correct** behaviour and confirms DNS is working; it
+is not a sign that anything is broken.
+
+This vhost carries no `default_server` on either listen line, so it answers
+for its own name only and cannot capture traffic meant for the other sites.
 
 ### This host is not indexed
 
