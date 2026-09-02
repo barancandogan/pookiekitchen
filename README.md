@@ -127,6 +127,41 @@ word. Neither changes any template.
 
 ---
 
+## Video hero
+
+The home page can carry a looping video behind the hero. It is off until
+`hero.clips` in `src/data.js` lists at least one slug, so turning it on is a
+content edit:
+
+```js
+const hero = {
+  poster: 'feature-plate',                       // assets/img/dish/feature-plate-1600.jpg
+  clips: ['sweet-chilli', 'buffalo-wings'],      // assets/video/<slug>-720.mp4
+};
+```
+
+Clips are 16:9 H.264 MP4, muted, about five seconds, 720p. The name carries the
+variant so a replaced clip is a renamed clip, and nginx caches them hard.
+
+**The poster is the page; the video is an enhancement.** The markup's first
+`<video>` has `autoplay muted loop playsinline`, so with JavaScript off one
+clip loops — a complete hero, not a broken one. `assets/js/main.js` removes
+`loop` and rotates the clips instead, crossfading each into the next across
+two alternating `<video>` elements so the fade is a real overlap rather than a
+cut.
+
+The script stands down, leaving the poster alone, whenever motion is unwanted
+or costly: `prefers-reduced-motion` (the CSS also hides the video outright),
+a data-saver connection, autoplay refused by the browser, the tab hidden, or
+the hero scrolled out of view.
+
+Text over the video clears AA over any frame, sight unseen, because it sits on
+the `--scrim` gradient: white on the worst-case composite is 7.83:1, and the
+amber h1 accent is 4.03:1, permitted for large text only. `audit.js` fails the
+build if a listed clip or the poster is missing.
+
+---
+
 ## Colour
 
 The palette comes from the firm's own logo — the values were read out of

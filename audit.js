@@ -194,6 +194,16 @@ if (D.allergens.perItem) {
   }
 }
 
+// Every hero clip referenced must exist, and so must the poster it falls back to.
+for (const slug of D.hero.clips) {
+  const f = path.join(DIST, 'assets/video', `${slug}-720.mp4`);
+  if (!fs.existsSync(f)) err('hero', `missing assets/video/${slug}-720.mp4`);
+}
+if (D.hero.clips.length) {
+  const poster = path.join(DIST, 'assets/img/dish', `${D.hero.poster}-1600.jpg`);
+  if (!fs.existsSync(poster)) err('hero', `missing poster ${D.hero.poster}-1600.jpg`);
+}
+
 // The CSS and data.js must agree on the brand values.
 const css = fs.readFileSync(path.join(__dirname, 'assets/css/main.css'), 'utf8');
 for (const [token, value] of [

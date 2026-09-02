@@ -110,6 +110,50 @@ function deliveryButtons(d) {
   }</div>`;
 }
 
+/* ----------------------------------------------------------------- hero */
+
+/**
+ * The home hero. With no clips it is the static block it always was. With
+ * clips it becomes a full-bleed video with the same words over it: a poster
+ * image, two <video> elements that alternate so a crossfade is a real overlap
+ * rather than a cut, and the --scrim gradient so the text clears AA over any
+ * frame, sight unseen (white on the worst-case composite is 7.83:1).
+ *
+ * The first <video> carries autoplay muted loop playsinline. With JavaScript
+ * off that is the whole behaviour — one clip, looping — and it is a real hero,
+ * not a broken one. main.js removes `loop` and takes over the rotation.
+ */
+function heroBlock(d) {
+  const inner = `
+  <p class="hero__eyebrow">${d.isOpen ? 'Open now' : 'Opening soon'}</p>
+  <h1>A whole meal for <em>£12.90</em> — and that is with pasta and a fresh salad.</h1>
+  <p class="hero__lede">${esc(D.copy.heroLede)}</p>
+  <div class="hero__actions">
+    <a class="btn btn--primary" href="/menu/">See the menu</a>
+    <a class="btn btn--ghost" href="${esc(D.site.instagramUrl)}" rel="noopener">@${esc(D.site.instagram)}</a>
+  </div>`;
+
+  if (!D.hero.clips.length) return `<section class="hero wrap">${inner}\n</section>`;
+
+  const poster = `/assets/img/dish/${D.hero.poster}-1600.jpg`;
+  const src = slug => `/assets/video/${slug}-720.mp4`;
+  const dim = D.photoDims[D.hero.poster] || [1600, 765];
+  const h = Math.round(dim[1] * 1600 / dim[0]);
+
+  return `<section class="hero hero--video" data-hero-video data-clips="${esc(D.hero.clips.map(src).join(' '))}">
+  <div class="hero__media" aria-hidden="true">
+    <img class="hero__poster" src="${poster}" alt="" width="1600" height="${h}" decoding="async">
+    <video class="hero__video is-active" autoplay muted loop playsinline preload="metadata" poster="${poster}">
+      <source src="${src(D.hero.clips[0])}" type="video/mp4">
+    </video>
+    <video class="hero__video" muted playsinline preload="none"></video>
+    <div class="hero__scrim"></div>
+  </div>
+  <div class="hero__text wrap">${inner}
+  </div>
+</section>`;
+}
+
 /* ----------------------------------------------------------------- home */
 
 const home = {
@@ -120,15 +164,7 @@ const home = {
     const featured = D.menu.find(c => c.id === 'plates').items[2]; // Sriracha Fire
 
     return `
-<section class="hero wrap">
-  <p class="hero__eyebrow">${d.isOpen ? 'Open now' : 'Opening soon'}</p>
-  <h1>A whole meal for <em>£12.90</em> — and that is with pasta and a fresh salad.</h1>
-  <p class="hero__lede">${esc(D.copy.heroLede)}</p>
-  <div class="hero__actions">
-    <a class="btn btn--primary" href="/menu/">See the menu</a>
-    <a class="btn btn--ghost" href="${esc(D.site.instagramUrl)}" rel="noopener">@${esc(D.site.instagram)}</a>
-  </div>
-</section>
+${heroBlock(d)}
 
 <section class="sec wrap">
   <p class="sec__kicker">Three things, one pan</p>

@@ -401,6 +401,25 @@ const copy = {
   sauceStory: { verified: false, body: null },
 };
 
+/* ----------------------------------------------------------------- hero */
+
+/**
+ * Looping video behind the home-page hero. An empty `clips` array means the
+ * static hero, exactly as before — so this is a content edit, like everything
+ * else here.
+ *
+ * Each clip is assets/video/<slug>-720.mp4: 16:9, H.264, muted, ~5 seconds,
+ * hashless name so treat a replaced clip as a renamed clip. `poster` is a dish
+ * slug from assets/img/dish/ at 1600 wide. It is what everyone sees before the
+ * first frame decodes, and ALL that is seen by anyone who asked for reduced
+ * motion, is on a data-saver connection, or whose browser refuses autoplay.
+ * The video is an enhancement; the poster is the page.
+ */
+const hero = {
+  poster: 'feature-plate',
+  clips: [],            // e.g. ['sweet-chilli', 'buffalo-wings', 'mediterranean-sirloin', 'creamy-curry']
+};
+
 /* ------------------------------------------------------------- derived */
 
 function isFilled(v) {
@@ -442,6 +461,6 @@ function derive() {
 
 module.exports = {
   site, status, contact, delivery, company, brand,
-  sauceFamilies, menu, lunchDeal, allergens, copy, photoDims,
+  sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero,
   derive, isFilled,
 };
