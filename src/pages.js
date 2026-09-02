@@ -21,6 +21,23 @@ function sauceDot(family) {
   return `<span class="dot dot--${family}"></span><span class="visually-hidden">${esc(label)} sauce.</span>`;
 }
 
+/**
+ * A dish photograph. WebP with a JPEG fallback, two widths, always lazy and
+ * always with explicit dimensions so it cannot shift the layout while loading.
+ * Alt text is empty on purpose: the dish name sits immediately beside the
+ * image, so describing it again is noise in a screen reader.
+ */
+function dishPhoto(slug, sizes, widths, cls) {
+  const dim = D.photoDims[slug] || [400, 400];
+  const src = w => `/assets/img/dish/${slug}-${w}`;
+  const srcset = ext => widths.map(w => `${src(w)}.${ext} ${w}w`).join(', ');
+  return `<picture>
+  <source type="image/webp" srcset="${srcset('webp')}" sizes="${sizes}">
+  <img class="${cls}" src="${src(widths[0])}.jpg" srcset="${srcset('jpg')}" sizes="${sizes}"
+       alt="" loading="lazy" decoding="async" width="${dim[0]}" height="${dim[1]}">
+</picture>`;
+}
+
 function row(item, opts = {}) {
   // A price whose mapping we could not read is not printed. Ditto a calorie
   // figure. Silence is recoverable; a wrong price on a menu is not.
@@ -32,16 +49,30 @@ function row(item, opts = {}) {
     ? `<span class="row__meta">${item.kcal} kcal</span>`
     : '';
 
-  return `<div class="row">
-  <span class="row__name">${sauceDot(item.sauce)}${esc(item.name)}</span>
-  ${priceOut}
-  ${when(item.desc, () => `<p class="row__desc">${esc(item.desc)}</p>`)}
-  ${kcal}
-  ${when(item.thirds && opts.showThirds !== false, () => `<div class="row__thirds">${thirdsGlyph()}</div>`)}
+  // Alignment is a property of the CHAPTER, not the row. Where any dish in a
+  // chapter has a photograph, the photo-less rows in it reserve the same
+  // column so every dish name starts on the same line. Where no dish in a
+  // chapter has one, nothing is reserved and the chapter sits flush left.
+  // The reserved slot is empty space, never a placeholder image.
+  const thumb = item.photo
+    ? dishPhoto(item.photo, '(max-width: 640px) 80px, 140px', [400, 800], 'row__thumb')
+    : (opts.reserveThumb ? '<span class="row__thumb row__thumb--empty" aria-hidden="true"></span>' : '');
+
+  return `<div class="row${item.photo ? ' row--photo' : ''}">
+  ${thumb}
+  <div class="row__body">
+    <span class="row__name">${sauceDot(item.sauce)}${esc(item.name)}</span>
+    ${priceOut}
+    ${when(item.desc, () => `<p class="row__desc">${esc(item.desc)}</p>`)}
+    ${kcal}
+    ${when(item.thirds && opts.showThirds !== false, () => `<div class="row__thirds">${thirdsGlyph()}</div>`)}
+  </div>
 </div>`;
 }
 
 function chapter(ch) {
+  const reserveThumb = ch.items.some(i => i.photo);
+
   // h2: a chapter is a top-level division of the menu page, not a subsection.
   return `<section class="menu__chapter" aria-labelledby="ch-${ch.id}">
   <div class="menu__head">
@@ -49,7 +80,7 @@ function chapter(ch) {
     ${when(ch.priceStatement, () => `<span class="menu__price-statement">${esc(ch.priceStatement)}</span>`)}
   </div>
   ${when(ch.lede, () => `<p class="menu__lede">${esc(ch.lede)}</p>`)}
-  ${ch.items.map(i => row(i)).join('\n')}
+  ${ch.items.map(i => row(i, { reserveThumb })).join('\n')}
   ${when(ch.extras && ch.extras.length, () => `<div class="menu__extras"><ul>${
     ch.extras.map(e => `<li>${esc(e.name)} — ${
       e.priceConfirmed === false ? 'price to confirm' : money(e.price)
@@ -120,6 +151,10 @@ const home = {
   <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
 </section>
 
+<section class="interstitial" aria-label="One of the plates">
+  ${dishPhoto('feature-plate', '100vw', [900, 1600], 'interstitial__img')}
+</section>
+
 <section class="sec wrap">
   <p class="sec__kicker">No surprises</p>
   <h2>Every price on the menu</h2>
@@ -184,6 +219,10 @@ const menuPage = {
   <h1>Everything we cook.</h1>
   <p class="hero__lede">Chicken thigh, marinated in our own blend and seared to order. The plates
   arrive complete — chicken, pasta and a fresh salad on one plate for ${money(12.90)}.</p>
+</section>
+
+<section class="interstitial" aria-label="A composed plate">
+  ${dishPhoto('feature-plate', '100vw', [900, 1600], 'interstitial__img')}
 </section>
 
 <section class="wrap" style="padding-bottom:clamp(40px,6vw,72px)">

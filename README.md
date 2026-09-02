@@ -22,7 +22,7 @@ src/pages.js     one object per page
 build.js         renders src/ → dist/, plus sitemap.xml and robots.txt
 audit.js         per-page checks plus the launch gate
 preview.js       bundles the built site into one self-contained HTML file
-assets/          css, js, the logo as SVG — copied verbatim into dist/
+assets/          css, js, the logo as SVG, dish photography — copied into dist/
 dist/            the built site (regenerated every build; safe to delete)
 ```
 
@@ -82,6 +82,49 @@ a number we also do not have, so the whole table waits until every day is decide
 
 ---
 
+## Photography
+
+Twelve of the fifteen photographs in the brand's Drive folder are wired in; the
+remaining three are marketing graphics (a banner, a price-tag advert, a neon
+sign mockup) rather than dishes.
+
+The sources are studio plates on a white backdrop, 1024–1472px, named
+`image (4).png` … `image (64).png`. Each was cropped to the plate itself — the
+white backdrop around it carries no information and only shrinks the dish in
+the thumbnail — then encoded at two widths in WebP with a JPEG fallback:
+
+```
+assets/img/dish/<slug>-400.webp   <slug>-400.jpg      row thumbnails
+assets/img/dish/<slug>-800.webp   <slug>-800.jpg      2× displays
+assets/img/dish/feature-plate-900|1600.webp|jpg       the full-bleed band
+```
+
+Cropping to the plate leaves aspect ratios between 1.00 (a round plate of
+wings) and 2.93 (a long oval). The thumbnail box is therefore a fixed
+140×105 with `object-fit: contain` and a `--surface` background — the same
+white the photographs were shot on, so the letterboxing is invisible and no
+plate is ever sliced. True intrinsic dimensions live in `photoDims` in
+`data.js` so the markup carries real `width`/`height`.
+
+**Alignment is a chapter-level property.** Where any dish in a chapter has a
+photograph, the photo-less rows in that chapter reserve the same column, so
+every dish name in the chapter starts on the same line. Where no dish in a
+chapter has one — Starters, Sides, Kids — nothing is reserved and the chapter
+sits flush left. The reserved slot is empty space, never a placeholder image.
+
+**Ten of the twelve matches are inferred.** The source filenames carry no dish
+names, so most were matched by what is on the plate. Two are unambiguous: the
+hummus under the Mediterranean sirloin and the red pepper sauce on the Roasted
+Pepper one. The rest carry `photoConfirmed: false` and `audit.js` lists them on
+every run. Unlike a price, a wrong photo is cheap to be wrong about — an
+unlabelled plate of wings is still a plate of wings — so they are shown rather
+than suppressed, but never silently.
+
+Adding a photograph is one word in `data.js`; removing one is deleting that
+word. Neither changes any template.
+
+---
+
 ## Colour
 
 The palette comes from the firm's own logo — the values were read out of
@@ -111,11 +154,32 @@ The differentiation therefore does not come from the palette — it comes from h
 it is used: a warm paper ground, an editorial serif, generous space, and the hot
 colours spent as accents rather than grounds.
 
-Every colour is a token on `:root`. Dark mode redefines tokens only, once under
-`prefers-color-scheme` (guarded with `:root:not([data-theme="light"])`) and once
-under `[data-theme="dark"]`, so the header toggle wins in both directions. The
-choice persists in `localStorage` and is applied by an inline script in `<head>`,
-before first paint, so there is no flash.
+### One theme, for now
+
+The site ships **light only**. Every colour is still a token on `:root` and
+nothing anywhere reads a literal, so restoring dark mode means adding two blocks
+to `main.css` and changing nothing else:
+
+```css
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { … } }
+:root[data-theme="dark"] { … }
+```
+
+The dark values were measured for this palette before the theme was dropped, so
+they do not have to be derived again:
+
+| Token | Dark | Against dark paper |
+|---|---|---|
+| `--paper` / `--sunken` / `--surface` | `#16120E` / `#0F0C09` / `#221B14` | — |
+| `--ink` / `--ink-2` / `--ink-3` | `#F6EEE1` / `#D5C7B4` / `#A99781` | 16.18 / 11.23 / 6.59 |
+| `--brand` | `#F2795A` | 6.80 — takes a **dark** label on a fill, never white |
+| `--herb` / `--honey` | `#78C79C` / `#E9B14A` | 9.27 / 9.63 |
+| `--line` / `--rule` | `#8A7358` / `#544537` | 4.15 / 2.03 |
+| `--third-*` | `#E97848` / `#F0CE85` / `#78C79C` | chicken / pasta / salad |
+
+`assets/js/main.js` is deliberately empty now that the toggle is gone — every
+page is complete server-side, so there is nothing to enhance. It stays because
+it is already wired up and deferred for whenever something does need scripting.
 
 ---
 

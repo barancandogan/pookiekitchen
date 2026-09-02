@@ -87,9 +87,6 @@ const header = `<header class="head">
     </a>
     <nav class="nav" aria-label="Main">
       ${nav}
-      <button class="themetoggle" type="button" data-theme-toggle aria-live="polite">
-        <span data-theme-label>Dark</span>
-      </button>
     </nav>
   </div>
 </header>`;
@@ -108,29 +105,6 @@ const extraCss = `
 
 const js = `
 (function () {
-  var root = document.documentElement, KEY = 'pookie-theme';
-  function systemDark(){ return window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches; }
-  function isDark(){
-    var e = root.getAttribute('data-theme');
-    return e === 'dark' ? true : e === 'light' ? false : systemDark();
-  }
-  var btn = document.querySelector('[data-theme-toggle]');
-  function paint(){
-    if (!btn) return;
-    var l = btn.querySelector('[data-theme-label]');
-    if (l) l.textContent = isDark() ? 'Light' : 'Dark';
-    btn.setAttribute('aria-label', isDark()
-      ? 'Switch to the light theme' : 'Switch to the dark theme');
-  }
-  if (btn) btn.addEventListener('click', function(){
-    var next = isDark() ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    try { localStorage.setItem(KEY, next); } catch (e) {}
-    paint();
-  });
-  paint();
-
   var pages = [].slice.call(document.querySelectorAll('.pv-page'));
   var navs  = [].slice.call(document.querySelectorAll('[data-nav]'));
   function show(id){
@@ -194,10 +168,6 @@ fs.writeFileSync(bodyOut, `<title>Pookie Chicken</title>\n${bodyContent}\n`);
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pookie Chicken</title>
-<script>
-(function(){try{var t=localStorage.getItem('pookie-theme');
-if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
-</script>
 </head>
 <body>
 ${bodyContent}

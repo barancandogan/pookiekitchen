@@ -2,9 +2,16 @@
 
 /* ==========================================================================
    Pookie Chicken
-   Every colour is a token on :root. Dark mode redefines tokens only — once
-   under prefers-color-scheme (guarded so an explicit light choice wins) and
-   once under [data-theme="dark"] so the header toggle wins in both directions.
+
+   LIGHT ONLY, deliberately. The site ships one theme for now.
+
+   Every colour is still a token on :root and nothing reads a literal, so
+   restoring dark mode is adding two blocks and changing nothing else:
+   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { ... } }
+   and :root[data-theme="dark"] { ... }, each redefining the tokens below.
+   The dark values that were measured for this palette are kept in
+   README.md so they do not have to be derived again.
+
    Contrast ratios in comments were computed, not estimated.
    ========================================================================== */
 
@@ -83,53 +90,7 @@
   --measure: 68ch;
   --wrap: 1120px;
 
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #16120E;  --sunken: #0F0C09;  --surface: #221B14;
-    --ink: #F6EEE1;    --ink-2: #D5C7B4;   --ink-3: #A99781;
-    --display-red: #FF6A54;
-    --brand: #F2795A;              /* 6.80:1 on dark paper */
-    --brand-ink: #16120E;          /* dark label on the light-ish fill */
-    --herb: #78C79C;
-    --honey: #E9B14A;
-    --honey-text: #E9B14A;
-    --line: #8A7358;
-    --rule: #544537;
-    --focus: #F2795A;
-    --sauce-chilli: #F2795A;
-    --sauce-glaze:  #E9B14A;
-    --sauce-smoke:  #D08A55;
-    --sauce-cream:  #EFDCBB;
-    --third-chicken:#E97848;
-    --third-pasta:  #F0CE85;
-    --third-salad:  #78C79C;
-    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
-  }
-}
-
-:root[data-theme="dark"] {
-  --paper: #16120E;  --sunken: #0F0C09;  --surface: #221B14;
-  --ink: #F6EEE1;    --ink-2: #D5C7B4;   --ink-3: #A99781;
-  --display-red: #FF6A54;
-  --brand: #F2795A;
-  --brand-ink: #16120E;
-  --herb: #78C79C;
-  --honey: #E9B14A;
-  --honey-text: #E9B14A;
-  --line: #8A7358;
-  --rule: #544537;
-  --focus: #F2795A;
-  --sauce-chilli: #F2795A;
-  --sauce-glaze:  #E9B14A;
-  --sauce-smoke:  #D08A55;
-  --sauce-cream:  #EFDCBB;
-  --third-chicken:#E97848;
-  --third-pasta:  #F0CE85;
-  --third-salad:  #78C79C;
-  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
+  color-scheme: light;
 }
 
 /* ---------------------------------------------------------------- reset */
@@ -196,10 +157,6 @@ a:hover { text-decoration-thickness: 2px; }
   padding: var(--s2) var(--s4);
 }
 .ribbon--open { background: var(--herb); color: var(--paper); }
-:root[data-theme="dark"] .ribbon--open { color: #0F0C09; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .ribbon--open { color: #0F0C09; }
-}
 
 /* --------------------------------------------------------------- header */
 
@@ -229,13 +186,6 @@ a:hover { text-decoration-thickness: 2px; }
   font-size: var(--t-sm); font-weight: 600; white-space: nowrap;
 }
 .nav a:hover, .nav a[aria-current="page"] { color: var(--brand); }
-
-.themetoggle {
-  background: none; border: 1px solid var(--line); color: var(--ink-2);
-  border-radius: var(--r-md); padding: 6px 10px; cursor: pointer;
-  font: inherit; font-size: var(--t-xs); line-height: 1;
-}
-.themetoggle:hover { border-color: var(--brand); color: var(--brand); }
 
 /* ----------------------------------------------------------------- hero */
 
@@ -319,15 +269,40 @@ a:hover { text-decoration-thickness: 2px; }
 
 .row {
   padding: var(--s4) var(--s5);
-  display: grid; grid-template-columns: 1fr auto;
-  gap: var(--s1) var(--s5); align-items: baseline;
+  display: flex; gap: var(--s4); align-items: flex-start;
 }
 .row + .row { border-top: 1px solid var(--rule); }
+
+/* The photograph leads the row when there is one. Everything below is scoped
+   to .row__body, so a row without a photo is not a degraded card — the flex
+   simply has one child instead of two. */
+.row__body {
+  flex: 1; min-width: 0;
+  /* minmax(0, 1fr), not 1fr: a bare 1fr track cannot shrink below its
+     min-content, so a long dish name pushes the price past the row edge on a
+     narrow screen and .menu's overflow clips it. */
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s1) var(--s5); align-items: baseline;
+}
+.row__thumb--empty { background: none; }
+
+.row__thumb {
+  width: 140px; height: 105px; flex: none;
+  /* contain, not cover: these are studio plates on white, and their aspect
+     ratios run from 1.00 to 2.93. Cover would slice the ends off a long oval
+     plate. The box background is --surface, the same white the photographs
+     were shot on, so the letterboxing is invisible. */
+  object-fit: contain; background: var(--surface);
+  border-radius: var(--r-sm);
+}
 
 .row__name {
   font-family: var(--display); font-size: var(--t-lg); font-weight: 600;
   line-height: var(--lh-snug);
-  display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+  /* block, not flex: as a flex container the dot became its own wrap item and
+     was left stranded on line one whenever the name wrapped. Inline flow keeps
+     it glued to the first word. */
+  display: block;
 }
 .row__price {
   font-variant-numeric: tabular-nums lining;
@@ -343,8 +318,10 @@ a:hover { text-decoration-thickness: 2px; }
 /* Every dot carries a ring, so its boundary clears 3:1 whatever the fill —
    --sauce-cream is 1.25:1 against the surface and invisible without it. */
 .dot {
+  display: inline-block; vertical-align: baseline;
   width: 10px; height: 10px; border-radius: 50%;
   border: 1.5px solid var(--ink-3); flex: none;
+  margin-right: var(--s2);
 }
 .dot--chilli { background: var(--sauce-chilli); }
 .dot--glaze  { background: var(--sauce-glaze); }
@@ -355,6 +332,16 @@ a:hover { text-decoration-thickness: 2px; }
                 background: var(--sunken); font-size: var(--t-sm); color: var(--ink-2); }
 .menu__extras ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
 .menu__extras li { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------- interstitial */
+
+/* Full-bleed appetite counterweight to the cream paper and the serif. One
+   image, no text over it — so there is no scrim to get wrong. */
+.interstitial { margin-block: clamp(32px, 5vw, 56px); }
+.interstitial__img {
+  width: 100%; height: clamp(220px, 34vw, 420px);
+  object-fit: cover; display: block;
+}
 
 /* ------------------------------------------------------------ price index */
 
@@ -425,9 +412,13 @@ a:hover { text-decoration-thickness: 2px; }
   .brandmark__name { font-size: var(--t-base); }
   .brandmark img { width: 32px; height: 32px; }
   .head__in { gap: var(--s3); }
-  .row { grid-template-columns: 1fr; }
-  .row__price, .row__meta { grid-column: 1; text-align: left; }
-  .row__meta { margin-top: var(--s1); }
+  .row { padding-inline: var(--s4); gap: var(--s3); }
+  .row__thumb { width: 80px; height: 62px; }
+  /* narrow screens cannot spare 96px of reserved whitespace */
+  .row__thumb--empty { display: none; }
+  .row__body { grid-template-columns: minmax(0, 1fr) auto; gap: var(--s1) var(--s3); }
+  .row__desc { grid-column: 1 / -1; }
+  .row__meta { grid-column: 1 / -1; text-align: left; margin-top: var(--s1); }
 }
 
 @media (prefers-reduced-motion: reduce) {

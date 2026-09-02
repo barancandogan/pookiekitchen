@@ -32,8 +32,13 @@ function walk(dir, out = []) {
 }
 
 const files = walk(DIST);
-const htmlFiles = files.filter(f => f.endsWith('.html'));
 const rel = f => path.relative(DIST, f);
+
+// preview.js writes bundles into dist/ that are deliberately not pages: they
+// carry all four pages at once, so four <h1>s and no per-page metadata is
+// correct for them. They are never deployed, so they are not audited.
+const isPreviewBundle = f => path.basename(f).startsWith('preview.');
+const htmlFiles = files.filter(f => f.endsWith('.html') && !isPreviewBundle(f));
 
 if (!htmlFiles.length) {
   console.error('No HTML in dist/. Run `node build.js` first.');
@@ -151,6 +156,32 @@ for (const ch of D.menu) {
 }
 if (unconfirmedPrices.length) warn('menu', `${unconfirmedPrices.length} unconfirmed price(s), suppressed in output: ${unconfirmedPrices.join(', ')}`);
 if (unconfirmedKcal.length) warn('menu', `${unconfirmedKcal.length} unconfirmed calorie figure(s), suppressed in output`);
+
+// Photographs are shown even when the match is a best guess — an unlabelled
+// plate of wings is still a plate of wings, so the cost of being wrong is low
+// and the appetite value is high. But it is never silent.
+const unconfirmedPhotos = [];
+for (const ch of D.menu) {
+  for (const it of ch.items) {
+    if (it.photo && it.photoConfirmed === false) unconfirmedPhotos.push(`${ch.name}/${it.name}`);
+  }
+}
+if (unconfirmedPhotos.length) {
+  warn('photos', `${unconfirmedPhotos.length} photo(s) matched to a dish by eye, shown but unconfirmed: ${unconfirmedPhotos.join(', ')}`);
+}
+
+// Every photo referenced must actually exist, in both formats and both widths.
+for (const ch of D.menu) {
+  for (const it of ch.items) {
+    if (!it.photo) continue;
+    for (const w of [400, 800]) {
+      for (const ext of ['webp', 'jpg']) {
+        const f = path.join(DIST, 'assets/img/dish', `${it.photo}-${w}.${ext}`);
+        if (!fs.existsSync(f)) err('photos', `missing ${it.photo}-${w}.${ext} for ${it.name}`);
+      }
+    }
+  }
+}
 
 // If per-item allergens are switched on, every item must carry them.
 if (D.allergens.perItem) {

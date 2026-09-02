@@ -42,16 +42,10 @@ ${when(canonical, () => `<link rel="canonical" href="${esc(canonical)}">`)}
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(page.description)}">
 ${when(canonical, () => `<meta property="og:url" content="${esc(canonical)}">`)}
-<meta name="theme-color" content="${D.brand.paper}" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="${D.brand.paperDark}" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="${D.brand.paper}">
 ${when(d.isPreOpening, () => `<meta name="robots" content="index, follow">`)}
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/main.css">
-<script>
-/* Applied before first paint so the chosen theme never flashes. */
-(function(){try{var t=localStorage.getItem('pookie-theme');
-if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
-</script>
 ${jsonLd(d)}`;
 }
 
@@ -144,9 +138,6 @@ function header(page) {
       ${link('/menu/', 'Menu')}
       ${link('/about/', 'About', true)}
       ${link('/find-us/', 'Find us')}
-      <button class="themetoggle" type="button" data-theme-toggle aria-live="polite">
-        <span data-theme-label>Dark</span>
-      </button>
     </nav>
   </div>
 </header>`;

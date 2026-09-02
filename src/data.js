@@ -127,6 +127,35 @@ const brand = {
   webfont: false,
 };
 
+/* --------------------------------------------------------- photo sizes */
+
+/**
+ * Intrinsic pixel dimensions of each photograph AFTER cropping, so the markup
+ * can carry true width/height attributes. The source shots are studio plates
+ * on a white backdrop and each was cropped to the plate itself, so the aspect
+ * ratios differ — 1.00 for a round plate of wings, 2.93 for a long oval. The
+ * thumbnail box is a fixed size and the image is object-fit:contain inside it,
+ * so a plate is never cropped and never distorted whatever its shape.
+ *
+ * Regenerate these alongside the files themselves; audit.js checks that every
+ * referenced photo exists in both formats and both widths.
+ */
+const photoDims = {
+  'boneless-bbq': [1254, 914],
+  'boneless-mango-habanero': [1254, 914],
+  'boneless-peri-peri': [1254, 910],
+  'buffalo-wings': [1254, 904],
+  'cheesy-triple-blast': [1465, 500],
+  'creamy-curry': [1254, 1222],
+  'feature-plate': [1472, 704],
+  'korean-bbq-wings': [1228, 841],
+  'mediterranean-sirloin': [1201, 962],
+  'peri-peri-wings': [930, 739],
+  'roasted-pepper-sirloin': [847, 848],
+  'sweet-chilli': [1472, 704],
+  'teriyaki': [1254, 992],
+};
+
 /* --------------------------------------------------------------- sauces */
 
 /**
@@ -147,6 +176,16 @@ const sauceFamilies = {
  * `thirds: true` marks a composed plate — protein + carbohydrate + salad —
  * and is the ONLY thing that renders the Three Thirds glyph. Its absence on
  * wings and sides is information, not an omission.
+ *
+ * `photo` names a file in assets/img/dish/ — <slug>-400 and -800, each as
+ * .webp and .jpg. A row without a photo is not a degraded card; it is simply a
+ * row, so adding or removing one is a one-word edit.
+ *
+ * `photoConfirmed` says whether the photograph is definitely THIS dish. The
+ * source files were named image (4).png … image (64).png, so most matches were
+ * inferred from what is on the plate. Two are unambiguous — the hummus under
+ * the Mediterranean sirloin and the red pepper sauce on the Roasted Pepper one.
+ * The rest are best guesses and audit.js lists them until the kitchen confirms.
  *
  * `kcal` values are transcribed from the printed menu PDF. The PDF's text
  * order was scrambled, so the figure-to-dish mapping in the composed-plate
@@ -177,17 +216,17 @@ const menu = [
     priceStatement: 'Every plate £12.90 — and that is with pasta and a fresh salad',
     lede: 'Marinated thigh, pan-seared to order. Never fried, never held.',
     items: [
-      { name: 'Teriyaki Chicken', price: 12.90, sauce: 'glaze', thirds: true, kcal: 860, kcalConfirmed: false,
+      { name: 'Teriyaki Chicken', price: 12.90, photo: 'teriyaki', photoConfirmed: false, sauce: 'glaze', thirds: true, kcal: 860, kcalConfirmed: false,
         desc: 'Marinated fillet glazed in teriyaki and finished with toasted sesame, with homemade basil pesto pasta and a fresh mixed salad.' },
       { name: 'Smoky Tomato Chicken', price: 12.90, sauce: 'smoke', thirds: true, kcal: 980, kcalConfirmed: false,
         desc: 'Marinated fillet in a rich roasted pepper and tomato sauce, with pesto pasta and a fresh mixed salad.' },
       { name: 'Sriracha Fire Chicken', price: 12.90, sauce: 'chilli', thirds: true, kcal: 820, kcalConfirmed: false,
         desc: 'Marinated fillet glazed with our homemade hot sauce, with pasta and a fresh mixed salad.' },
-      { name: 'Cheesy Triple Blast Chicken', price: 12.90, sauce: 'cream', thirds: true, kcal: 920, kcalConfirmed: false,
+      { name: 'Cheesy Triple Blast Chicken', price: 12.90, photo: 'cheesy-triple-blast', photoConfirmed: false, sauce: 'cream', thirds: true, kcal: 920, kcalConfirmed: false,
         desc: 'Pan-seared fillet under a rich homemade cheese sauce, with crisp potato wedges and a fresh mixed salad.' },
-      { name: 'Sweet Chilli Chicken', price: 12.90, sauce: 'glaze', thirds: true, kcal: 890, kcalConfirmed: false,
+      { name: 'Sweet Chilli Chicken', price: 12.90, photo: 'sweet-chilli', photoConfirmed: false, sauce: 'glaze', thirds: true, kcal: 890, kcalConfirmed: false,
         desc: 'Fillet in a sweet chilli glaze finished with toasted sesame, with pasta and a fresh mixed salad.' },
-      { name: 'Creamy Curry Chicken', price: 12.90, sauce: 'cream', thirds: true, kcal: 840, kcalConfirmed: false,
+      { name: 'Creamy Curry Chicken', price: 12.90, photo: 'creamy-curry', photoConfirmed: false, sauce: 'cream', thirds: true, kcal: 840, kcalConfirmed: false,
         desc: 'Fillet in a rich, aromatic curry sauce, with pasta and a fresh mixed salad.' },
     ],
   },
@@ -215,11 +254,11 @@ const menu = [
         desc: 'Crispy fried wings glazed in sweet hot honey and sriracha.' },
       { name: 'Mango Habanero Wings', price: 9.90, priceConfirmed: false, sauce: 'chilli', kcal: 740, kcalConfirmed: true,
         desc: 'Crispy fried wings in a bold mango habanero glaze — tropical sweetness with a fiery finish.' },
-      { name: 'Peri Peri Flame Wings', price: 8.90, priceConfirmed: false, sauce: 'chilli', kcal: 720, kcalConfirmed: false,
+      { name: 'Peri Peri Flame Wings', price: 8.90, photo: 'peri-peri-wings', photoConfirmed: false, priceConfirmed: false, sauce: 'chilli', kcal: 720, kcalConfirmed: false,
         desc: 'Crispy wings glazed in peri peri.' },
-      { name: 'Buffalo Fire Wings', price: 8.90, priceConfirmed: false, sauce: 'chilli', kcal: 810, kcalConfirmed: true,
+      { name: 'Buffalo Fire Wings', price: 8.90, photo: 'buffalo-wings', photoConfirmed: false, priceConfirmed: false, sauce: 'chilli', kcal: 810, kcalConfirmed: true,
         desc: 'Golden crispy wings tossed in a rich buffalo sauce.' },
-      { name: 'Korean BBQ Wings', price: 8.90, priceConfirmed: false, sauce: 'glaze', kcal: 740, kcalConfirmed: false,
+      { name: 'Korean BBQ Wings', price: 8.90, photo: 'korean-bbq-wings', photoConfirmed: false, priceConfirmed: false, sauce: 'glaze', kcal: 740, kcalConfirmed: false,
         desc: 'Eight pieces of crispy fried chicken tossed in smoky Korean BBQ sauce, served with salad.' },
     ],
   },
@@ -229,11 +268,11 @@ const menu = [
     name: 'Boneless thigh',
     priceStatement: 'Everything here is £10.90',
     items: [
-      { name: 'Golden Mango Habanero Boneless', price: 10.90, sauce: 'chilli', kcal: 860, kcalConfirmed: true,
+      { name: 'Golden Mango Habanero Boneless', price: 10.90, photo: 'boneless-mango-habanero', photoConfirmed: false, sauce: 'chilli', kcal: 860, kcalConfirmed: true,
         desc: 'Boneless peri peri marinated thigh pieces in a light crisp batter, fried golden.' },
-      { name: 'Crispy Peri Peri Boneless Thigh', price: 10.90, sauce: 'chilli', kcal: 740, kcalConfirmed: true,
+      { name: 'Crispy Peri Peri Boneless Thigh', price: 10.90, photo: 'boneless-peri-peri', photoConfirmed: false, sauce: 'chilli', kcal: 740, kcalConfirmed: true,
         desc: 'Boneless thigh pieces in a light crisp batter, fried golden for a tender, crunchy bite.' },
-      { name: 'BBQ Boneless Thigh', price: 10.90, sauce: 'glaze', kcal: 810, kcalConfirmed: true,
+      { name: 'BBQ Boneless Thigh', price: 10.90, photo: 'boneless-bbq', photoConfirmed: false, sauce: 'glaze', kcal: 810, kcalConfirmed: true,
         desc: 'Crispy boneless thigh tossed in rich Korean BBQ sauce — smoky, sweet and savoury.' },
     ],
   },
@@ -257,9 +296,9 @@ const menu = [
     name: 'Sirloin steak',
     priceStatement: 'Both £20.90 — 150g sirloin, fries and salad',
     items: [
-      { name: 'Mediterranean Sirloin', price: 20.90, sauce: 'cream', kcal: null, kcalConfirmed: false,
+      { name: 'Mediterranean Sirloin', price: 20.90, photo: 'mediterranean-sirloin', photoConfirmed: true, sauce: 'cream', kcal: null, kcalConfirmed: false,
         desc: 'Grilled 150g sirloin over a creamy hummus blend, with fries and a fresh mixed salad.' },
-      { name: 'Roasted Pepper Sirloin', price: 20.90, sauce: 'smoke', kcal: null, kcalConfirmed: false,
+      { name: 'Roasted Pepper Sirloin', price: 20.90, photo: 'roasted-pepper-sirloin', photoConfirmed: true, sauce: 'smoke', kcal: null, kcalConfirmed: false,
         desc: 'Grilled 150g sirloin with a rich roasted pepper and tomato sauce, with crisp fries and a fresh mixed salad.' },
     ],
   },
@@ -389,6 +428,6 @@ function derive() {
 
 module.exports = {
   site, status, contact, delivery, company, brand,
-  sauceFamilies, menu, lunchDeal, allergens, copy,
+  sauceFamilies, menu, lunchDeal, allergens, copy, photoDims,
   derive, isFilled,
 };
