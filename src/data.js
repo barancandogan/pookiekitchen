@@ -127,10 +127,12 @@ const brand = {
     orangeDark: '#FC6604',    // drip, "Chicken"
     amber:  '#FDAA04',        // body
   },
-  text:   '#A32E17',          // --brand, light theme
-  textDark: '#F2795A',        // --brand, dark theme
-  paper:  '#FBF6EC',
-  paperDark: '#16120E',
+  text:   '#B45100',          // --brand: the most orange ramp step that
+                              // clears AA on white (5.10) and on the
+                              // --sunken band (4.79) alike
+  display: '#E06E00',         // --display-orange: large text only (3.28:1)
+  paper:  '#FFFFFF',
+  paperDark: '#16120E',       // kept for the dark palette in README.md
 
   // Set to true only once fraunces-600.woff2 exists in assets/fonts/ and is
   // licensed for self-hosting. While false the site ships the system serif

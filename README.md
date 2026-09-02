@@ -138,29 +138,47 @@ The palette comes from the firm's own logo — the values were read out of
 | orange | `#FD8105` | the body gradient, and the word "Chicken" |
 | amber | `#FDAA04` | the chicken's body |
 
-Measured against the `#FBF6EC` page ground, none of them can carry body text:
-red is 4.22:1, orange 2.34:1, amber 1.78:1. WCAG AA needs 4.5:1.
+The page ground is **white** and the accent is **orange**, both at the client's
+request. Measured on white, none of the logo values can carry body text: orange
+is 2.52:1, red 4.54:1, amber 1.92:1, against the 4.5:1 AA threshold.
 
-Rejecting the palette is not an option — it is the brand. So it is layered:
+Rejecting the palette is not an option — it is the brand. So it is layered, and
+each step is the most orange value that clears its own threshold:
 
-1. **`--logo-*`** — untouched. The logo and decorative fills only. Logos are
-   exempt from contrast requirements (WCAG 1.4.3), so the mark is never altered.
-2. **`--display-red`** — `#E12F1C` at 24px and above only, where 4.22:1 clears
-   the 3:1 large-text threshold. The wordmark and the price in the `<h1>`.
-3. **`--brand`** — `#A32E17`, 6.59:1. Body copy, links, small UI. Every other
-   use of red on the site.
+1. **`--logo-*`** — untouched. The logo, and fills that carry *dark* text
+   (`--ink` on `--logo-orange` is 7.17:1). Logos are exempt from contrast
+   requirements (WCAG 1.4.3), so the mark is never altered.
+2. **`--display-orange`** — `#E06E00`, 3.28:1. Headings of 28px and up, where
+   the large-text threshold is 3:1. `h1` and section `h2`s.
+3. **`--brand`** — `#B45100`. Everything else: links, small UI, button fills
+   under white text, and the 20–24px semibold headings and dish names that sit
+   too near the large-text boundary to gamble on.
 
-Amber is a **fill only**; `--ink` on amber is 9.70:1.
+`--brand` is `#B45100` rather than a brighter `#B85400` for one reason: the
+chapter headers sit on `--sunken`, and on that band the brighter value measures
+**4.48:1** — under AA by two hundredths. Every colour here is checked against
+*both* grounds, not just the page.
 
-The differentiation therefore does not come from the palette — it comes from how
-it is used: a warm paper ground, an editorial serif, generous space, and the hot
-colours spent as accents rather than grounds.
+### What is orange and what is not
+
+The display face carries the brand colour; the body face stays `--ink`.
+Headings and dish names are orange, descriptions are dark. Two deliberate
+exceptions:
+
+- **Prices are `--ink`.** A price is data, not branding, and it has to be the
+  most legible thing on the row.
+- **The wordmark keeps the logo's own red-and-orange pairing.** It is the
+  lockup, not a heading.
+
+Amber is a **fill only**; `--ink` on amber is 9.42:1.
 
 ### One theme, for now
 
 The site ships **light only**. Every colour is still a token on `:root` and
 nothing anywhere reads a literal, so restoring dark mode means adding two blocks
-to `main.css` and changing nothing else:
+to `main.css` and changing nothing else. Note that the dark values below were
+measured against the *earlier* cream-and-red palette; the orange ramp would need
+re-deriving for a dark ground before it could be used.
 
 ```css
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { … } }

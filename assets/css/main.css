@@ -17,9 +17,16 @@
 
 :root {
   /* -- grounds ---------------------------------------------------------- */
-  --paper:        #FBF6EC;   /* warm cream. the page is paper, not screen */
-  --sunken:       #F3EADB;   /* tinted bands */
-  --surface:      #FFFFFF;   /* raised: menu block, cards */
+  --paper:        #FFFFFF;   /* white, at the client's request */
+  --sunken:       #FCF7F2;   /* faint warm tint, biased toward the orange
+                                accent so the bands read as chosen rather
+                                than as a default grey. Deliberately this
+                                pale: --brand sits on it in the chapter
+                                headers, and a darker band pushed that pair
+                                to 4.48:1, just under AA. */
+  --surface:      #FFFFFF;   /* raised: menu block, cards. Equal to --paper
+                                now, so the block is defined by its --rule
+                                border rather than by a fill. */
 
   /* -- ink -------------------------------------------------------------- */
   --ink:          #1A1512;   /* 16.81:1 on paper */
@@ -27,16 +34,28 @@
   --ink-3:        #6A5C4E;   /*  5.99:1 on paper */
 
   /* -- brand, three layers ---------------------------------------------
-     logo-*  : untouched logo values. Logo and decorative fills ONLY.
-     display : logo red at >=24px only. 4.22:1 — clears 3:1 large-text.
-     brand   : darkened for text. 6.59:1 — clears 4.5:1 body.
-     Never use --logo-red for body copy. It fails AA at text sizes.        */
+     The accent is ORANGE, at the client's request. The logo's own orange
+     is #FD8105, which measures 2.52:1 on white — it fails AA for body text
+     (4.5:1) and even the large-text threshold (3:1). So the same three-layer
+     rule as before, walked down the orange ramp until each use passes:
+
+     logo-*   : untouched logo values. The logo, and fills that carry DARK
+                text (--ink on --logo-orange is 7.17:1).
+     display  : #E06E00, 3.28:1 — headings at 24px and above only.
+     brand    : #B45100 — 5.10:1 on white, 4.79:1 on --sunken, and 5.10:1
+                under the white text of a button fill. Body copy, links,
+                small UI. Chosen as the most orange step that clears AA on
+                BOTH grounds, not just the page.
+
+     Never use --logo-orange for text. Two of the three ramp steps exist
+     precisely because it cannot be.                                       */
   --logo-red:     #E12F1C;
   --logo-orange:  #FD8105;
   --logo-amber:   #FDAA04;
-  --display-red:  #E12F1C;
-  --brand:        #A32E17;   /* 6.59:1 on paper */
-  --brand-ink:    #FFFFFF;   /* on --brand fill: 7.09:1 */
+  --display-red:  #E12F1C;   /* the wordmark only — it mirrors the logo */
+  --display-orange: #E06E00; /* 3.28:1 on white — large text only */
+  --brand:        #B45100;   /* 5.10:1 white · 4.79:1 sunken */
+  --brand-ink:    #FFFFFF;   /* on --brand fill: 5.10:1 */
 
   --herb:         #2E6A4A;   /* 5.95:1 — balance signal, open state */
   --honey:        #FDAA04;   /* FILL ONLY. --ink on honey = 9.70:1 */
@@ -45,7 +64,7 @@
   /* -- lines ------------------------------------------------------------ */
   --line:         #7E6A54;   /* borders that ARE the control. 4.78:1 */
   --rule:         #D2C0A2;   /* decorative hairlines */
-  --focus:        #B4491F;   /* 4.98:1 */
+  --focus:        #C05C00;   /* 4.40:1 — the threshold for a focus ring is 3:1 */
 
   /* -- sauce families ---------------------------------------------------- */
   --sauce-chilli: #A32E17;
@@ -115,7 +134,16 @@ h1, h2, h3, h4 {
   line-height: var(--lh-tight);
   text-wrap: balance;
   margin: 0;
+  /* The display face carries the brand colour; body copy stays --ink.
+     Which orange depends on size, because size is what sets the contrast
+     threshold: h1 and h2 are 28px and up, so they clear large-text (3:1)
+     on --display-orange. h3/h4 and dish names are 20-24px semibold, which
+     is too close to the 18.66px-bold boundary to rely on, so they take
+     --brand, which clears 4.5:1 at any size. */
+  color: var(--brand);
 }
+
+h1, .sec h2, .band h2 { color: var(--display-orange); }
 
 p, ul, ol { margin: 0; }
 img, video { max-width: 100%; height: auto; display: block; }
@@ -175,7 +203,9 @@ a:hover { text-decoration-thickness: 2px; }
 .brandmark__name {
   font-family: var(--display); font-weight: 700;
   font-size: var(--t-lg); line-height: 1; white-space: nowrap;
-  color: var(--display-red);        /* >=20px, and this is the wordmark */
+  /* the lockup, so it keeps the logo's own red-and-orange pairing rather
+     than the site's heading colour */
+  color: var(--display-red);
   letter-spacing: -0.01em;
 }
 .brandmark__name span { color: var(--logo-orange); }
@@ -195,7 +225,7 @@ a:hover { text-decoration-thickness: 2px; }
   color: var(--ink-3); font-weight: 700; margin-bottom: var(--s4);
 }
 .hero h1 { font-size: var(--t-3xl); letter-spacing: -0.02em; max-width: 22ch; }
-.hero h1 em { font-style: normal; color: var(--display-red); }
+.hero h1 em { font-style: normal; color: var(--display-orange); }
 .hero__lede { margin-top: var(--s5); max-width: 58ch; font-size: var(--t-md); color: var(--ink-2); }
 .hero__actions { margin-top: var(--s6); display: flex; flex-wrap: wrap; gap: var(--s3); }
 
@@ -263,7 +293,7 @@ a:hover { text-decoration-thickness: 2px; }
   display: flex; flex-wrap: wrap; align-items: baseline;
   justify-content: space-between; gap: var(--s3);
 }
-.menu__head h2 { font-size: var(--t-lg); }
+.menu__head h2 { font-size: var(--t-lg); color: var(--brand); }
 .menu__price-statement { font-size: var(--t-sm); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .menu__lede { padding: var(--s4) var(--s5) 0; color: var(--ink-2); font-size: var(--t-sm); max-width: 60ch; }
 
@@ -298,6 +328,7 @@ a:hover { text-decoration-thickness: 2px; }
 
 .row__name {
   font-family: var(--display); font-size: var(--t-lg); font-weight: 600;
+  color: var(--brand);
   line-height: var(--lh-snug);
   /* block, not flex: as a flex container the dot became its own wrap item and
      was left stranded on line one whenever the name wrapped. Inline flow keeps
@@ -307,6 +338,9 @@ a:hover { text-decoration-thickness: 2px; }
 .row__price {
   font-variant-numeric: tabular-nums lining;
   font-weight: 700; font-size: var(--t-md); text-align: right; white-space: nowrap;
+  /* deliberately --ink, not the brand colour: a price is data, and it has to
+     be the most legible thing on the row */
+  color: var(--ink);
 }
 .row__desc { grid-column: 1; font-size: var(--t-sm); color: var(--ink-2); max-width: 56ch; }
 .row__meta {
@@ -355,6 +389,7 @@ a:hover { text-decoration-thickness: 2px; }
 .prices__cell dd {
   margin: 0; font-family: var(--display); font-size: var(--t-xl);
   font-weight: 600; font-variant-numeric: tabular-nums lining;
+  color: var(--ink);
 }
 
 /* ------------------------------------------------------------------ band */
