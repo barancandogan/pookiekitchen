@@ -34,6 +34,37 @@ const DIST = path.join(ROOT, 'dist');
 build();
 
 const css = fs.readFileSync(path.join(ROOT, 'assets/css/main.css'), 'utf8');
+
+/**
+ * The bundle is one file with no origin to resolve /assets/ against, so every
+ * photograph has to travel inside it. Only the narrow variant of each is
+ * inlined — the bundle is for review on a screen, not for shipping — and the
+ * <picture>/srcset machinery is dropped with it, since there is now exactly
+ * one source to choose from.
+ */
+function inlinePhotos(html) {
+  const cache = new Map();
+  const dataUri = file => {
+    if (!cache.has(file)) {
+      const abs = path.join(ROOT, 'assets/img/dish', file);
+      cache.set(file, 'data:image/webp;base64,' + fs.readFileSync(abs).toString('base64'));
+    }
+    return cache.get(file);
+  };
+  return html.replace(/<picture>[\s\S]*?<\/picture>/g, block => {
+    const img = block.match(/<img\b[^>]*>/)[0];
+    const slug = (block.match(/\/assets\/img\/dish\/([a-z0-9-]+)-\d+\./) || [])[1];
+    if (!slug) return block;
+    const width = slug === 'feature-plate' ? 900 : 400;
+    return img
+      .replace(/\ssrcset="[^"]*"/, '')
+      .replace(/\ssizes="[^"]*"/, '')
+      // every byte is already in the file, so deferring the decode buys
+      // nothing and just leaves a reviewer scrolling past empty boxes
+      .replace(/\sloading="lazy"/, '')
+      .replace(/\ssrc="[^"]*"/, ` src="${dataUri(`${slug}-${width}.webp`)}"`);
+  });
+}
 const logo = fs.readFileSync(path.join(ROOT, 'assets/img/logo-mark.svg'), 'utf8')
   .replace(/<\?xml[^>]*\?>\s*/, '');
 
@@ -72,7 +103,7 @@ const actionbar = (first.match(/<div class="actionbar">[\s\S]*?<\/div>\s*<\/div>
 const sections = ROUTES.map(r => {
   const html = fs.readFileSync(fileFor(r.path), 'utf8');
   return `<main id="main" class="pv-page" data-page="${r.id}"${
-    r.id === 'home' ? '' : ' hidden'}>${mainOf(html)}</main>`;
+    r.id === 'home' ? '' : ' hidden'}>${inlinePhotos(mainOf(html))}</main>`;
 }).join('\n');
 
 const nav = ROUTES.map(r =>
