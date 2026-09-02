@@ -1,5 +1,17 @@
 @charset "utf-8";
 
+/* Display face: Anton (SIL Open Font License), self-hosted, 18.6 kB, one
+   weight. Chosen to match the client's own mock-up — heavy, condensed,
+   upright capitals. Body copy stays on the system stack; the wordmark keeps
+   its own serif because it mirrors the logo. */
+@font-face {
+  font-family: "Anton";
+  src: url("/assets/fonts/anton-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ==========================================================================
    Pookie Chicken
 
@@ -24,6 +36,9 @@
                                 pale: --brand sits on it in the chapter
                                 headers, and a darker band pushed that pair
                                 to 4.48:1, just under AA. */
+  --dark:         #141110;   /* the dark ground: hero, footer. White on it
+                                is 18.4:1; --logo-orange on it is 7.1:1, so
+                                the logo's own orange is text-safe here. */
   --surface:      #FFFFFF;   /* raised: menu block, cards. Equal to --paper
                                 now, so the block is defined by its --rule
                                 border rather than by a fill. */
@@ -81,8 +96,8 @@
   --scrim: linear-gradient(to top, rgba(20,14,9,.86), rgba(20,14,9,.72) 45%, transparent);
 
   /* -- type -------------------------------------------------------------- */
-  --display: "Fraunces", "Iowan Old Style", Georgia, "Palatino Linotype",
-             Palatino, "Times New Roman", serif;
+  --display: "Anton", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+  --wordmark: "Iowan Old Style", Georgia, "Palatino Linotype", Palatino, serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
 
@@ -130,8 +145,10 @@ body {
 
 h1, h2, h3, h4 {
   font-family: var(--display);
-  font-weight: 600;
-  line-height: var(--lh-tight);
+  font-weight: 400;                 /* Anton has one weight */
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  line-height: .98;
   text-wrap: balance;
   margin: 0;
   /* The display face carries the brand colour; body copy stays --ink.
@@ -201,7 +218,7 @@ a:hover { text-decoration-thickness: 2px; }
 .brandmark { display: flex; align-items: center; gap: var(--s3); text-decoration: none; }
 .brandmark img { width: 40px; height: 40px; }
 .brandmark__name {
-  font-family: var(--display); font-weight: 700;
+  font-family: var(--wordmark); font-weight: 700;
   font-size: var(--t-lg); line-height: 1; white-space: nowrap;
   /* the lockup, so it keeps the logo's own red-and-orange pairing rather
      than the site's heading colour */
@@ -221,8 +238,11 @@ a:hover { text-decoration-thickness: 2px; }
 
 .hero { padding-block: clamp(48px, 8vw, 96px) clamp(32px, 5vw, 56px); }
 .hero__eyebrow {
+  display: inline-block;
   font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase;
-  color: var(--ink-3); font-weight: 700; margin-bottom: var(--s4);
+  font-weight: 700; margin-bottom: var(--s4);
+  background: var(--logo-orange); color: #1A1512;   /* 7.17:1 */
+  padding: 6px 14px; border-radius: 999px;
 }
 .hero h1 { font-size: var(--t-3xl); letter-spacing: -0.02em; max-width: 22ch; }
 .hero h1 em { font-style: normal; color: var(--display-orange); }
@@ -231,10 +251,13 @@ a:hover { text-decoration-thickness: 2px; }
 
 .btn {
   display: inline-flex; align-items: center; gap: var(--s2);
-  font: inherit; font-size: var(--t-sm); font-weight: 700;
-  padding: 12px 20px; border-radius: var(--r-md);
+  font: inherit; font-size: var(--t-xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 13px 22px; border-radius: 999px;
   text-decoration: none; cursor: pointer; border: 1px solid transparent;
 }
+.btn--dark { background: var(--dark); color: #FFFFFF; }
+.btn--dark:hover { filter: brightness(1.25); }
 .btn--primary { background: var(--brand); color: var(--brand-ink); }
 .btn--primary:hover { filter: brightness(1.08); }
 .btn--ghost { border-color: var(--line); color: var(--ink); background: none; }
@@ -428,6 +451,80 @@ a:hover { text-decoration-thickness: 2px; }
 .foot__legal { margin-top: var(--s6); padding-top: var(--s4);
                border-top: 1px solid var(--rule); font-size: var(--t-xs); }
 
+/* ------------------------------------------------------- home: split */
+
+.split { display: grid; gap: var(--s6); align-items: center;
+         grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
+.split__img { width: 100%; height: auto; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+
+/* Two-line headline: first line ink, second the display orange — the mock-up's
+   device, and legal because these run 28px and up (large-text threshold 3:1). */
+.sec h2.hx, .hx { color: var(--ink); font-size: clamp(2.2rem, 1.4rem + 3.4vw, 4.5rem); }
+.hx span { display: block; }
+.hx em { display: block; font-style: normal; color: var(--display-orange); }
+
+/* --------------------------------------------------- home: artwork band */
+
+.artwork { margin-block: clamp(24px, 4vw, 48px); }
+.artwork__img { width: 100%; height: auto; display: block; }
+
+/* ---------------------------------------------------------- home: cards */
+
+.cards { margin-top: var(--s6); display: grid; gap: var(--s5);
+         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--rule);
+        border-radius: var(--r-lg); overflow: hidden;
+        display: flex; flex-direction: column; }
+.card__media { aspect-ratio: 4 / 3; background: var(--surface);
+               display: grid; place-items: center; padding: var(--s3); }
+.card__media picture, .card__img { width: 100%; height: 100%; }
+.card__img { object-fit: contain; }
+.card__body { padding: var(--s3) var(--s4) var(--s5); display: grid; gap: var(--s2);
+              align-content: start; flex: 1; }
+.card__name { font-size: 1.45rem; color: var(--brand); }
+.card__desc { font-size: var(--t-sm); color: var(--ink-2); }
+.card__row { display: flex; justify-content: space-between; align-items: baseline;
+             gap: var(--s3); margin-top: auto; padding-top: var(--s2); }
+.card__price { font-weight: 700; font-variant-numeric: tabular-nums lining; color: var(--ink); }
+.card__link { font-size: var(--t-sm); font-weight: 700; color: var(--brand); text-decoration: none; }
+.card__link:hover { text-decoration: underline; }
+.pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+        text-transform: uppercase; padding: 4px 10px; border-radius: 999px; }
+.pill--herb { background: var(--herb); color: #FFFFFF; justify-self: start; }   /* 6.41:1 */
+
+.prices { margin-top: var(--s5); gap: var(--s2); }
+.prices__cell { border-radius: 999px; padding: var(--s2) var(--s4); flex-direction: row;
+                align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.prices__cell dd { font-size: var(--t-md); }
+
+/* ------------------------------------------------------- home: CTA band */
+
+/* Bright logo orange as a ground with DARK text: 7.17:1. White on it would be
+   2.52:1, which fails even for the largest heading. */
+.cta-band { position: relative; isolation: isolate; overflow: hidden;
+            background: var(--logo-orange); color: #1A1512;
+            padding-block: clamp(56px, 10vw, 120px); text-align: center; }
+.cta-band__wm { position: absolute; inset: 0; z-index: -1; margin: 0;
+                display: grid; place-items: center; pointer-events: none;
+                font-family: var(--display); text-transform: uppercase;
+                font-size: clamp(8rem, 30vw, 26rem); line-height: 1;
+                color: rgba(255,255,255,.16); letter-spacing: .02em; user-select: none; }
+.cta-band__h { font-size: clamp(3rem, 1.6rem + 7vw, 7.5rem); line-height: .92; color: #1A1512; }
+.cta-band__p { margin: var(--s4) auto var(--s6); max-width: 46ch; font-size: var(--t-md); }
+
+/* --------------------------------------------------------- dark footer */
+
+.foot { background: var(--dark); color: rgba(255,255,255,.78); border-top: 0; }
+.foot h2 { color: #FFFFFF; font-family: var(--sans); text-transform: none; letter-spacing: .08em; }
+.foot a { color: #FFFFFF; }
+.foot__legal { border-top-color: rgba(255,255,255,.14); color: rgba(255,255,255,.62); }
+
+/* --------------------------------------------------------- header CTA */
+
+.nav__cta { padding: 9px 16px; }
+@media (max-width: 640px) { .nav__cta { display: none; } }   /* the action bar has it */
+
 /* -------------------------------------------------------- mobile bar */
 
 .actionbar {
@@ -477,9 +574,12 @@ a:hover { text-decoration-thickness: 2px; }
    permitted for the large h1 accent only, never for body text. */
 .hero__scrim { position: absolute; inset: 0; background: var(--scrim); }
 .hero__text { position: relative; padding-top: clamp(96px, 20vh, 200px); }
-.hero--video h1 { color: #FFFFFF; }
+.hero--video h1 {
+  color: #FFFFFF;
+  font-size: clamp(3rem, 1.8rem + 6.2vw, 7rem);
+  line-height: .92; max-width: 14ch;
+}
 .hero--video h1 em { color: var(--logo-amber); }
-.hero--video .hero__eyebrow { color: rgba(255,255,255,.8); }
 .hero--video .hero__lede { color: rgba(255,255,255,.9); }
 .hero--video .btn--ghost { color: #FFFFFF; border-color: rgba(255,255,255,.7); }
 .hero--video .btn--ghost:hover { color: #FFFFFF; border-color: #FFFFFF; }

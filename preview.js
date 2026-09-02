@@ -33,7 +33,10 @@ const DIST = path.join(ROOT, 'dist');
 
 build();
 
-const css = fs.readFileSync(path.join(ROOT, 'assets/css/main.css'), 'utf8');
+const css = fs.readFileSync(path.join(ROOT, 'assets/css/main.css'), 'utf8')
+  // the display font travels inside the bundle too (18.6 kB -> ~25 kB base64)
+  .replace('url("/assets/fonts/anton-latin-400-normal.woff2")',
+    `url("data:font/woff2;base64,${fs.readFileSync(path.join(ROOT, 'assets/fonts/anton-latin-400-normal.woff2')).toString('base64')}")`);
 
 /**
  * The bundle is one file with no origin to resolve /assets/ against, so every
@@ -46,23 +49,24 @@ function inlinePhotos(html) {
   const cache = new Map();
   const dataUri = file => {
     if (!cache.has(file)) {
-      const abs = path.join(ROOT, 'assets/img/dish', file);
+      const abs = path.join(ROOT, 'assets/img', file);
       cache.set(file, 'data:image/webp;base64,' + fs.readFileSync(abs).toString('base64'));
     }
     return cache.get(file);
   };
   return html.replace(/<picture>[\s\S]*?<\/picture>/g, block => {
     const img = block.match(/<img\b[^>]*>/)[0];
-    const slug = (block.match(/\/assets\/img\/dish\/([a-z0-9-]+)-\d+\./) || [])[1];
+    const m = block.match(/\/assets\/img\/(dish|brand)\/([a-z0-9-]+)-\d+\./) || [];
+    const dir = m[1], slug = m[2];
     if (!slug) return block;
-    const width = slug === 'feature-plate' ? 900 : 400;
+    const width = (slug === 'feature-plate' || dir === 'brand') ? 900 : 400;
     return img
       .replace(/\ssrcset="[^"]*"/, '')
       .replace(/\ssizes="[^"]*"/, '')
       // every byte is already in the file, so deferring the decode buys
       // nothing and just leaves a reviewer scrolling past empty boxes
       .replace(/\sloading="lazy"/, '')
-      .replace(/\ssrc="[^"]*"/, ` src="${dataUri(`${slug}-${width}.webp`)}"`);
+      .replace(/\ssrc="[^"]*"/, ` src="${dataUri(`${dir}/${slug}-${width}.webp`)}"`);
   });
 }
 /**

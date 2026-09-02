@@ -162,6 +162,35 @@ build if a listed clip or the poster is missing.
 
 ---
 
+## Home page (v2) and the display face
+
+The home page follows the client's own builder mock-up: a dark hero with a
+huge uppercase headline and an orange badge, a two-line "Deep marination.
+Juicy perfection." section (their words, from the neon-sign artwork), the
+"Where every bite is a hug" banner (their artwork), a card grid of six dishes,
+an orange "Come get some." band, and a dark footer. Buttons are pills.
+
+What the mock-up contained and this site does **not**: a street address, opening
+hours, an "Order now" button and menu items that are not on the real menu. Those
+were template filler. The redesign takes the visual language and keeps every
+rule above — unknown facts render nothing, and there is no ordering button
+because there is no ordering channel.
+
+The display face is **Anton** (SIL OFL, self-hosted at
+`assets/fonts/anton-latin-400-normal.woff2`, 18.6 kB, one weight), preloaded
+and `font-display: swap`, with Impact and a condensed system stack behind it.
+Headings and dish names are uppercase in it; body copy stays on the system
+sans; the wordmark keeps its own serif because it mirrors the logo. The `--dark`
+ground is `#141110`: white on it is 18.4:1 and the logo's own orange is 7.1:1,
+so on dark surfaces the untouched logo orange is text-safe.
+
+The cards show only dishes whose price is confirmed — a dash reads as honest on
+the menu and as broken on a teaser card — and link to their chapter on the menu
+rather than to an ordering flow that does not exist. The orange band uses dark
+text on the bright logo orange (7.17:1); white on it would be 2.52:1.
+
+---
+
 ## Colour
 
 The palette comes from the firm's own logo — the values were read out of

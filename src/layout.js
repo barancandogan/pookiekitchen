@@ -45,6 +45,7 @@ ${when(canonical, () => `<meta property="og:url" content="${esc(canonical)}">`)}
 <meta name="theme-color" content="${D.brand.paper}">
 ${when(!D.site.indexable, () => `<meta name="robots" content="noindex, nofollow">`)}
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/anton-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/main.css">
 ${jsonLd(d)}`;
 }
@@ -138,6 +139,7 @@ function header(page) {
       ${link('/menu/', 'Menu')}
       ${link('/about/', 'About', true)}
       ${link('/find-us/', 'Find us')}
+      <a class="btn btn--primary nav__cta" href="/menu/">See the menu</a>
     </nav>
   </div>
 </header>`;

@@ -126,19 +126,31 @@ function deliveryButtons(d) {
 function heroBlock(d) {
   const inner = `
   <p class="hero__eyebrow">${d.isOpen ? 'Open now' : 'Opening soon'}</p>
-  <h1>A whole meal for <em>£12.90</em> — and that is with pasta and a fresh salad.</h1>
+  <h1>A whole meal for <em>${money(D.menu.find(c => c.id === 'plates').items[0].price)}</em>.</h1>
   <p class="hero__lede">${esc(D.copy.heroLede)}</p>
   <div class="hero__actions">
     <a class="btn btn--primary" href="/menu/">See the menu</a>
     <a class="btn btn--ghost" href="${esc(D.site.instagramUrl)}" rel="noopener">@${esc(D.site.instagram)}</a>
   </div>`;
 
-  if (!D.hero.clips.length) return `<section class="hero wrap">${inner}\n</section>`;
-
   const poster = `/assets/img/dish/${D.hero.poster}-1600.jpg`;
   const src = slug => `/assets/video/${slug}-720.mp4`;
   const dim = D.photoDims[D.hero.poster] || [1600, 765];
   const h = Math.round(dim[1] * 1600 / dim[0]);
+
+  // No clips: the same dark composition over the poster, with no <video> at
+  // all — so the page never looks different depending on whether a clip
+  // exists, only on whether anything moves.
+  if (!D.hero.clips.length) {
+    return `<section class="hero hero--video">
+  <div class="hero__media" aria-hidden="true">
+    <img class="hero__poster" src="${poster}" alt="" width="1600" height="${h}" decoding="async">
+    <div class="hero__scrim"></div>
+  </div>
+  <div class="hero__text wrap">${inner}
+  </div>
+</section>`;
+  }
 
   return `<section class="hero hero--video" data-hero-video data-clips="${esc(D.hero.clips.map(src).join(' '))}">
   <div class="hero__media" aria-hidden="true">
@@ -156,46 +168,79 @@ function heroBlock(d) {
 
 /* ----------------------------------------------------------------- home */
 
+/**
+ * The brand's own banner artwork, full width. It carries its tagline as
+ * baked-in text, so the alt repeats it.
+ */
+function bannerBlock() {
+  const b = D.copy.banner;
+  const p = w => `/assets/img/brand/${b.file}-${w}`;
+  return `<section class="artwork" aria-label="${esc(b.alt)}">
+  <picture>
+    <source type="image/webp" srcset="${p(900)}.webp 900w, ${p(1600)}.webp 1600w" sizes="100vw">
+    <img class="artwork__img" src="${p(900)}.jpg" srcset="${p(900)}.jpg 900w, ${p(1600)}.jpg 1600w" sizes="100vw"
+         alt="${esc(b.alt)}" loading="lazy" decoding="async" width="1600" height="601">
+  </picture>
+</section>`;
+}
+
+/**
+ * Six dishes as cards. Each links to its chapter on the menu — there is no
+ * ordering channel yet, so there is no "Order" button to promise one.
+ */
+function teaserCards() {
+  const wanted = D.copy.teaser;
+  const found = [];
+  for (const ch of D.menu) for (const it of ch.items) {
+    if (it.photo && wanted.includes(it.photo)) found.push({ ch, it });
+  }
+  found.sort((a, b) => wanted.indexOf(a.it.photo) - wanted.indexOf(b.it.photo));
+  return found.map(({ ch, it }) => `<article class="card">
+  <div class="card__media">${dishPhoto(it.photo, '(max-width: 640px) 100vw, 320px', [400, 800], 'card__img')}</div>
+  <div class="card__body">
+    ${it.thirds ? '<span class="pill pill--herb">Complete plate</span>' : ''}
+    <h3 class="card__name">${esc(it.name)}</h3>
+    ${when(it.desc, () => `<p class="card__desc">${esc(it.desc)}</p>`)}
+    <div class="card__row">
+      <span class="card__price">${it.priceConfirmed === false ? '—' : money(it.price)}</span>
+      <a class="card__link" href="/menu/#ch-${ch.id}">See on the menu →</a>
+    </div>
+  </div>
+</article>`).join('\n');
+}
+
 const home = {
   path: '/',
   title: 'Home',
   description: 'Marinated chicken thigh, pan-seared to order and served with pasta, a fresh salad and our own sauces. A whole meal, not a portion of meat.',
   body(d) {
-    const featured = D.menu.find(c => c.id === 'plates').items[2]; // Sriracha Fire
-
     return `
 ${heroBlock(d)}
 
-<section class="sec wrap">
-  <p class="sec__kicker">Three things, one pan</p>
-  <h2>Every composed plate is protein, carbohydrate and salad.</h2>
-  <p class="sec__lede">Not a portion of meat with sides sold separately. The glyph below marks
-  every plate on the menu that arrives this way — and its absence on the wings is information too.</p>
-  <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
-  <div class="balance">
-    ${D.copy.balance.map(b =>
-      `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`
-    ).join('')}
+<section class="sec wrap split">
+  <div>
+    <p class="sec__kicker">Three things, one pan</p>
+    <h2 class="hx"><span>${esc(D.copy.headline2[0])}</span> <em>${esc(D.copy.headline2[1])}</em></h2>
+    <p class="sec__lede">Every composed plate is protein, carbohydrate and salad — not a portion of meat with
+    sides sold separately. The glyph marks every plate on the menu that arrives this way.</p>
+    <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
+    <div class="balance">
+      ${D.copy.balance.map(b =>
+        `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`
+      ).join('')}
+    </div>
   </div>
+  <div>${dishPhoto('boneless-bbq', '(max-width: 900px) 100vw, 520px', [400, 800], 'split__img')}</div>
 </section>
+
+${bannerBlock()}
 
 <section class="sec wrap">
-  <p class="sec__kicker">One of six</p>
-  <h2>${esc(featured.name)}</h2>
-  <p class="sec__lede">${esc(featured.desc)}</p>
-  <p style="margin-top:var(--s4);font-family:var(--display);font-size:var(--t-xl);font-weight:600;font-variant-numeric:tabular-nums lining">${money(featured.price)}</p>
-  <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
-</section>
-
-<section class="interstitial" aria-label="One of the plates">
-  ${dishPhoto('feature-plate', '100vw', [900, 1600], 'interstitial__img')}
-</section>
-
-<section class="sec wrap">
-  <p class="sec__kicker">No surprises</p>
-  <h2>Every price on the menu</h2>
-  <p class="sec__lede">The full menu is one page away, but you should not have to go there
-  to find out what dinner costs.</p>
+  <p class="sec__kicker">From the menu</p>
+  <h2 class="hx"><span>Six from the menu.</span> <em>Every price shown.</em></h2>
+  <div class="cards">
+${teaserCards()}
+  </div>
   <dl class="prices">
     ${D.menu.filter(c => c.priceStatement).map(c => {
       const p = c.items.find(i => i.priceConfirmed !== false);
@@ -216,6 +261,15 @@ ${heroBlock(d)}
         ? D.lunchDeal.prices.map(money).join(' · ')
         : 'Lunch pricing to be confirmed'
     }</p>
+  </div>
+</section>
+
+<section class="cta-band" aria-labelledby="cta-h">
+  <div class="wrap">
+    <p class="cta-band__wm" aria-hidden="true">Pookie</p>
+    <h2 id="cta-h" class="cta-band__h">${esc(D.copy.cta.headline)}</h2>
+    <p class="cta-band__p">${esc(D.copy.cta.body)}</p>
+    <a class="btn btn--dark" href="/menu/">See the full menu</a>
   </div>
 </section>
 

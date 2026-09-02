@@ -396,6 +396,23 @@ const copy = {
     { title: 'Salad', body: 'A fresh mixed salad on every composed plate. Included, not an upsell.' },
   ],
 
+  // Home page, redesigned after the client's builder mock-up. The lines below
+  // are the brand's own words where they exist — "Deep marination. Juicy
+  // perfection." is printed on their neon-sign artwork — and plain statements
+  // of fact where they do not. Nothing here claims an address, hours, an
+  // ordering channel or a popularity we cannot stand behind.
+  headline2: ['Deep marination.', 'Juicy perfection.'],
+  banner: { file: 'banner', alt: 'Where every bite is a hug — Pookie Chicken' },
+  // Six dishes for the home-page cards. Only dishes whose price is confirmed:
+  // a dash on a teaser card reads as broken, where on the menu it reads as
+  // honest. Swap in the wings the moment their prices are confirmed.
+  teaser: ['sweet-chilli', 'mediterranean-sirloin', 'creamy-curry',
+           'teriyaki', 'boneless-bbq', 'boneless-mango-habanero'],
+  cta: {
+    headline: 'Come get some.',
+    body: 'Marinated overnight, seared to order, and a whole plate every time.',
+  },
+
   // Gated: this claim is unverified, so the section does not render until
   // someone at the kitchen signs it off and flips the flag.
   sauceStory: { verified: false, body: null },
