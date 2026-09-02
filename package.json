@@ -1,0 +1,13 @@
+{
+  "name": "pookie-chicken",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pookie Chicken — dependency-free static site",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "node build.js --serve",
+    "audit": "node audit.js",
+    "check": "node build.js && node audit.js"
+  },
+  "engines": { "node": ">=18" }
+}

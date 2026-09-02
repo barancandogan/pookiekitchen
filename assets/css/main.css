@@ -1,0 +1,439 @@
+@charset "utf-8";
+
+/* ==========================================================================
+   Pookie Chicken
+   Every colour is a token on :root. Dark mode redefines tokens only — once
+   under prefers-color-scheme (guarded so an explicit light choice wins) and
+   once under [data-theme="dark"] so the header toggle wins in both directions.
+   Contrast ratios in comments were computed, not estimated.
+   ========================================================================== */
+
+:root {
+  /* -- grounds ---------------------------------------------------------- */
+  --paper:        #FBF6EC;   /* warm cream. the page is paper, not screen */
+  --sunken:       #F3EADB;   /* tinted bands */
+  --surface:      #FFFFFF;   /* raised: menu block, cards */
+
+  /* -- ink -------------------------------------------------------------- */
+  --ink:          #1A1512;   /* 16.81:1 on paper */
+  --ink-2:        #463C32;   /*  9.98:1 on paper */
+  --ink-3:        #6A5C4E;   /*  5.99:1 on paper */
+
+  /* -- brand, three layers ---------------------------------------------
+     logo-*  : untouched logo values. Logo and decorative fills ONLY.
+     display : logo red at >=24px only. 4.22:1 — clears 3:1 large-text.
+     brand   : darkened for text. 6.59:1 — clears 4.5:1 body.
+     Never use --logo-red for body copy. It fails AA at text sizes.        */
+  --logo-red:     #E12F1C;
+  --logo-orange:  #FD8105;
+  --logo-amber:   #FDAA04;
+  --display-red:  #E12F1C;
+  --brand:        #A32E17;   /* 6.59:1 on paper */
+  --brand-ink:    #FFFFFF;   /* on --brand fill: 7.09:1 */
+
+  --herb:         #2E6A4A;   /* 5.95:1 — balance signal, open state */
+  --honey:        #FDAA04;   /* FILL ONLY. --ink on honey = 9.70:1 */
+  --honey-text:   #8A5A0E;   /* 5.49:1 — when the glaze family needs words */
+
+  /* -- lines ------------------------------------------------------------ */
+  --line:         #7E6A54;   /* borders that ARE the control. 4.78:1 */
+  --rule:         #D2C0A2;   /* decorative hairlines */
+  --focus:        #B4491F;   /* 4.98:1 */
+
+  /* -- sauce families ---------------------------------------------------- */
+  --sauce-chilli: #A32E17;
+  --sauce-glaze:  #B5751A;
+  --sauce-smoke:  #8A4520;
+  --sauce-cream:  #EFDCBB;   /* 1.25:1 — invisible alone, hence the ring */
+
+  /* -- three thirds ------------------------------------------------------ */
+  --third-chicken:#8F3A18;
+  --third-pasta:  #D9A441;
+  --third-salad:  #2E6A4A;
+
+  /* -- scrim: guarantees AA over any photograph, sight unseen ------------- */
+  --scrim: linear-gradient(to top, rgba(20,14,9,.86), rgba(20,14,9,.72) 45%, transparent);
+
+  /* -- type -------------------------------------------------------------- */
+  --display: "Fraunces", "Iowan Old Style", Georgia, "Palatino Linotype",
+             Palatino, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+
+  --t-xs:   0.8125rem;
+  --t-sm:   0.875rem;
+  --t-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --t-md:   clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --t-lg:   clamp(1.25rem, 1.14rem + 0.5vw, 1.5rem);
+  --t-xl:   clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --t-2xl:  clamp(1.75rem, 1.4rem + 1.5vw, 2.75rem);
+  --t-3xl:  clamp(2.25rem, 1.6rem + 3.2vw, 4rem);
+
+  --lh-tight: 1.1;
+  --lh-snug:  1.25;
+  --lh-base:  1.6;
+
+  /* -- space ------------------------------------------------------------- */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+
+  --r-sm: 2px; --r-md: 3px; --r-lg: 6px;
+  --shadow: 0 1px 2px rgba(26,21,18,.06), 0 8px 24px -12px rgba(26,21,18,.18);
+
+  --measure: 68ch;
+  --wrap: 1120px;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #16120E;  --sunken: #0F0C09;  --surface: #221B14;
+    --ink: #F6EEE1;    --ink-2: #D5C7B4;   --ink-3: #A99781;
+    --display-red: #FF6A54;
+    --brand: #F2795A;              /* 6.80:1 on dark paper */
+    --brand-ink: #16120E;          /* dark label on the light-ish fill */
+    --herb: #78C79C;
+    --honey: #E9B14A;
+    --honey-text: #E9B14A;
+    --line: #8A7358;
+    --rule: #544537;
+    --focus: #F2795A;
+    --sauce-chilli: #F2795A;
+    --sauce-glaze:  #E9B14A;
+    --sauce-smoke:  #D08A55;
+    --sauce-cream:  #EFDCBB;
+    --third-chicken:#E97848;
+    --third-pasta:  #F0CE85;
+    --third-salad:  #78C79C;
+    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #16120E;  --sunken: #0F0C09;  --surface: #221B14;
+  --ink: #F6EEE1;    --ink-2: #D5C7B4;   --ink-3: #A99781;
+  --display-red: #FF6A54;
+  --brand: #F2795A;
+  --brand-ink: #16120E;
+  --herb: #78C79C;
+  --honey: #E9B14A;
+  --honey-text: #E9B14A;
+  --line: #8A7358;
+  --rule: #544537;
+  --focus: #F2795A;
+  --sauce-chilli: #F2795A;
+  --sauce-glaze:  #E9B14A;
+  --sauce-smoke:  #D08A55;
+  --sauce-cream:  #EFDCBB;
+  --third-chicken:#E97848;
+  --third-pasta:  #F0CE85;
+  --third-salad:  #78C79C;
+  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
+}
+
+/* ---------------------------------------------------------------- reset */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  line-height: var(--lh-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+  text-wrap: balance;
+  margin: 0;
+}
+
+p, ul, ol { margin: 0; }
+img, video { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--brand); text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.wrap { max-width: var(--wrap); margin-inline: auto; padding-inline: clamp(20px, 5vw, 48px); }
+.measure { max-width: var(--measure); }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+.skip {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--brand); color: var(--brand-ink);
+  padding: var(--s3) var(--s4); border-radius: 0 0 var(--r-md) 0;
+}
+.skip:focus { left: 0; }
+
+/* -------------------------------------------------------- status ribbon */
+
+.ribbon {
+  background: var(--honey);
+  color: #1A1512;                  /* 9.70:1 on honey — literal, because the
+                                      honey fill is the same in both themes */
+  font-size: var(--t-sm);
+  font-weight: 600;
+  text-align: center;
+  padding: var(--s2) var(--s4);
+}
+.ribbon--open { background: var(--herb); color: var(--paper); }
+:root[data-theme="dark"] .ribbon--open { color: #0F0C09; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ribbon--open { color: #0F0C09; }
+}
+
+/* --------------------------------------------------------------- header */
+
+.head {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+}
+.head__in {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s4); padding-block: var(--s3);
+}
+.brandmark { display: flex; align-items: center; gap: var(--s3); text-decoration: none; }
+.brandmark img { width: 40px; height: 40px; }
+.brandmark__name {
+  font-family: var(--display); font-weight: 700;
+  font-size: var(--t-lg); line-height: 1; white-space: nowrap;
+  color: var(--display-red);        /* >=20px, and this is the wordmark */
+  letter-spacing: -0.01em;
+}
+.brandmark__name span { color: var(--logo-orange); }
+
+.nav { display: flex; align-items: center; gap: var(--s5); }
+.nav a {
+  color: var(--ink-2); text-decoration: none;
+  font-size: var(--t-sm); font-weight: 600; white-space: nowrap;
+}
+.nav a:hover, .nav a[aria-current="page"] { color: var(--brand); }
+
+.themetoggle {
+  background: none; border: 1px solid var(--line); color: var(--ink-2);
+  border-radius: var(--r-md); padding: 6px 10px; cursor: pointer;
+  font: inherit; font-size: var(--t-xs); line-height: 1;
+}
+.themetoggle:hover { border-color: var(--brand); color: var(--brand); }
+
+/* ----------------------------------------------------------------- hero */
+
+.hero { padding-block: clamp(48px, 8vw, 96px) clamp(32px, 5vw, 56px); }
+.hero__eyebrow {
+  font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 700; margin-bottom: var(--s4);
+}
+.hero h1 { font-size: var(--t-3xl); letter-spacing: -0.02em; max-width: 22ch; }
+.hero h1 em { font-style: normal; color: var(--display-red); }
+.hero__lede { margin-top: var(--s5); max-width: 58ch; font-size: var(--t-md); color: var(--ink-2); }
+.hero__actions { margin-top: var(--s6); display: flex; flex-wrap: wrap; gap: var(--s3); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  font: inherit; font-size: var(--t-sm); font-weight: 700;
+  padding: 12px 20px; border-radius: var(--r-md);
+  text-decoration: none; cursor: pointer; border: 1px solid transparent;
+}
+.btn--primary { background: var(--brand); color: var(--brand-ink); }
+.btn--primary:hover { filter: brightness(1.08); }
+.btn--ghost { border-color: var(--line); color: var(--ink); background: none; }
+.btn--ghost:hover { border-color: var(--brand); color: var(--brand); }
+
+/* -------------------------------------------------------------- section */
+
+.sec { padding-block: clamp(40px, 6vw, 72px); border-top: 1px solid var(--rule); }
+.sec__kicker {
+  font-size: var(--t-xs); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--brand); font-weight: 700; margin-bottom: var(--s3);
+}
+.sec h2 { font-size: var(--t-2xl); letter-spacing: -0.014em; }
+.sec__lede { margin-top: var(--s4); max-width: var(--measure); color: var(--ink-2); }
+
+/* ------------------------------------------------------ three thirds */
+
+.thirds { display: flex; gap: 2px; width: 172px; }
+.thirds__seg { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.thirds__bar { height: 30px; border: 1px solid var(--line); }
+.thirds__lb {
+  font-size: 11px; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; text-align: center;
+}
+/* Four redundant channels: fill texture, a gap of ground, an edge, a label.
+   Pairwise hue separation is 1.18:1 in light mode — colour is deliberately
+   not the carrying channel. */
+.thirds__bar--chicken { background: var(--third-chicken); }
+.thirds__bar--pasta {
+  background: repeating-linear-gradient(45deg,
+    var(--third-pasta) 0 4px, transparent 4px 8px), var(--surface);
+}
+.thirds__bar--salad {
+  background: radial-gradient(circle at 3px 3px,
+    var(--third-salad) 1.6px, transparent 1.7px) 0 0 / 7px 7px, var(--surface);
+}
+
+.thirds--lead { width: 232px; }
+.thirds--lead .thirds__bar { height: 38px; }
+
+.balance { margin-top: var(--s6); display: grid; gap: var(--s5);
+           grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.balance__item h3 { font-size: var(--t-lg); margin-bottom: var(--s2); }
+.balance__item p { color: var(--ink-2); font-size: var(--t-sm); }
+
+/* ----------------------------------------------------------- menu block */
+
+.menu { margin-top: var(--s6); border: 1px solid var(--rule);
+        border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+
+.menu__chapter + .menu__chapter { border-top: 1px solid var(--rule); }
+
+.menu__head {
+  background: var(--sunken); padding: var(--s3) var(--s5);
+  border-bottom: 1px solid var(--rule);
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: var(--s3);
+}
+.menu__head h2 { font-size: var(--t-lg); }
+.menu__price-statement { font-size: var(--t-sm); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.menu__lede { padding: var(--s4) var(--s5) 0; color: var(--ink-2); font-size: var(--t-sm); max-width: 60ch; }
+
+.row {
+  padding: var(--s4) var(--s5);
+  display: grid; grid-template-columns: 1fr auto;
+  gap: var(--s1) var(--s5); align-items: baseline;
+}
+.row + .row { border-top: 1px solid var(--rule); }
+
+.row__name {
+  font-family: var(--display); font-size: var(--t-lg); font-weight: 600;
+  line-height: var(--lh-snug);
+  display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+}
+.row__price {
+  font-variant-numeric: tabular-nums lining;
+  font-weight: 700; font-size: var(--t-md); text-align: right; white-space: nowrap;
+}
+.row__desc { grid-column: 1; font-size: var(--t-sm); color: var(--ink-2); max-width: 56ch; }
+.row__meta {
+  grid-column: 2; text-align: right; font-size: var(--t-xs);
+  color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+.row__thirds { grid-column: 1; margin-top: var(--s3); }
+
+/* Every dot carries a ring, so its boundary clears 3:1 whatever the fill —
+   --sauce-cream is 1.25:1 against the surface and invisible without it. */
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 1.5px solid var(--ink-3); flex: none;
+}
+.dot--chilli { background: var(--sauce-chilli); }
+.dot--glaze  { background: var(--sauce-glaze); }
+.dot--smoke  { background: var(--sauce-smoke); }
+.dot--cream  { background: var(--sauce-cream); }
+
+.menu__extras { padding: var(--s4) var(--s5); border-top: 1px solid var(--rule);
+                background: var(--sunken); font-size: var(--t-sm); color: var(--ink-2); }
+.menu__extras ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+.menu__extras li { font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------ price index */
+
+.prices { margin-top: var(--s6); display: grid; gap: 2px;
+          grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
+.prices__cell {
+  background: var(--surface); border: 1px solid var(--rule);
+  padding: var(--s4); display: flex; flex-direction: column; gap: var(--s1);
+}
+.prices__cell dt { font-size: var(--t-sm); color: var(--ink-2); }
+.prices__cell dd {
+  margin: 0; font-family: var(--display); font-size: var(--t-xl);
+  font-weight: 600; font-variant-numeric: tabular-nums lining;
+}
+
+/* ------------------------------------------------------------------ band */
+
+.band { background: var(--sunken); border-block: 1px solid var(--rule);
+        padding-block: clamp(32px, 5vw, 56px); }
+.band h2 { font-size: var(--t-xl); }
+.band__prices { margin-top: var(--s4); font-family: var(--display);
+                font-size: var(--t-2xl); font-variant-numeric: tabular-nums lining; }
+
+/* ------------------------------------------------------------- notice */
+
+.notice {
+  margin-top: var(--s5); border: 1px solid var(--line);
+  border-left: 3px solid var(--honey);
+  border-radius: var(--r-sm); padding: var(--s4) var(--s5);
+  background: var(--surface); font-size: var(--t-sm); color: var(--ink-2);
+  max-width: var(--measure);
+}
+.notice strong { color: var(--ink); }
+
+/* ------------------------------------------------------------- follow */
+
+.follow { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s5); }
+
+/* ------------------------------------------------------------- footer */
+
+.foot { border-top: 1px solid var(--rule); padding-block: var(--s7) var(--s8);
+        font-size: var(--t-sm); color: var(--ink-3); }
+.foot__grid { display: grid; gap: var(--s5);
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.foot h2 { font-family: var(--sans); font-size: var(--t-xs);
+           letter-spacing: .08em; text-transform: uppercase;
+           color: var(--ink-2); font-weight: 700; margin-bottom: var(--s3); }
+.foot a { color: var(--ink-2); }
+.foot__legal { margin-top: var(--s6); padding-top: var(--s4);
+               border-top: 1px solid var(--rule); font-size: var(--t-xs); }
+
+/* -------------------------------------------------------- mobile bar */
+
+.actionbar {
+  position: sticky; bottom: 0; z-index: 30;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--rule);
+  padding: var(--s3) 0;
+  display: none;
+}
+@media (max-width: 640px) {
+  .actionbar { display: block; }
+  .actionbar .wrap { display: flex; gap: var(--s2); }
+  .actionbar .btn { flex: 1; justify-content: center; }
+  .nav { gap: var(--s3); }
+  .nav__link--secondary { display: none; }
+  .brandmark__name { font-size: var(--t-base); }
+  .brandmark img { width: 32px; height: 32px; }
+  .head__in { gap: var(--s3); }
+  .row { grid-template-columns: 1fr; }
+  .row__price, .row__meta { grid-column: 1; text-align: left; }
+  .row__meta { margin-top: var(--s1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

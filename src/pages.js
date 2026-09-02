@@ -1,0 +1,324 @@
+'use strict';
+
+const D = require('./data');
+const { esc, money, when } = require('./layout');
+
+/* ---------------------------------------------------- shared components */
+
+function thirdsGlyph(lead) {
+  // Never rendered below 24px wide — there is no micro variant. Below that the
+  // labels cannot fit and the redundant coding collapses to colour alone.
+  return `<div class="thirds${lead ? ' thirds--lead' : ''}" role="img" aria-label="A composed plate: chicken, pasta and salad">
+  <span class="thirds__seg"><span class="thirds__bar thirds__bar--chicken"></span><span class="thirds__lb">Chicken</span></span>
+  <span class="thirds__seg"><span class="thirds__bar thirds__bar--pasta"></span><span class="thirds__lb">Pasta</span></span>
+  <span class="thirds__seg"><span class="thirds__bar thirds__bar--salad"></span><span class="thirds__lb">Salad</span></span>
+</div>`;
+}
+
+function sauceDot(family) {
+  if (!family) return '';
+  const label = D.sauceFamilies[family].label;
+  return `<span class="dot dot--${family}"></span><span class="visually-hidden">${esc(label)} sauce.</span>`;
+}
+
+function row(item, opts = {}) {
+  // A price whose mapping we could not read is not printed. Ditto a calorie
+  // figure. Silence is recoverable; a wrong price on a menu is not.
+  const priceOut = item.priceConfirmed === false
+    ? `<span class="row__price" aria-label="Price to be confirmed">—</span>`
+    : `<span class="row__price">${money(item.price)}</span>`;
+
+  const kcal = (item.kcal && item.kcalConfirmed)
+    ? `<span class="row__meta">${item.kcal} kcal</span>`
+    : '';
+
+  return `<div class="row">
+  <span class="row__name">${sauceDot(item.sauce)}${esc(item.name)}</span>
+  ${priceOut}
+  ${when(item.desc, () => `<p class="row__desc">${esc(item.desc)}</p>`)}
+  ${kcal}
+  ${when(item.thirds && opts.showThirds !== false, () => `<div class="row__thirds">${thirdsGlyph()}</div>`)}
+</div>`;
+}
+
+function chapter(ch) {
+  // h2: a chapter is a top-level division of the menu page, not a subsection.
+  return `<section class="menu__chapter" aria-labelledby="ch-${ch.id}">
+  <div class="menu__head">
+    <h2 id="ch-${ch.id}">${esc(ch.name)}</h2>
+    ${when(ch.priceStatement, () => `<span class="menu__price-statement">${esc(ch.priceStatement)}</span>`)}
+  </div>
+  ${when(ch.lede, () => `<p class="menu__lede">${esc(ch.lede)}</p>`)}
+  ${ch.items.map(i => row(i)).join('\n')}
+  ${when(ch.extras && ch.extras.length, () => `<div class="menu__extras"><ul>${
+    ch.extras.map(e => `<li>${esc(e.name)} — ${
+      e.priceConfirmed === false ? 'price to confirm' : money(e.price)
+    }</li>`).join('')
+  }</ul></div>`)}
+</section>`;
+}
+
+function allergenNotice(d) {
+  // The site refuses to present a menu as complete without discharging the
+  // allergen duty. While nothing can be said, it says that plainly.
+  if (D.allergens.perItem) return '';
+  if (D.allergens.statement) {
+    return `<div class="notice"><strong>Allergens.</strong> ${esc(D.allergens.statement)}</div>`;
+  }
+  return `<div class="notice"><strong>Allergens.</strong> Full allergen information for every
+dish will be published here before we open, and will be available in the restaurant.
+If you have an allergy, please ask a member of the team before ordering.</div>`;
+}
+
+function deliveryButtons(d) {
+  if (!d.deliveryLive.length) return '';
+  return `<div class="follow">${
+    d.deliveryLive.map(x =>
+      `<a class="btn btn--primary" href="${esc(x.url)}" rel="noopener">Order on ${esc(x.name)}</a>`
+    ).join('')
+  }</div>`;
+}
+
+/* ----------------------------------------------------------------- home */
+
+const home = {
+  path: '/',
+  title: 'Home',
+  description: 'Marinated chicken thigh, pan-seared to order and served with pasta, a fresh salad and our own sauces. A whole meal, not a portion of meat.',
+  body(d) {
+    const featured = D.menu.find(c => c.id === 'plates').items[2]; // Sriracha Fire
+
+    return `
+<section class="hero wrap">
+  <p class="hero__eyebrow">${d.isOpen ? 'Open now' : 'Opening soon'}</p>
+  <h1>A whole meal for <em>£12.90</em> — and that is with pasta and a fresh salad.</h1>
+  <p class="hero__lede">${esc(D.copy.heroLede)}</p>
+  <div class="hero__actions">
+    <a class="btn btn--primary" href="/menu/">See the menu</a>
+    <a class="btn btn--ghost" href="${esc(D.site.instagramUrl)}" rel="noopener">@${esc(D.site.instagram)}</a>
+  </div>
+</section>
+
+<section class="sec wrap">
+  <p class="sec__kicker">Three things, one pan</p>
+  <h2>Every composed plate is protein, carbohydrate and salad.</h2>
+  <p class="sec__lede">Not a portion of meat with sides sold separately. The glyph below marks
+  every plate on the menu that arrives this way — and its absence on the wings is information too.</p>
+  <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
+  <div class="balance">
+    ${D.copy.balance.map(b =>
+      `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`
+    ).join('')}
+  </div>
+</section>
+
+<section class="sec wrap">
+  <p class="sec__kicker">One of six</p>
+  <h2>${esc(featured.name)}</h2>
+  <p class="sec__lede">${esc(featured.desc)}</p>
+  <p style="margin-top:var(--s4);font-family:var(--display);font-size:var(--t-xl);font-weight:600;font-variant-numeric:tabular-nums lining">${money(featured.price)}</p>
+  <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
+</section>
+
+<section class="sec wrap">
+  <p class="sec__kicker">No surprises</p>
+  <h2>Every price on the menu</h2>
+  <p class="sec__lede">The full menu is one page away, but you should not have to go there
+  to find out what dinner costs.</p>
+  <dl class="prices">
+    ${D.menu.filter(c => c.priceStatement).map(c => {
+      const p = c.items.find(i => i.priceConfirmed !== false);
+      return p ? `<div class="prices__cell"><dt>${esc(c.name)}</dt><dd>${money(p.price)}</dd></div>` : '';
+    }).join('')}
+  </dl>
+  <div class="hero__actions" style="margin-top:var(--s6)">
+    <a class="btn btn--primary" href="/menu/">The whole menu</a>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="sec__kicker">${esc(D.lunchDeal.from)}–${esc(D.lunchDeal.to)}</p>
+    <h2>${esc(D.lunchDeal.name)} — ${esc(D.lunchDeal.claim)}</h2>
+    <p class="band__prices">${
+      D.lunchDeal.priceConfirmed
+        ? D.lunchDeal.prices.map(money).join(' · ')
+        : 'Lunch pricing to be confirmed'
+    }</p>
+  </div>
+</section>
+
+<section class="sec wrap">
+  <p class="sec__kicker">About us</p>
+  <h2>Freshly prepared daily, made for chicken lovers</h2>
+  <div class="sec__lede" style="display:flex;flex-direction:column;gap:var(--s4)">
+    ${D.copy.about.map(p => `<p>${esc(p)}</p>`).join('')}
+  </div>
+</section>
+
+<section class="sec wrap">
+  <p class="sec__kicker">${d.isOpen ? 'Order' : 'Be first to know'}</p>
+  <h2>${d.isOpen ? 'Hungry now?' : 'We are not open yet.'}</h2>
+  <p class="sec__lede">${d.isOpen
+    ? 'Come in, or order for delivery.'
+    : 'The date is not fixed yet. Instagram is where it will be announced first — no email list, no forms, nothing to unsubscribe from.'}</p>
+  ${deliveryButtons(d)}
+  <div class="follow">
+    <a class="btn ${d.deliveryLive.length ? 'btn--ghost' : 'btn--primary'}" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
+    ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">Call us</a>`)}
+  </div>
+</section>`;
+  },
+};
+
+/* ----------------------------------------------------------------- menu */
+
+const menuPage = {
+  path: '/menu/',
+  title: 'Menu',
+  description: 'The full Pookie Chicken menu — chicken plates at £12.90 with pasta and salad, wings, boneless thigh, wraps, sirloin steak and a children’s menu.',
+  body(d) {
+    return `
+<section class="hero wrap">
+  <p class="hero__eyebrow">Menu</p>
+  <h1>Everything we cook.</h1>
+  <p class="hero__lede">Chicken thigh, marinated in our own blend and seared to order. The plates
+  arrive complete — chicken, pasta and a fresh salad on one plate for ${money(12.90)}.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:clamp(40px,6vw,72px)">
+  <div class="menu">
+    ${D.menu.map(chapter).join('\n')}
+  </div>
+  ${allergenNotice(d)}
+  ${when(!D.menu.every(c => c.items.every(i => i.priceConfirmed !== false)), () =>
+    `<div class="notice"><strong>A note on the wings.</strong> The wing prices sit between
+    ${money(8.90)} and ${money(9.90)} and the per-item mapping is being confirmed with the
+    kitchen. Rather than print a price that might be wrong, we have left it out until it is checked.</div>`)}
+  ${deliveryButtons(d)}
+</section>`;
+  },
+};
+
+/* ---------------------------------------------------------------- about */
+
+const about = {
+  path: '/about/',
+  title: 'About',
+  description: 'Pookie Chicken prepares chicken fresh every day with its own marinades and homemade sauces, and serves it as a complete, balanced plate.',
+  body(d) {
+    return `
+<section class="hero wrap">
+  <p class="hero__eyebrow">About</p>
+  <h1>A complete plate, made fresh every day.</h1>
+</section>
+
+<section class="sec wrap">
+  <div class="measure" style="display:flex;flex-direction:column;gap:var(--s4)">
+    ${D.copy.about.map(p => `<p>${esc(p)}</p>`).join('')}
+  </div>
+</section>
+
+<section class="sec wrap">
+  <p class="sec__kicker">What that means on the plate</p>
+  <h2>Protein, carbohydrate, salad</h2>
+  <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
+  <div class="balance">
+    ${D.copy.balance.map(b =>
+      `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`
+    ).join('')}
+  </div>
+</section>
+
+${when(D.copy.sauceStory.verified, () => `
+<section class="sec wrap">
+  <p class="sec__kicker">The sauces</p>
+  <h2>Made here</h2>
+  <p class="sec__lede">${esc(D.copy.sauceStory.body || '')}</p>
+</section>`)}`;
+  },
+};
+
+/* -------------------------------------------------------------- find us */
+
+const findUs = {
+  path: '/find-us/',
+  title: 'Find us',
+  description: 'Where to find Pookie Chicken, the hours we are open, and how to reach the restaurant by phone or email once we have opened our doors.',
+  body(d) {
+    if (!d.addressKnown) {
+      return `
+<section class="hero wrap">
+  <p class="hero__eyebrow">Find us</p>
+  <h1>We do not have a door to point you at yet.</h1>
+  <p class="hero__lede">The site is up before the restaurant is. When the address and the
+  opening date are fixed they will be published here first, and announced on Instagram
+  the same day.</p>
+  <div class="hero__actions">
+    <a class="btn btn--primary" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
+    <a class="btn btn--ghost" href="/menu/">Read the menu</a>
+  </div>
+</section>`;
+    }
+
+    const a = D.contact.address;
+    return `
+<section class="hero wrap">
+  <p class="hero__eyebrow">Find us</p>
+  <h1>${esc(a.locality)}</h1>
+  <address class="hero__lede" style="font-style:normal">
+    ${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}
+  </address>
+  <div class="hero__actions">
+    ${when(a.mapsUrl, () => `<a class="btn btn--primary" href="${esc(a.mapsUrl)}" rel="noopener">Open in Maps</a>`)}
+    ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
+  </div>
+</section>
+
+${when(d.hoursKnown, () => `
+<section class="sec wrap">
+  <p class="sec__kicker">Hours</p>
+  <h2>When we are here</h2>
+  <dl class="prices" style="margin-top:var(--s5)">
+    ${require('./layout').DAY_ORDER.map(k => {
+      const L = require('./layout');
+      const v = D.contact.hours[k];
+      return `<div class="prices__cell"><dt>${L.DAY_LABEL[k]}</dt><dd style="font-size:var(--t-lg)">${
+        v === 'closed' ? 'Closed' : `${esc(v[0])}–${esc(v[1])}`}</dd></div>`;
+    }).join('')}
+  </dl>
+</section>`)}`;
+  },
+};
+
+/* ------------------------------------------------------------------ 404 */
+
+const notFound = {
+  path: '/404.html',
+  title: 'Page not found',
+  description: 'That page does not exist on the Pookie Chicken site. The menu, with every plate and every price, is probably what you were looking for.',
+  body() {
+    return `
+<section class="hero wrap">
+  <p class="hero__eyebrow">404</p>
+  <h1>That page is not on the menu.</h1>
+  <p class="hero__lede">Whatever you were looking for has moved or never existed.
+  The menu is the best place to start.</p>
+  <div class="hero__actions">
+    <a class="btn btn--primary" href="/menu/">See the menu</a>
+    <a class="btn btn--ghost" href="/">Home</a>
+  </div>
+</section>`;
+  },
+};
+
+/* ---------------------------------------------------------------------- */
+
+// /catering/ is gated: without an inbox to send an enquiry to, the page would
+// be a dead end. It appears in this list only once cateringEmail is set.
+function allPages() {
+  const pages = [home, menuPage, about, findUs, notFound];
+  return pages;
+}
+
+module.exports = { allPages, home, menuPage, about, findUs, notFound };
