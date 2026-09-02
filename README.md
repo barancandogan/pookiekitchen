@@ -22,8 +22,11 @@ src/pages.js     one object per page
 build.js         renders src/ → dist/, plus sitemap.xml and robots.txt
 audit.js         per-page checks plus the launch gate
 preview.js       bundles the built site into one self-contained HTML file
-deploy.sh        pull, build, audit and publish — run on the server
-deploy/          the nginx vhost, kept in the repo so the server is reproducible
+.github/         the Deploy workflow: build + audit on every push, shipped to the
+                 VPS over SSH once the secrets exist
+deploy/          the server side of a deploy — the nginx vhost and remote.sh —
+                 kept in the repo so the server is reproducible
+deploy.sh        the manual alternative: pull, build, audit and publish, on the server
 assets/          css, js, the logo as SVG, dish photography — copied into dist/
 dist/            the built site (regenerated every build; safe to delete)
 ```
@@ -378,12 +381,58 @@ other sites on that host.
 | | |
 |---|---|
 | URL | `https://pookie.nileapps.co.uk` |
-| Repo on server | `/srv/pookiekitchen` (read-only GitHub deploy key) |
+| Host | `187.127.84.93` (Hostinger, Ubuntu 24.04 — the box that serves regnum.nileapps.co.uk) |
 | Web root | `/var/www/pookie` |
 | nginx vhost | `/etc/nginx/sites-available/pookie` (from `deploy/nginx.conf`) |
 | TLS | Let's Encrypt via certbot, auto-renewed |
 
-Deploying is one command **on the server**:
+### Deploys run from GitHub Actions
+
+`.github/workflows/deploy.yml` runs on every push to `main`, and by hand from
+the Actions tab (Deploy → Run workflow). It builds, **runs the audit as a
+gate**, then ships `dist/` and `deploy/` to the server over SSH and runs
+`deploy/remote.sh` there. The server needs no GitHub access, no Node and no
+clone of this repository — it only ever receives a finished, audited build.
+
+`remote.sh` is idempotent and does the one-time setup itself: it installs the
+nginx vhost from `deploy/nginx.conf` if it is missing, publishes the build,
+reloads nginx only after `nginx -t` passes, and asks certbot for a certificate
+once — and only when the domain already resolves to that machine, because a
+failed validation counts against Let's Encrypt's rate limit.
+
+Without the secrets below the workflow is a plain CI check: build and audit
+run on every push, the deploy job is skipped, and the run carries a warning
+saying so.
+
+**One-time setup: repository secrets** (Settings → Secrets and variables →
+Actions → New repository secret):
+
+| Secret | Value |
+|---|---|
+| `VPS_HOST` | `187.127.84.93` |
+| `VPS_SSH_KEY` | a private key whose public half is in `/root/.ssh/authorized_keys` on the server (hPanel → VPS → Settings → SSH keys adds it without a terminal) |
+| `VPS_PASSWORD` | the root password, if you would rather not use a key. It works; the key is better |
+| `VPS_USER` | optional, default `root`. `remote.sh` needs root |
+| `VPS_HOST_KEY` | optional: a `known_hosts` line to pin the server (`ssh-keyscan -H 187.127.84.93`). Without it the first connection trusts whatever answers |
+
+A key pair for this, made on your own machine:
+
+```bash
+ssh-keygen -t ed25519 -C pookie-actions -f pookie-actions -N ""
+# pookie-actions.pub  -> the server (authorized_keys, or hPanel → SSH keys)
+# pookie-actions      -> the VPS_SSH_KEY secret, the whole file including
+#                        the BEGIN/END lines
+```
+
+Then push to `main`, or run the workflow by hand. The run's summary shows the
+HTTP status the server answered with.
+
+### Deploying from the server instead
+
+`deploy.sh` is the manual path and does the same job from the other side: it
+needs a clone of this repository on the server, which — the repository being
+private — needs its own read-only deploy key. Once that exists, deploying is
+one command **on the server**:
 
 ```bash
 /srv/pookiekitchen/deploy.sh
@@ -394,9 +443,9 @@ the web root and reloads nginx. `set -e` plus a non-zero audit means a broken
 build never reaches the web root. `dist/` is not committed — the server builds
 its own copy.
 
-### One-time server setup
+### One-time server setup for the manual path
 
-The repository is private, so the server needs its own read-only deploy key.
+Only needed if you deploy with `deploy.sh`; the workflow above needs none of it.
 
 ```bash
 # 1. DNS: point an A record for pookie.nileapps.co.uk at this server first.

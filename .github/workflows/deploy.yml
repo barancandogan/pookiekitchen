@@ -1,0 +1,131 @@
+name: Deploy
+
+# Every push to main builds the site and runs the audit — that part needs no
+# secrets and is a plain CI check. When the server secrets are set (README →
+# Deployment) the same audited build is shipped to the VPS; until then the
+# deploy job is skipped and the run says so in a warning.
+#
+# The server needs no GitHub access under this scheme: the build happens here,
+# only dist/ and deploy/ travel over SSH, and deploy/remote.sh does the rest.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build
+        run: node build.js
+
+      # The audit is the gate, not a report: it exits non-zero on a structural
+      # or accessibility failure and on any launch-gate breach, and a failed
+      # step here means nothing reaches the server.
+      - name: Audit
+        run: node audit.js
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 3
+          if-no-files-found: error
+
+      - name: Are the server secrets set?
+        id: gate
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+          PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          if [ -n "$HOST" ] && { [ -n "$KEY" ] || [ -n "$PASSWORD" ]; }; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Deploy skipped::VPS_HOST and VPS_SSH_KEY (or VPS_PASSWORD) are not set. Add them under Settings → Secrets and variables → Actions, then re-run this workflow."
+          fi
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      HOST: ${{ secrets.VPS_HOST }}
+      SSH_USER: ${{ secrets.VPS_USER || 'root' }}
+      SSHPASS: ${{ secrets.VPS_PASSWORD }}
+      STAGE: /srv/pookie-deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: SSH credentials
+        env:
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+          HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if [ -n "$HOST_KEY" ]; then
+            printf '%s\n' "$HOST_KEY" > ~/.ssh/known_hosts
+          else
+            # trust-on-first-use; set VPS_HOST_KEY to pin the server's key instead
+            ssh-keyscan -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
+            [ -s ~/.ssh/known_hosts ] || { echo "::error::could not reach $HOST on port 22"; exit 1; }
+          fi
+          if [ -n "$KEY" ]; then
+            printf '%s\n' "$KEY" > ~/.ssh/id_deploy
+            chmod 600 ~/.ssh/id_deploy
+            echo "SSH=ssh -i $HOME/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes" >> "$GITHUB_ENV"
+          else
+            sudo apt-get update -qq >/dev/null
+            sudo apt-get install -y -qq sshpass >/dev/null
+            echo "SSH=sshpass -e ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no" >> "$GITHUB_ENV"
+          fi
+
+      - name: Ship the build
+        run: |
+          $SSH "$SSH_USER@$HOST" "mkdir -p $STAGE"
+          rsync -az --delete -e "$SSH" dist deploy "$SSH_USER@$HOST:$STAGE/"
+
+      - name: Install on the server
+        run: $SSH "$SSH_USER@$HOST" "bash $STAGE/deploy/remote.sh"
+
+      - name: Smoke test
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 -H 'Host: pookie.nileapps.co.uk' "http://$HOST/" || echo 000)
+          echo "http://$HOST/ (Host: pookie.nileapps.co.uk) -> $code"
+          case "$code" in
+            200|301|302) ;;
+            *) echo "::error::unexpected status $code from the server"; exit 1 ;;
+          esac
+          tls=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://pookie.nileapps.co.uk/ || echo 000)
+          echo "https://pookie.nileapps.co.uk/ -> $tls"
+          {
+            echo "### Deployed \`${GITHUB_SHA::7}\` to $HOST"
+            echo ""
+            echo "| Check | Status |"
+            echo "|---|---|"
+            echo "| http://$HOST/ with Host header | $code |"
+            echo "| https://pookie.nileapps.co.uk/ | $tls |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$tls" = 200 ] || echo "::warning::https is not answering 200 yet — see the certificate notes in deploy/remote.sh"
