@@ -6,6 +6,7 @@ A dependency-free static site for a UK chicken restaurant that has not opened ye
 node build.js            # write ./dist
 node build.js --serve    # write ./dist and serve it on http://localhost:4173
 node audit.js            # structural, accessibility and launch-readiness checks
+node preview.js          # bundle the whole site into one shareable HTML file
 ```
 
 Node 18+ and nothing else. No install step, no dependencies, no lockfile.
@@ -20,12 +21,19 @@ src/layout.js    document shell: head, JSON-LD, ribbon, header, footer, action b
 src/pages.js     one object per page
 build.js         renders src/ → dist/, plus sitemap.xml and robots.txt
 audit.js         per-page checks plus the launch gate
+preview.js       bundles the built site into one self-contained HTML file
 assets/          css, js, the logo as SVG — copied verbatim into dist/
 dist/            the built site (regenerated every build; safe to delete)
 ```
 
 Editing copy means editing `src/data.js` and rebuilding. Nothing in `dist/` is
 edited by hand.
+
+`preview.js` exists because there is nowhere to deploy this yet. It inlines the
+CSS, the JS and the logo, and rewires the internal links to swap sections in
+place, so all four pages travel as one file you can email or open from a
+`file://` URL. It is a review tool, not the site — real pages, real URLs and the
+sitemap come from `build.js`, and nothing in the bundle is ever deployed.
 
 ---
 
