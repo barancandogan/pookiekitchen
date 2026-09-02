@@ -101,14 +101,21 @@ inside a white thumbnail box that grey read as a leftover background. So every
 dish photograph is now brought to **one norm**:
 
 1. The food is segmented with ISNet (the `isnet-general-use` model, run
-   locally with onnxruntime — no credits, no upload).
-2. Inside the convex hull of the plate, every pixel within a few levels of the
-   backdrop colour is keyed to pure white; the plate's rim, its natural soft
-   shadow and the food are kept. A white plate keyed against white loses
-   nothing visible, which is why this is safe where a generic cut-out (which
-   removed most of the plates) was not.
-3. The result is centred on a 3:2 canvas, plate no wider than 88% of it, and
-   encoded at three widths in WebP with a JPEG fallback:
+   locally with onnxruntime — no credits, no upload). A generic cut-out stops
+   here, and it removed most of the plates: white china on a white backdrop
+   is invisible to a colour-based key and to the model alike.
+2. The plate's silhouette is therefore found spatially, not by colour: the
+   convex hull of the sharp edges in the shot (the rim, and everything on the
+   plate). The natural shadow is soft and has no sharp edge, so it stays
+   outside. A dip bowl beside a plate of wings is found by its sauce — a
+   compact, smooth, saturated disc with a bright, food-free ring round it —
+   and gets a hull of its own, so the two are not bridged.
+3. Inside the silhouette, backdrop-coloured pixels go to pure white (the
+   plate's own colour); the rim shading and the food keep their values. The
+   result is centred on a 3:2 canvas filled with the same warm light grey
+   (`--photo-ground`, `#F2EDE6`) so a white plate reads as a plate, with one
+   synthetic soft shadow under every dish, and is encoded at three widths in
+   WebP with a JPEG fallback:
 
 ```
 assets/img/dish/<slug>-400.webp   <slug>-400.jpg      row thumbnails
@@ -118,12 +125,14 @@ assets/img/dish/feature-plate-900|1600.webp|jpg       the hero poster (own crop)
 ```
 
 Because every canvas is 3:2, the thumbnail box is 180×120 (96×64 on narrow
-screens) and the card media block is `aspect-ratio: 3 / 2`, both on pure
-white — nothing is letterboxed and no plate is ever sliced. `object-fit:
+screens) and the card media block is `aspect-ratio: 3 / 2`, both on
+`--photo-ground` — nothing is letterboxed and no plate is ever sliced. `object-fit:
 contain` stays on as a guard for any future photo in another proportion.
 `photoDims` in `data.js` carries the 1200×800 intrinsic size so the markup has
-real `width`/`height`. The pipeline is `scratchpad/cutout/cut.py` (masks) and
-`cut2.py` (keying and composition); re-run both to regenerate every file.
+real `width`/`height`. The pipeline is `tools/photos/cut.py` (masks) and
+`tools/photos/plate.py` (silhouette, ground and composition); re-run both to
+regenerate every file. The ISNet model (178 MB) is fetched by `cut.py` on
+first use and is not committed.
 
 **Alignment is a chapter-level property.** Where any dish in a chapter has a
 photograph, the photo-less rows in that chapter reserve the same column, so

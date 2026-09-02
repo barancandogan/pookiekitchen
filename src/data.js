@@ -149,11 +149,11 @@ const brand = {
  *
  * Every dish photograph is now ONE norm: the plate cut out of its studio shot
  * (the original backdrops were near-white but not white, and each carried its
- * own shadow) and set on pure white, centred on a 3:2 canvas with the same
- * soft shadow under every plate. So all of them are 1200 × 800 at the largest
- * width, and a thumbnail box of the same proportion shows the whole plate with
- * no letterboxing whatever the plate's shape. Only the hero poster keeps its
- * own crop.
+ * own shadow) and set on the same warm light-grey ground (--photo-ground in
+ * the CSS), centred on a 3:2 canvas with the same soft shadow under every
+ * plate. So all of them are 1200 × 800 at the largest width, and a thumbnail
+ * box of the same proportion shows the whole plate with no letterboxing
+ * whatever the plate's shape. Only the hero poster keeps its own crop.
  *
  * Regenerate these alongside the files themselves; audit.js checks that every
  * referenced photo exists in both formats and every width.

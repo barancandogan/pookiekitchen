@@ -79,6 +79,8 @@
   /* -- lines ------------------------------------------------------------ */
   --line:         #7E6A54;   /* borders that ARE the control. 4.78:1 */
   --rule:         #D2C0A2;   /* decorative hairlines */
+  --photo-ground: #F2EDE6;   /* the ground every dish photograph is set on: a warm
+                                light grey, so a white plate reads as a plate */
   --focus:        #C05C00;   /* 4.40:1 — the threshold for a focus ring is 3:1 */
 
   /* -- sauce families ---------------------------------------------------- */
@@ -337,17 +339,18 @@ a:hover { text-decoration-thickness: 2px; }
   display: grid; grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--s1) var(--s5); align-items: baseline;
 }
-.row__thumb--empty { background: none; }
-
 .row__thumb {
   width: 180px; height: 120px; flex: none;
   /* Every dish photograph is the same 3:2 canvas — the plate cut out and set
-     on pure white with one soft shadow — so a 3:2 box shows all of it with
-     nothing to letterbox. contain is belt and braces: if a photo ever arrives
-     in another proportion it is shrunk, never sliced. */
-  object-fit: contain; background: #FFFFFF;
-  border-radius: var(--r-sm);
+     on --photo-ground with one soft shadow — so a 3:2 box shows all of it
+     with nothing to letterbox. The box carries the same ground, so contain
+     (kept as a guard for a photo in another proportion) never shows a seam. */
+  object-fit: contain; background: var(--photo-ground);
+  border-radius: var(--r-md);
 }
+/* The reserved slot in a photo-less row is empty space, never a grey box:
+   this must come after .row__thumb to win. */
+.row__thumb--empty { background: none; }
 
 .row__name {
   /* Anton has one weight: asking for 600 made the browser synthesise a bold,
@@ -477,15 +480,15 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* Two wide cards to a row, as in the mock-up: the photograph runs edge to edge
    across the top, then one label, the name, a line, and price + link on the
-   same row. Every photograph is the same 3:2 cut-out-on-white canvas, so the
-   media block is pure white and needs no padding to look consistent. */
+   same row. Every photograph is the same 3:2 canvas on --photo-ground, so the
+   media block carries that ground and needs no padding to look consistent. */
 .cards { margin-top: var(--s6); display: grid; gap: var(--s5);
          grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
 .card { background: var(--surface); border: 1px solid var(--rule);
         border-radius: 12px; overflow: hidden;
         display: flex; flex-direction: column; }
-.card__media { aspect-ratio: 3 / 2; background: #FFFFFF; border-bottom: 1px solid var(--sunken); }
+.card__media { aspect-ratio: 3 / 2; background: var(--photo-ground); }
 .card__media picture, .card__img { width: 100%; height: 100%; display: block; }
 .card__img { object-fit: contain; }
 .card__body { padding: var(--s4) var(--s5) var(--s5); display: grid; gap: var(--s2);
