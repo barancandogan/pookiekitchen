@@ -72,8 +72,9 @@ function build() {
 
 function writeSitemap(pages, d) {
   // Without a hostname a sitemap cannot carry absolute URLs, and a sitemap of
-  // relative paths is invalid. Skip it rather than emit something broken.
-  if (!D.site.url) {
+  // relative paths is invalid. A sitemap on a host we are asking crawlers to
+  // stay out of is a contradiction, so that case is empty too.
+  if (!D.site.url || !D.site.indexable) {
     fs.writeFileSync(path.join(DIST, 'sitemap.xml'),
       '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n');
     return false;
@@ -88,6 +89,11 @@ function writeSitemap(pages, d) {
 }
 
 function writeRobots(d) {
+  if (!D.site.indexable) {
+    fs.writeFileSync(path.join(DIST, 'robots.txt'),
+      '# Staging host \u2014 see site.indexable in src/data.js\nUser-agent: *\nDisallow: /\n');
+    return;
+  }
   const lines = ['User-agent: *', 'Allow: /'];
   if (D.site.url) lines.push('', `Sitemap: ${D.site.url}/sitemap.xml`);
   fs.writeFileSync(path.join(DIST, 'robots.txt'), lines.join('\n') + '\n');
@@ -154,6 +160,7 @@ if (require.main === module) {
   if (!d.deliveryLive.length) unknown.push('delivery links');
   if (!D.site.url) unknown.push('site.url');
   if (unknown.length) console.log(`  not yet known: ${unknown.join(', ')}`);
+  if (!D.site.indexable) console.log('  robots: NOINDEX (staging host)');
 
   if (process.argv.includes('--serve')) serve();
 }

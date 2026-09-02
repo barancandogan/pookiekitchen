@@ -22,6 +22,8 @@ src/pages.js     one object per page
 build.js         renders src/ → dist/, plus sitemap.xml and robots.txt
 audit.js         per-page checks plus the launch gate
 preview.js       bundles the built site into one self-contained HTML file
+deploy.sh        pull, build, audit and publish — run on the server
+deploy/          the nginx vhost, kept in the repo so the server is reproducible
 assets/          css, js, the logo as SVG, dish photography — copied into dist/
 dist/            the built site (regenerated every build; safe to delete)
 ```
@@ -282,3 +284,89 @@ moment the site claims to be open — plus a check that the brand hex values in
       wired in; the layout is deliberately photo-count-agnostic, so they can
       land in any order
 - [ ] Confirm the firm holds usage rights to the photography
+
+---
+
+## Deployment
+
+The site is served from a VPS as plain static files behind nginx, alongside the
+other sites on that host.
+
+| | |
+|---|---|
+| URL | `https://pookie.nileapps.co.uk` |
+| Repo on server | `/srv/pookiekitchen` (read-only GitHub deploy key) |
+| Web root | `/var/www/pookie` |
+| nginx vhost | `/etc/nginx/sites-available/pookie` (from `deploy/nginx.conf`) |
+| TLS | Let's Encrypt via certbot, auto-renewed |
+
+Deploying is one command **on the server**:
+
+```bash
+/srv/pookiekitchen/deploy.sh
+```
+
+It fetches `main`, rebuilds, **runs the audit as a gate**, rsyncs `dist/` into
+the web root and reloads nginx. `set -e` plus a non-zero audit means a broken
+build never reaches the web root. `dist/` is not committed — the server builds
+its own copy.
+
+### One-time server setup
+
+The repository is private, so the server needs its own read-only deploy key.
+
+```bash
+# 1. DNS: point an A record for pookie.nileapps.co.uk at this server first.
+#    Everything below fails until it resolves.
+
+# 2. Deploy key, on the server
+ssh-keygen -t ed25519 -C "pookie-deploy" -f /root/.ssh/pookie_deploy -N ""
+cat /root/.ssh/pookie_deploy.pub
+#    Add that key at:
+#    github.com/barancandogan/pookiekitchen/settings/keys → Add deploy key
+#    Read-only. Do NOT tick "Allow write access".
+
+cat >> /root/.ssh/config <<'EOF'
+Host github-pookie
+  HostName github.com
+  User git
+  IdentityFile /root/.ssh/pookie_deploy
+  IdentitiesOnly yes
+EOF
+
+# 3. Clone
+git clone git@github-pookie:barancandogan/pookiekitchen.git /srv/pookiekitchen
+chmod +x /srv/pookiekitchen/deploy.sh
+
+# 4. nginx
+cp /srv/pookiekitchen/deploy/nginx.conf /etc/nginx/sites-available/pookie
+ln -s /etc/nginx/sites-available/pookie /etc/nginx/sites-enabled/pookie
+mkdir -p /var/www/pookie
+nginx -t && systemctl reload nginx
+
+# 5. TLS — certbot rewrites the vhost to add the certificate and the
+#    http→https redirect, so it must run after step 4.
+certbot --nginx -d pookie.nileapps.co.uk
+
+# 6. First deploy
+/srv/pookiekitchen/deploy.sh
+```
+
+Node 18+ must be on the server. The Regnum site on the same host already
+needs it, so it is almost certainly there — `node --version` to confirm.
+
+### This host is not indexed
+
+`site.indexable` is `false` in `src/data.js`, so every page carries
+`noindex, nofollow`, `robots.txt` disallows everything, and the sitemap is
+empty.
+
+That is deliberate. `pookie.nileapps.co.uk` is a staging subdomain of somebody
+else's domain. If it gets indexed now, that URL is what ranks for the brand —
+and when the real domain is bought the two compete, splitting the signal and
+leaving a stale copy in the results. Nothing is hidden: the site is a link away
+as it always was.
+
+On the day the real domain goes live, change `site.url` to it and flip
+`site.indexable` to `true`. Nothing else needs touching — canonicals, Open
+Graph, `robots.txt` and the sitemap all read from those two fields.

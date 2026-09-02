@@ -43,7 +43,7 @@ ${when(canonical, () => `<link rel="canonical" href="${esc(canonical)}">`)}
 <meta property="og:description" content="${esc(page.description)}">
 ${when(canonical, () => `<meta property="og:url" content="${esc(canonical)}">`)}
 <meta name="theme-color" content="${D.brand.paper}">
-${when(d.isPreOpening, () => `<meta name="robots" content="index, follow">`)}
+${when(!D.site.indexable, () => `<meta name="robots" content="noindex, nofollow">`)}
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/main.css">
 ${jsonLd(d)}`;

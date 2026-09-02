@@ -21,7 +21,19 @@ const site = {
 
   // The production hostname. Feeds canonicals, Open Graph and the sitemap.
   // Until this is set the build emits relative canonicals and omits og:url.
-  url: null,                                    // e.g. 'https://pookiechicken.co.uk'
+  // This is the staging host; change it when the real domain is bought, and
+  // nothing else needs touching.
+  url: 'https://pookie.nileapps.co.uk',
+
+  // Whether search engines may index this host.
+  //
+  // FALSE while the site lives on a staging subdomain of somebody else's
+  // domain. If Google indexes pookie.nileapps.co.uk now, that URL is what
+  // ranks for "pookie chicken" — and when the real domain is bought the two
+  // compete, splitting the signal and leaving a stale staging copy in the
+  // results. Nothing about the site is hidden by this; it is a link away as
+  // always. Flip to true on the day the real domain goes live.
+  indexable: false,
 
   locale: 'en-GB',
   currency: 'GBP',
