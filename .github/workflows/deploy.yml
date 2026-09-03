@@ -50,16 +50,45 @@ jobs:
 
       - name: Are the server secrets set?
         id: gate
+        # The host and user are not secrets, so a repository Variable does for
+        # them too. The key or password must be a Secret. Every expected name is
+        # reported as found/missing (never its value) so a skipped deploy says
+        # exactly what to fix.
         env:
-          HOST: ${{ secrets.VPS_HOST }}
+          HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST }}
           KEY: ${{ secrets.VPS_SSH_KEY }}
           PASSWORD: ${{ secrets.VPS_PASSWORD }}
+          S_HOST: ${{ secrets.VPS_HOST != '' }}
+          S_USER: ${{ secrets.VPS_USER != '' }}
+          S_KEY: ${{ secrets.VPS_SSH_KEY != '' }}
+          S_PASSWORD: ${{ secrets.VPS_PASSWORD != '' }}
+          S_HOST_KEY: ${{ secrets.VPS_HOST_KEY != '' }}
+          V_HOST: ${{ vars.VPS_HOST != '' }}
+          V_USER: ${{ vars.VPS_USER != '' }}
+          V_KEY: ${{ vars.VPS_SSH_KEY != '' }}
+          V_PASSWORD: ${{ vars.VPS_PASSWORD != '' }}
         run: |
+          {
+            echo "### Server settings seen by this run"
+            echo ""
+            echo "| Name | Secret | Variable |"
+            echo "|---|---|---|"
+            echo "| VPS_HOST | $S_HOST | $V_HOST |"
+            echo "| VPS_USER | $S_USER | $V_USER |"
+            echo "| VPS_SSH_KEY | $S_KEY | $V_KEY |"
+            echo "| VPS_PASSWORD | $S_PASSWORD | $V_PASSWORD |"
+            echo "| VPS_HOST_KEY | $S_HOST_KEY | - |"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
           if [ -n "$HOST" ] && { [ -n "$KEY" ] || [ -n "$PASSWORD" ]; }; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning title=Deploy skipped::VPS_HOST and VPS_SSH_KEY (or VPS_PASSWORD) are not set. Add them under Settings → Secrets and variables → Actions, then re-run this workflow."
+            missing=""
+            [ -n "$HOST" ] || missing="$missing VPS_HOST"
+            [ -n "$KEY" ] || [ -n "$PASSWORD" ] || missing="$missing VPS_SSH_KEY-or-VPS_PASSWORD"
+            hint="Add them in THIS repository under Settings → Secrets and variables → Actions → Secrets (repository secrets, not environment secrets)."
+            [ "$V_KEY" = true ] || [ "$V_PASSWORD" = true ] && hint="A key or password was added as a Variable; it must be a Secret (Secrets tab). $hint"
+            echo "::warning title=Deploy skipped::Missing:$missing. $hint"
           fi
 
   deploy:
@@ -67,8 +96,8 @@ jobs:
     if: needs.build.outputs.ready == 'true'
     runs-on: ubuntu-latest
     env:
-      HOST: ${{ secrets.VPS_HOST }}
-      SSH_USER: ${{ secrets.VPS_USER || 'root' }}
+      HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST }}
+      SSH_USER: ${{ secrets.VPS_USER || vars.VPS_USER || 'root' }}
       SSHPASS: ${{ secrets.VPS_PASSWORD }}
       STAGE: /srv/pookie-deploy
     steps:
