@@ -55,9 +55,10 @@ jobs:
         # reported as found/missing (never its value) so a skipped deploy says
         # exactly what to fix.
         env:
-          HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST }}
-          KEY: ${{ secrets.VPS_SSH_KEY }}
+          HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST || '187.127.84.93' }}
+          KEY: ${{ secrets.VPS_SSH_KEY || secrets.PAWCAL_DEPLOY }}
           PASSWORD: ${{ secrets.VPS_PASSWORD }}
+          S_PAWCAL: ${{ secrets.PAWCAL_DEPLOY != '' }}
           S_HOST: ${{ secrets.VPS_HOST != '' }}
           S_USER: ${{ secrets.VPS_USER != '' }}
           S_KEY: ${{ secrets.VPS_SSH_KEY != '' }}
@@ -78,6 +79,10 @@ jobs:
             echo "| VPS_SSH_KEY | $S_KEY | $V_KEY |"
             echo "| VPS_PASSWORD | $S_PASSWORD | $V_PASSWORD |"
             echo "| VPS_HOST_KEY | $S_HOST_KEY | - |"
+            echo "| PAWCAL_DEPLOY (accepted as the key) | $S_PAWCAL | - |"
+            echo ""
+            echo "The host falls back to the address in README.md when neither a Secret"
+            echo "nor a Variable sets it, so only a credential is strictly required."
           } | tee -a "$GITHUB_STEP_SUMMARY"
           if [ -n "$HOST" ] && { [ -n "$KEY" ] || [ -n "$PASSWORD" ]; }; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -85,9 +90,9 @@ jobs:
             echo "ready=false" >> "$GITHUB_OUTPUT"
             missing=""
             [ -n "$HOST" ] || missing="$missing VPS_HOST"
-            [ -n "$KEY" ] || [ -n "$PASSWORD" ] || missing="$missing VPS_SSH_KEY-or-VPS_PASSWORD"
-            hint="Add them in THIS repository under Settings → Secrets and variables → Actions → Secrets (repository secrets, not environment secrets)."
-            [ "$V_KEY" = true ] || [ "$V_PASSWORD" = true ] && hint="A key or password was added as a Variable; it must be a Secret (Secrets tab). $hint"
+            [ -n "$KEY" ] || [ -n "$PASSWORD" ] || missing="$missing a-credential(VPS_SSH_KEY,VPS_PASSWORD-or-PAWCAL_DEPLOY)"
+            hint="Add it in THIS repository under Settings → Secrets and variables → Actions → Repository secrets."
+            [ "$V_KEY" = true ] || [ "$V_PASSWORD" = true ] && hint="A key or password was added as a Variable; it must be a Secret. $hint"
             echo "::warning title=Deploy skipped::Missing:$missing. $hint"
           fi
 
@@ -96,7 +101,7 @@ jobs:
     if: needs.build.outputs.ready == 'true'
     runs-on: ubuntu-latest
     env:
-      HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST }}
+      HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST || '187.127.84.93' }}
       SSH_USER: ${{ secrets.VPS_USER || vars.VPS_USER || 'root' }}
       SSHPASS: ${{ secrets.VPS_PASSWORD }}
       STAGE: /srv/pookie-deploy
@@ -110,7 +115,7 @@ jobs:
 
       - name: SSH credentials
         env:
-          KEY: ${{ secrets.VPS_SSH_KEY }}
+          KEY: ${{ secrets.VPS_SSH_KEY || secrets.PAWCAL_DEPLOY }}
           HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
@@ -121,14 +126,45 @@ jobs:
             ssh-keyscan -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
             [ -s ~/.ssh/known_hosts ] || { echo "::error::could not reach $HOST on port 22"; exit 1; }
           fi
+          # The credential may be a private key or a password, and the secret it
+          # arrives in may be named for another project. Decide by what it IS,
+          # not by which name it came under. Only the verdict is ever printed.
+          kind=none
           if [ -n "$KEY" ]; then
-            printf '%s\n' "$KEY" > ~/.ssh/id_deploy
-            chmod 600 ~/.ssh/id_deploy
-            echo "SSH=ssh -i $HOME/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes" >> "$GITHUB_ENV"
-          else
-            sudo apt-get update -qq >/dev/null
-            sudo apt-get install -y -qq sshpass >/dev/null
-            echo "SSH=sshpass -e ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no" >> "$GITHUB_ENV"
+            if printf '%s' "$KEY" | grep -q -- '-----BEGIN .*PRIVATE KEY-----'; then
+              kind=key
+            else
+              kind=password
+              SSHPASS="$KEY"
+            fi
+          elif [ -n "$SSHPASS" ]; then
+            kind=password
+          fi
+          echo "credential looks like: $kind"
+          case "$kind" in
+            key)
+              printf '%s\n' "$KEY" > ~/.ssh/id_deploy
+              chmod 600 ~/.ssh/id_deploy
+              ssh-keygen -y -f ~/.ssh/id_deploy >/dev/null 2>&1 \
+                || { echo "::error::the credential begins like a private key but OpenSSH cannot read it. If it is passphrase-protected, or is a GitHub deploy key rather than a server login key, it cannot be used here."; exit 1; }
+              echo "SSH=ssh -i $HOME/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes" >> "$GITHUB_ENV"
+              ;;
+            password)
+              sudo apt-get update -qq >/dev/null
+              sudo apt-get install -y -qq sshpass >/dev/null
+              echo "SSHPASS=$SSHPASS" >> "$GITHUB_ENV"
+              echo "SSH=sshpass -e ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no" >> "$GITHUB_ENV"
+              ;;
+            *) echo "::error::no usable credential"; exit 1 ;;
+          esac
+
+      # A named step, so a wrong or foreign credential fails HERE with a clear
+      # message rather than halfway through an rsync.
+      - name: Can we log in?
+        run: |
+          if ! $SSH -o ConnectTimeout=20 "$SSH_USER@$HOST" 'echo ok; hostname; uname -sr'; then
+            echo "::error title=SSH login failed::Could not log in to $SSH_USER@$HOST. The credential in the repository secret is not accepted by that server — check it is a login key or password for the VPS itself, not a GitHub deploy key or a credential for a different host."
+            exit 1
           fi
 
       - name: Ship the build

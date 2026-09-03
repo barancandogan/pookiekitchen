@@ -435,11 +435,22 @@ Actions → New repository secret):
 
 | Secret | Value |
 |---|---|
-| `VPS_HOST` | `187.127.84.93` (a repository Variable works for this one too; it is not secret) |
 | `VPS_SSH_KEY` | a private key whose public half is in `/root/.ssh/authorized_keys` on the server (hPanel → VPS → Settings → SSH keys adds it without a terminal) |
 | `VPS_PASSWORD` | the root password, if you would rather not use a key. It works; the key is better |
+| `PAWCAL_DEPLOY` | accepted as the credential too, so a key already in the repository under that name needs no second copy. The workflow decides whether the value is a key or a password by reading it, not by its name |
+| `VPS_HOST` | optional, defaults to `187.127.84.93`. Not secret, so a repository Variable does |
 | `VPS_USER` | optional, default `root`. `remote.sh` needs root |
 | `VPS_HOST_KEY` | optional: a `known_hosts` line to pin the server (`ssh-keyscan -H 187.127.84.93`). Without it the first connection trusts whatever answers |
+
+Only a credential is strictly required. A **repository** secret, not an environment
+secret, and on the Actions tab rather than Codespaces or Dependabot — a secret
+in any of those other places is invisible to this workflow, and the run's summary
+prints which names it could actually see.
+
+The first thing the deploy job does is log in and run `hostname`. A credential
+that belongs to another host, or a GitHub deploy key (which authenticates to
+GitHub, not to a server), fails there with a message saying so rather than
+halfway through copying files.
 
 A key pair for this, made on your own machine:
 
