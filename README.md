@@ -431,7 +431,7 @@ Actions → New repository secret):
 
 | Secret | Value |
 |---|---|
-| `VPS_HOST` | `187.127.84.93` |
+| `VPS_HOST` | `187.127.84.93` (a repository Variable works for this one too; it is not secret) |
 | `VPS_SSH_KEY` | a private key whose public half is in `/root/.ssh/authorized_keys` on the server (hPanel → VPS → Settings → SSH keys adds it without a terminal) |
 | `VPS_PASSWORD` | the root password, if you would rather not use a key. It works; the key is better |
 | `VPS_USER` | optional, default `root`. `remote.sh` needs root |
