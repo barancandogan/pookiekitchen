@@ -122,9 +122,20 @@ jobs:
           if [ -n "$HOST_KEY" ]; then
             printf '%s\n' "$HOST_KEY" > ~/.ssh/known_hosts
           else
-            # trust-on-first-use; set VPS_HOST_KEY to pin the server's key instead
-            ssh-keyscan -H "$HOST" > ~/.ssh/known_hosts 2>/dev/null
-            [ -s ~/.ssh/known_hosts ] || { echo "::error::could not reach $HOST on port 22"; exit 1; }
+            # trust-on-first-use; set VPS_HOST_KEY to pin the server's key instead.
+            # `|| true` matters: the step runs under `bash -e`, so a failing
+            # ssh-keyscan would otherwise abort it before anything explains why.
+            ssh-keyscan -T 15 -H "$HOST" > ~/.ssh/known_hosts 2>/tmp/keyscan.err || true
+            if [ ! -s ~/.ssh/known_hosts ]; then
+              echo "ssh-keyscan said:"; sed 's/^/  /' /tmp/keyscan.err || true
+              if timeout 15 bash -c "exec 3<>/dev/tcp/$HOST/22" 2>/dev/null; then
+                echo "port 22 accepted a TCP connection but offered no host key"
+              else
+                echo "nothing accepted a TCP connection on port 22"
+              fi
+              echo "::error title=No SSH on $HOST::Nothing answered SSH at $HOST:22, so the deploy cannot start. Either that is not this server's address — set VPS_HOST (a repository Secret or Variable) to the right one — or the server does not accept SSH from GitHub's runners."
+              exit 1
+            fi
           fi
           # The credential may be a private key or a password, and the secret it
           # arrives in may be named for another project. Decide by what it IS,
@@ -152,7 +163,7 @@ jobs:
             password)
               sudo apt-get update -qq >/dev/null
               sudo apt-get install -y -qq sshpass >/dev/null
-              echo "SSHPASS=$SSHPASS" >> "$GITHUB_ENV"
+              { echo 'SSHPASS<<__SSHPASS_EOF__'; printf '%s\n' "$SSHPASS"; echo '__SSHPASS_EOF__'; } >> "$GITHUB_ENV"
               echo "SSH=sshpass -e ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no" >> "$GITHUB_ENV"
               ;;
             *) echo "::error::no usable credential"; exit 1 ;;
