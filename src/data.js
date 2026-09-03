@@ -436,8 +436,13 @@ const copy = {
  */
 const hero = {
   poster: 'feature-plate',
-  clips: ['brand-5'],   // the brand's own footage: pan, plate, fork, cut — 8.3 s
-                        // add generated clips here as they land, e.g. 'sweet-chilli'
+  // The brand's own footage, both 8.2 s at 720p. They rotate: main.js crossfades
+  // each into the next a moment before it ends. Order matters only in that the
+  // first one is the one a visitor always sees, so it leads with the plate.
+  clips: [
+    'brand-5',   // pan, plate, fork, cut
+    'brand-7',   // the fryer, the sauce poured, the pan, the finished wings
+  ],
 };
 
 /* ------------------------------------------------------------- derived */
