@@ -87,7 +87,7 @@ function inlineClips(html) {
   return html;
 }
 
-const logo = fs.readFileSync(path.join(ROOT, 'assets/img/logo-mark.svg'), 'utf8')
+const logo = fs.readFileSync(path.join(ROOT, 'assets/img/logo-lockup.svg'), 'utf8')
   .replace(/<\?xml[^>]*\?>\s*/, '');
 
 // Route -> the id its section gets in the bundle.
@@ -135,8 +135,7 @@ const nav = ROUTES.map(r =>
 const header = `<header class="head">
   <div class="wrap head__in">
     <a class="brandmark" href="#home" data-nav="home">
-      <span class="brandmark__logo" aria-hidden="true">${logo}</span>
-      <span class="brandmark__name">Pookie <span>Chicken</span></span>
+      <span class="brandmark__logo" role="img" aria-label="Pookie Chicken">${logo}</span>
     </a>
     <nav class="nav" aria-label="Main">
       ${nav}
@@ -146,14 +145,15 @@ const header = `<header class="head">
 
 const extraCss = `
 /* preview-only: the bundle swaps sections rather than loading pages */
-.brandmark__logo { display:block; width:40px; height:40px; }
-.brandmark__logo svg { width:100%; height:100%; display:block; }
+/* the bundle has no origin to load /assets/ from, so the lockup is inlined */
+.brandmark__logo { display:block; height:52px; }
+.brandmark__logo svg { height:100%; width:auto; display:block; }
 .pv-banner {
   background: var(--sunken); border-bottom: 1px solid var(--rule);
   color: var(--ink-3); font-size: var(--t-xs); text-align: center;
   padding: 6px var(--s4);
 }
-@media (max-width: 640px) { .brandmark__logo { width:32px; height:32px; } }
+@media (max-width: 640px) { .brandmark__logo { height:40px; } }
 `;
 
 const js = `

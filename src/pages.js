@@ -127,7 +127,6 @@ function heroBlock(d) {
   const inner = `
   <p class="hero__eyebrow">${d.isOpen ? 'Open now' : 'Opening soon'}</p>
   <h1>A whole meal for <em>${money(D.menu.find(c => c.id === 'plates').items[0].price)}</em>.</h1>
-  <p class="hero__lede">${esc(D.copy.heroLede)}</p>
   <div class="hero__actions">
     <a class="btn btn--primary" href="/menu/">See the menu</a>
     <a class="btn btn--ghost" href="${esc(D.site.instagramUrl)}" rel="noopener">@${esc(D.site.instagram)}</a>

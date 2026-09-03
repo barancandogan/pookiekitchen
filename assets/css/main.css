@@ -2,8 +2,8 @@
 
 /* Display face: Anton (SIL Open Font License), self-hosted, 18.6 kB, one
    weight. Chosen to match the client's own mock-up — heavy, condensed,
-   upright capitals. Body copy stays on the system stack; the wordmark keeps
-   its own serif because it mirrors the logo. */
+   upright capitals. Body copy stays on the system stack; nothing typesets the
+   brand name at all — the header carries the logo lockup as artwork. */
 @font-face {
   font-family: "Anton";
   src: url("/assets/fonts/anton-latin-400-normal.woff2") format("woff2");
@@ -67,7 +67,6 @@
   --logo-red:     #E12F1C;
   --logo-orange:  #FD8105;
   --logo-amber:   #FDAA04;
-  --display-red:  #E12F1C;   /* the wordmark only — it mirrors the logo */
   --display-orange: #E06E00; /* 3.28:1 on white — large text only */
   --brand:        #B45100;   /* 5.10:1 white · 4.79:1 sunken */
   --brand-ink:    #FFFFFF;   /* on --brand fill: 5.10:1 */
@@ -99,7 +98,6 @@
 
   /* -- type -------------------------------------------------------------- */
   --display: "Anton", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
-  --wordmark: "Iowan Old Style", Georgia, "Palatino Linotype", Palatino, serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
 
@@ -217,17 +215,13 @@ a:hover { text-decoration-thickness: 2px; }
   display: flex; align-items: center; justify-content: space-between;
   gap: var(--s4); padding-block: var(--s3);
 }
-.brandmark { display: flex; align-items: center; gap: var(--s3); text-decoration: none; }
-.brandmark img { width: 40px; height: 40px; }
-.brandmark__name {
-  font-family: var(--wordmark); font-weight: 700;
-  font-size: var(--t-lg); line-height: 1; white-space: nowrap;
-  /* the lockup, so it keeps the logo's own red-and-orange pairing rather
-     than the site's heading colour */
-  color: var(--display-red);
-  letter-spacing: -0.01em;
-}
-.brandmark__name span { color: var(--logo-orange); }
+/* The brand's own lockup, straight from the logo artwork: the rooster mark,
+   then "Pookie" over "Chicken". The artwork carries the name, so nothing is
+   typeset beside it and the alt text is the brand name rather than empty.
+   The height is fixed and the width follows, so the 654:234 ratio holds at
+   every size. */
+.brandmark { display: flex; align-items: center; text-decoration: none; }
+.brandmark img { height: 52px; width: auto; display: block; }
 
 .nav { display: flex; align-items: center; gap: var(--s5); }
 .nav a {
@@ -558,8 +552,7 @@ a:hover { text-decoration-thickness: 2px; }
   .actionbar .btn { flex: 1; justify-content: center; }
   .nav { gap: var(--s3); }
   .nav__link--secondary { display: none; }
-  .brandmark__name { font-size: var(--t-base); }
-  .brandmark img { width: 32px; height: 32px; }
+  .brandmark img { height: 40px; }
   .head__in { gap: var(--s3); }
   .row { padding-inline: var(--s4); gap: var(--s3); }
   .row__thumb { width: 96px; height: 64px; }
@@ -597,7 +590,6 @@ a:hover { text-decoration-thickness: 2px; }
   line-height: .92; max-width: 14ch;
 }
 .hero--video h1 em { color: var(--logo-amber); }
-.hero--video .hero__lede { color: rgba(255,255,255,.9); }
 .hero--video .btn--ghost { color: #FFFFFF; border-color: rgba(255,255,255,.7); }
 .hero--video .btn--ghost:hover { color: #FFFFFF; border-color: #FFFFFF; }
 

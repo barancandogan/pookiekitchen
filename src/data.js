@@ -392,8 +392,6 @@ const copy = {
     'We believe the best chicken comes from freshness, attention to detail, and recipes made with care. Freshly prepared daily, and made for chicken lovers.',
   ],
 
-  heroLede: 'Marinated chicken thigh, pan-seared fresh to order, and served with pasta, a fresh salad and our own sauces. High-quality protein and balanced carbohydrates — a whole meal, not a portion of meat.',
-
   balance: [
     { title: 'Chicken', body: 'Thigh, marinated in our own blend and seared in a pan to order. Not fried, not held under a lamp.' },
     { title: 'Pasta', body: 'Tossed in homemade basil pesto, or swapped for wedges or fries depending on the plate.' },

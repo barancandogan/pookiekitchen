@@ -206,7 +206,10 @@ The display face is **Anton** (SIL OFL, self-hosted at
 `assets/fonts/anton-latin-400-normal.woff2`, 18.6 kB, one weight), preloaded
 and `font-display: swap`, with Impact and a condensed system stack behind it.
 Headings and dish names are uppercase in it; body copy stays on the system
-sans; the wordmark keeps its own serif because it mirrors the logo. The `--dark`
+sans. Nothing typesets the brand name: the header carries the logo artwork
+itself, the lockup from the brand's own PDF — the rooster mark, then "Pookie"
+over "Chicken" — as a single SVG at a fixed height, with the brand name as its
+alt text. The `--dark`
 ground is `#141110`: white on it is 18.4:1 and the logo's own orange is 7.1:1,
 so on dark surfaces the untouched logo orange is text-safe.
 
@@ -257,8 +260,9 @@ exceptions:
 
 - **Prices are `--ink`.** A price is data, not branding, and it has to be the
   most legible thing on the row.
-- **The wordmark keeps the logo's own red-and-orange pairing.** It is the
-  lockup, not a heading.
+- **The wordmark is the logo artwork**, so it keeps the logo's own
+  red-and-orange pairing. It is the lockup, not a heading, and it is never
+  recoloured.
 
 Amber is a **fill only**; `--ink` on amber is 9.42:1.
 

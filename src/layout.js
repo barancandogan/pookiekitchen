@@ -132,8 +132,7 @@ function header(page) {
   return `<header class="head">
   <div class="wrap head__in">
     <a class="brandmark" href="/">
-      <img src="/assets/img/logo-mark.svg" alt="" width="40" height="40">
-      <span class="brandmark__name">Pookie <span>Chicken</span></span>
+      <img src="/assets/img/logo-lockup.svg" alt="Pookie Chicken" width="145" height="52">
     </a>
     <nav class="nav" aria-label="Main">
       ${link('/menu/', 'Menu')}

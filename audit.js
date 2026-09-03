@@ -83,14 +83,26 @@ for (const file of htmlFiles) {
   }
 
   // --- links and buttons have an accessible name
+  //
+  // The name can come from three places, and a tag-strip alone sees only the
+  // first: the element's own text, an aria-label (its own, or one on a nested
+  // role="img"), or the non-empty alt of an image inside it. That last case is
+  // the header logo — a link whose only content is the lockup is named by the
+  // lockup's alt text, exactly as the accessibility tree names it.
+  // Each <img> is matched first and its alt looked for inside the whole tag:
+  // testing `<img\s[^>]*\salt=` in one pass would miss `<img alt="x" src="y">`,
+  // where `<img\s` has already consumed the only space before alt. The leading
+  // \s is what keeps data-alt="…" from counting as a name.
+  const named = (whole, inner) =>
+    !!inner.replace(/<[^>]*>/g, '').trim()
+    || /aria-label="[^"]+"/.test(whole)
+    || [...inner.matchAll(/<img\s[^>]*>/g)].some(t => /\salt="[^"]+"/.test(t[0]));
+
   for (const m of html.matchAll(/<a\s[^>]*>([\s\S]*?)<\/a>/g)) {
-    const inner = m[1].replace(/<[^>]*>/g, '').trim();
-    const hasAria = /aria-label="[^"]+"/.test(m[0]);
-    if (!inner && !hasAria) err(name, `link with no accessible name: ${m[0].slice(0, 80)}`);
+    if (!named(m[0], m[1])) err(name, `link with no accessible name: ${m[0].slice(0, 80)}`);
   }
   for (const m of html.matchAll(/<button\s[^>]*>([\s\S]*?)<\/button>/g)) {
-    const inner = m[1].replace(/<[^>]*>/g, '').trim();
-    if (!inner && !/aria-label="[^"]+"/.test(m[0])) err(name, 'button with no accessible name');
+    if (!named(m[0], m[1])) err(name, 'button with no accessible name');
   }
 
   // --- images carry alt (empty alt is valid for decorative)
