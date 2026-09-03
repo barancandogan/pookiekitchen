@@ -258,8 +258,10 @@ The display face carries the brand colour; the body face stays `--ink`.
 Headings and dish names are orange, descriptions are dark. Two deliberate
 exceptions:
 
-- **Prices are `--ink`.** A price is data, not branding, and it has to be the
-  most legible thing on the row.
+- **Prices on the menu are `--ink`.** A price in a list is data, not branding,
+  and it has to be the most legible thing on the row. The home page is the
+  exception: its cards and the price index below them set prices in `--brand`
+  (5.10:1), because there a price is a headline rather than a column.
 - **The wordmark is the logo artwork**, so it keeps the logo's own
   red-and-orange pairing. It is the lockup, not a heading, and it is never
   recoloured.

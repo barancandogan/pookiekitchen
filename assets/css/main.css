@@ -412,8 +412,11 @@ a:hover { text-decoration-thickness: 2px; }
 .prices__cell dt { font-size: var(--t-sm); color: var(--ink-2); }
 .prices__cell dd {
   margin: 0; font-family: var(--display); font-size: var(--t-xl);
-  font-weight: 600; font-variant-numeric: tabular-nums lining;
-  color: var(--ink);
+  font-weight: 400; font-variant-numeric: tabular-nums lining;
+  /* --brand, matching the card prices this index summarises: 5.10:1 on the
+     white chip. The menu rows keep --ink, where a price is data in a list
+     rather than a headline. */
+  color: var(--brand);
 }
 
 /* ------------------------------------------------------------------ band */
@@ -533,7 +536,12 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* --------------------------------------------------------- header CTA */
 
+/* `.nav a` (0,1,1) outranks `.btn--primary` (0,1,0), so the CTA was inheriting
+   the nav's link colour: --ink-2 on the brand fill, 2.11:1, and on hover it
+   would have been --brand on --brand. Named here, after those rules and at a
+   specificity that wins, it is white on brand: 5.10:1. */
 .nav__cta { padding: 9px 16px; }
+.nav a.nav__cta, .nav a.nav__cta:hover { color: var(--brand-ink); }
 @media (max-width: 640px) { .nav__cta { display: none; } }   /* the action bar has it */
 
 /* -------------------------------------------------------- mobile bar */
