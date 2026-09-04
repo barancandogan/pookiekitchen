@@ -405,11 +405,6 @@ const copy = {
   // ordering channel or a popularity we cannot stand behind.
   headline2: ['Deep marination.', 'Juicy perfection.'],
   banner: { file: 'banner', alt: 'Where every bite is a hug — Pookie Chicken' },
-  // Six dishes for the home-page cards. Only dishes whose price is confirmed:
-  // a dash on a teaser card reads as broken, where on the menu it reads as
-  // honest. Swap in the wings the moment their prices are confirmed.
-  teaser: ['sweet-chilli', 'mediterranean-sirloin', 'creamy-curry',
-           'teriyaki', 'boneless-bbq', 'boneless-mango-habanero'],
   cta: {
     headline: 'Come get some.',
     body: 'Marinated overnight, seared to order, and a whole plate every time.',

@@ -475,37 +475,47 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* ---------------------------------------------------------- home: cards */
 
-/* Two wide cards to a row, as in the mock-up: the photograph runs edge to edge
-   across the top, then one label, the name, a line, and price + link on the
-   same row. Every photograph is the same 3:2 canvas on --photo-ground, so the
-   media block carries that ground and needs no padding to look consistent. */
-.cards { margin-top: var(--s6); display: grid; gap: var(--s5);
-         grid-template-columns: repeat(2, minmax(0, 1fr)); }
-@media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
-.card { background: var(--surface); border: 1px solid var(--rule);
-        border-radius: 12px; overflow: hidden;
-        display: flex; flex-direction: column; }
-.card__media { aspect-ratio: 3 / 2; background: var(--photo-ground); }
-.card__media picture, .card__img { width: 100%; height: 100%; display: block; }
-.card__img { object-fit: contain; }
-.card__body { padding: var(--s4) var(--s5) var(--s5); display: grid; gap: var(--s2);
-              align-content: start; flex: 1; }
-.card__name { font-size: 1.75rem; color: var(--ink); margin-top: var(--s1); }
-.card__desc { font-size: var(--t-sm); color: var(--ink-2); }
-.card__row { display: flex; justify-content: space-between; align-items: baseline;
-             gap: var(--s3); margin-top: auto; padding-top: var(--s3); }
-/* The mock-up sets the price in the display face and the brand orange. --brand
-   is the text-safe orange (5.10:1 on white), so the price keeps its legibility
-   while taking the mock-up's colour. */
-.card__price { font-family: var(--display); font-size: 1.75rem; line-height: 1;
-               color: var(--brand); font-variant-numeric: lining-nums; }
-.card__link { font-size: var(--t-sm); font-weight: 700; color: var(--ink); text-decoration: none; }
-.card__link:hover { text-decoration: underline; color: var(--brand); }
-.pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em;
-        text-transform: uppercase; padding: 4px 10px; border-radius: 999px; justify-self: start; }
-.pill--herb   { background: var(--herb); color: #FFFFFF; }            /* 6.41:1 */
-.pill--chilli { background: var(--sauce-chilli); color: #FFFFFF; }    /* 7.1:1 */
-.pill--plain  { background: var(--sunken); color: var(--ink-2); border: 1px solid var(--rule); }  /* 9.4:1 */
+/* ------------------------------------------------ home: the text menu */
+
+/* The whole menu as words. A grid rather than one long column, because 32
+   lines stacked is a scroll and not a summary; auto-fill means the number of
+   columns follows the width instead of a breakpoint guessing at it. */
+.listing { margin-top: var(--s6); display: grid; gap: var(--s6) var(--s7);
+           grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.listing__ch h3 { font-size: var(--t-lg); color: var(--brand); margin-bottom: var(--s3); }
+.listing__ch ul { list-style: none; margin: 0; padding: 0; }
+.listing__ch li {
+  display: flex; align-items: baseline; gap: var(--s4);
+  padding: 7px 0; border-bottom: 1px solid var(--rule);
+}
+.listing__name { flex: 1; min-width: 0; font-size: var(--t-sm); color: var(--ink); }
+/* The display face and the brand orange, as on the price index this replaced:
+   --brand is 5.10:1 on white, so the figure stays the legible thing on a line
+   even though it is no longer --ink. */
+.listing__price {
+  font-family: var(--display); font-size: var(--t-md); line-height: 1;
+  color: var(--brand); font-variant-numeric: lining-nums; white-space: nowrap;
+}
+
+/* -------------------------------------------------- home: the gallery */
+
+/* Photographs and nothing else — no caption, no price, no link. Every one is
+   the same 3:2 canvas on --photo-ground, so the cells line up whatever shape
+   the plate is and nothing needs cropping. */
+.gallery { margin-top: var(--s6); display: grid; gap: var(--s4);
+           grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+           list-style: none; margin-inline: 0; padding: 0; }
+.gallery li { margin: 0; }
+.gallery__img {
+  width: 100%; aspect-ratio: 3 / 2; object-fit: contain; display: block;
+  background: var(--photo-ground); border-radius: 12px;
+}
+/* On a phone auto-fill drops to one column, and twelve full-width plates is a
+   very long scroll for a block whose whole job is to be glanced at. Two
+   across, always: at 3:2 each cell is still tall enough to read a plate. */
+@media (max-width: 600px) {
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); }
+}
 
 .prices { margin-top: var(--s5); gap: var(--s2); }
 .prices__cell { border-radius: 999px; padding: var(--s2) var(--s4); flex-direction: row;

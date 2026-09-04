@@ -213,10 +213,19 @@ alt text. The `--dark`
 ground is `#141110`: white on it is 18.4:1 and the logo's own orange is 7.1:1,
 so on dark surfaces the untouched logo orange is text-safe.
 
-The cards show only dishes whose price is confirmed — a dash reads as honest on
-the menu and as broken on a teaser card — and link to their chapter on the menu
-rather than to an ordering flow that does not exist. The orange band uses dark
-text on the bright logo orange (7.17:1); white on it would be 2.52:1.
+Below the banner the page is two blocks rather than a row of cards. First the
+**whole menu as words** — chapter, dish, price, nothing else — in a grid that
+takes as many columns as the width allows. Then a **gallery of the
+photographs**, with no caption, price or link on any of them. The split is the
+point: one block to read, one to look at, neither repeating the other.
+
+Because nothing beside a gallery photograph names it, those images carry the
+dish name as their alt text. Every other photograph on the site keeps an empty
+alt, since the name is already there in the markup next to it.
+
+Unconfirmed prices print a dash in the listing exactly as they do on the menu
+page. The orange band uses dark text on the bright logo orange (7.17:1); white
+on it would be 2.52:1.
 
 ---
 

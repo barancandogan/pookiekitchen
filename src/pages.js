@@ -27,14 +27,14 @@ function sauceDot(family) {
  * Alt text is empty on purpose: the dish name sits immediately beside the
  * image, so describing it again is noise in a screen reader.
  */
-function dishPhoto(slug, sizes, widths, cls) {
+function dishPhoto(slug, sizes, widths, cls, alt = '') {
   const dim = D.photoDims[slug] || [400, 400];
   const src = w => `/assets/img/dish/${slug}-${w}`;
   const srcset = ext => widths.map(w => `${src(w)}.${ext} ${w}w`).join(', ');
   return `<picture>
   <source type="image/webp" srcset="${srcset('webp')}" sizes="${sizes}">
   <img class="${cls}" src="${src(widths[0])}.jpg" srcset="${srcset('jpg')}" sizes="${sizes}"
-       alt="" loading="lazy" decoding="async" width="${dim[0]}" height="${dim[1]}">
+       alt="${esc(alt)}" loading="lazy" decoding="async" width="${dim[0]}" height="${dim[1]}">
 </picture>`;
 }
 
@@ -184,41 +184,42 @@ function bannerBlock() {
 }
 
 /**
- * The one label a card carries, in the order that matters to the person
- * choosing: heat first, then whether the plate is a complete meal, else the
- * chapter it belongs to. Never more than one — a card is not a spec sheet.
+ * The menu as words: chapter, dish, price, and nothing else. No photograph,
+ * no description, no per-line link — the gallery underneath carries the
+ * pictures, and /menu/ carries the detail. A price that is not confirmed
+ * prints a dash here exactly as it does on the menu itself.
  */
-function cardPill(ch, it) {
-  if (it.sauce === 'chilli') return '<span class="pill pill--chilli">Spicy</span>';
-  if (it.thirds) return '<span class="pill pill--herb">Complete plate</span>';
-  return `<span class="pill pill--plain">${esc(ch.name)}</span>`;
+function menuListing() {
+  return D.menu.map(ch => `  <section class="listing__ch">
+    <h3>${esc(ch.name)}</h3>
+    <ul>
+${ch.items.map(it => `      <li><span class="listing__name">${esc(it.name)}</span>${
+    it.priceConfirmed === false
+      ? '<span class="listing__price" aria-label="Price to be confirmed">—</span>'
+      : `<span class="listing__price">${money(it.price)}</span>`
+  }</li>`).join('\n')}
+    </ul>
+  </section>`).join('\n');
 }
 
 /**
- * Six dishes as cards, after the client's mock-up: photograph across the top,
- * one label, the name, a line of description, then the price and a link on
- * the same row. Each links to its chapter on the menu — there is no ordering
- * channel yet, so there is no "Order" button to promise one.
+ * Every dish photograph, once, in menu order. No caption, no price, no link:
+ * the pictures are the whole of the block. That makes the alt text the only
+ * thing naming each plate, so — unlike every other photograph on the site,
+ * where the dish name sits right beside the image and a second reading of it
+ * would be noise — these carry the dish name rather than an empty alt.
  */
-function teaserCards() {
-  const wanted = D.copy.teaser;
-  const found = [];
-  for (const ch of D.menu) for (const it of ch.items) {
-    if (it.photo && wanted.includes(it.photo)) found.push({ ch, it });
+function galleryPhotos() {
+  const seen = new Set();
+  const out = [];
+  for (const ch of D.menu) {
+    for (const it of ch.items) {
+      if (!it.photo || seen.has(it.photo)) continue;
+      seen.add(it.photo);
+      out.push(`    <li>${dishPhoto(it.photo, '(max-width: 600px) 50vw, 280px', [400, 800], 'gallery__img', it.name)}</li>`);
+    }
   }
-  found.sort((a, b) => wanted.indexOf(a.it.photo) - wanted.indexOf(b.it.photo));
-  return found.map(({ ch, it }) => `<article class="card">
-  <div class="card__media">${dishPhoto(it.photo, '(max-width: 720px) 100vw, 580px', [400, 800, 1200], 'card__img')}</div>
-  <div class="card__body">
-    ${cardPill(ch, it)}
-    <h3 class="card__name">${esc(it.name)}</h3>
-    ${when(it.desc, () => `<p class="card__desc">${esc(it.desc)}</p>`)}
-    <div class="card__row">
-      <span class="card__price">${it.priceConfirmed === false ? '—' : money(it.price)}</span>
-      <a class="card__link" href="/menu/#ch-${ch.id}">On the menu <span aria-hidden="true">→</span></a>
-    </div>
-  </div>
-</article>`).join('\n');
+  return out.join('\n');
 }
 
 const home = {
@@ -248,20 +249,22 @@ ${heroBlock(d)}
 ${bannerBlock()}
 
 <section class="sec wrap">
-  <p class="sec__kicker">From the menu</p>
-  <h2 class="hx"><span>Six from the menu.</span> <em>Every price shown.</em></h2>
-  <div class="cards">
-${teaserCards()}
+  <p class="sec__kicker">The menu</p>
+  <h2 class="hx"><span>Everything we cook.</span> <em>Every price we can confirm.</em></h2>
+  <div class="listing">
+${menuListing()}
   </div>
-  <dl class="prices">
-    ${D.menu.filter(c => c.priceStatement).map(c => {
-      const p = c.items.find(i => i.priceConfirmed !== false);
-      return p ? `<div class="prices__cell"><dt>${esc(c.name)}</dt><dd>${money(p.price)}</dd></div>` : '';
-    }).join('')}
-  </dl>
   <div class="hero__actions" style="margin-top:var(--s6)">
-    <a class="btn btn--primary" href="/menu/">The whole menu</a>
+    <a class="btn btn--primary" href="/menu/">The menu, with descriptions</a>
   </div>
+</section>
+
+<section class="sec wrap" aria-labelledby="gallery-h">
+  <p class="sec__kicker">The gallery</p>
+  <h2 id="gallery-h" class="hx"><span>The food, photographed.</span></h2>
+  <ul class="gallery">
+${galleryPhotos()}
+  </ul>
 </section>
 
 <section class="band">
