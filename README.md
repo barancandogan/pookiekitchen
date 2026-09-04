@@ -472,8 +472,16 @@ ssh-keygen -t ed25519 -C pookie-actions -f pookie-actions -N ""
 #                        the BEGIN/END lines
 ```
 
-Then push to `main`, or run the workflow by hand. The run's summary shows the
-HTTP status the server answered with.
+Then run the workflow by hand: Actions → Deploy → Run workflow.
+
+**A push does not deploy on its own until you say so.** Every deploy is a login
+to the VPS, and a credential the server rejects is a failed root login; repeated
+on every push, fail2ban bans the runner. So the push path builds and audits
+only, and deploying is a deliberate act. Once a run has gone green, set the
+repository **Variable** `AUTO_DEPLOY` to `true` and every push to `main`
+deploys again.
+
+The run's summary shows the HTTP status the server answered with.
 
 ### Deploying from the server instead
 

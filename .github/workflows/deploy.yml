@@ -96,9 +96,18 @@ jobs:
             echo "::warning title=Deploy skipped::Missing:$missing. $hint"
           fi
 
+  # Deploying does NOT happen on every push. Each attempt is a login to the
+  # VPS, and a credential that is not accepted is a failed root login: repeat
+  # that on every push and fail2ban, which most servers run, eventually bans
+  # the runner. So while the credential is unproven the push path builds and
+  # audits only, and a deploy is a deliberate act — Actions → Deploy → Run
+  # workflow. Set the repository Variable AUTO_DEPLOY to true once a run has
+  # gone green, and every push deploys again.
   deploy:
     needs: build
-    if: needs.build.outputs.ready == 'true'
+    if: >-
+      needs.build.outputs.ready == 'true' &&
+      (github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true')
     runs-on: ubuntu-latest
     env:
       HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST || '187.127.84.93' }}
