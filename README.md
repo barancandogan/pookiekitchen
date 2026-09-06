@@ -192,9 +192,10 @@ build if a listed clip or the poster is missing.
 
 The home page follows the client's own builder mock-up: a dark hero with a
 huge uppercase headline and an orange badge, a two-line "Deep marination.
-Juicy perfection." section (their words, from the neon-sign artwork), the
-"Where every bite is a hug" banner (their artwork), a card grid of six dishes,
-an orange "Come get some." band, and a dark footer. Buttons are pills.
+Juicy perfection." section (their words, from the neon-sign artwork), the menu
+and the photographs, an orange "Come get some." band closed by the "Where every
+bite is a hug" banner — their artwork, edge to edge with nothing over it — and a
+dark footer. Buttons are pills.
 
 What the mock-up contained and this site does **not**: a street address, opening
 hours, an "Order now" button and menu items that are not on the real menu. Those
@@ -213,7 +214,7 @@ alt text. The `--dark`
 ground is `#141110`: white on it is 18.4:1 and the logo's own orange is 7.1:1,
 so on dark surfaces the untouched logo orange is text-safe.
 
-Below the banner the page is two blocks rather than a row of cards. First the
+The middle of the page is two blocks rather than a row of cards. First the
 **whole menu as words** — chapter, dish, price, nothing else — in a grid that
 takes as many columns as the width allows. Then a **gallery of the
 photographs**, with no caption, price or link on any of them. The split is the
