@@ -471,6 +471,9 @@ a:hover { text-decoration-thickness: 2px; }
 /* --------------------------------------------------- home: artwork band */
 
 .artwork { margin-block: clamp(24px, 4vw, 48px); }
+/* Closing the CTA band, the artwork is a band itself: flush to the orange
+   above it, with nothing over it and no gap either side. */
+.cta-band + .artwork { margin-block: 0; }
 .artwork__img { width: 100%; height: auto; display: block; }
 
 /* ---------------------------------------------------------- home: cards */

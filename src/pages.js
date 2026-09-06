@@ -246,8 +246,6 @@ ${heroBlock(d)}
   <div>${dishPhoto('boneless-bbq', '(max-width: 900px) 100vw, 520px', [400, 800], 'split__img')}</div>
 </section>
 
-${bannerBlock()}
-
 <section class="sec wrap">
   <p class="sec__kicker">The menu</p>
   <h2 class="hx"><span>Everything we cook.</span> <em>Every price we can confirm.</em></h2>
@@ -287,6 +285,8 @@ ${galleryPhotos()}
     <a class="btn btn--dark" href="/menu/">See the full menu</a>
   </div>
 </section>
+
+${bannerBlock()}
 
 <section class="sec wrap">
   <p class="sec__kicker">About us</p>
