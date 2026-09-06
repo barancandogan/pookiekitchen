@@ -499,9 +499,47 @@ the web root and reloads nginx. `set -e` plus a non-zero audit means a broken
 build never reaches the web root. `dist/` is not committed — the server builds
 its own copy.
 
-### One-time server setup for the manual path
+### Deploying from the browser terminal
 
-Only needed if you deploy with `deploy.sh`; the workflow above needs none of it.
+`deploy/bootstrap.sh` is the whole server side in one idempotent script, meant
+for hPanel's browser terminal when SSH from elsewhere is not available. It
+installs what is missing (git, rsync, nginx, certbot, openssh-client, Node 20),
+creates the server's own read-only deploy key, clones the repository, installs
+the nginx vhost, builds, publishes, and asks certbot for a certificate — each
+step only if it has not been done already, so running it again is simply a
+deploy.
+
+The repository is private, so the key has to be authorised once. That is why
+the script runs in two passes: the first prints the key and stops, and the
+second does the work.
+
+```bash
+# 1. as root, make the key and print it
+apt-get update -qq && apt-get install -y -qq git openssh-client
+K=/root/.ssh/pookie_deploy
+[ -f $K ] || ssh-keygen -t ed25519 -C pookie-deploy -f $K -N ""
+grep -q '^Host github-pookie$' /root/.ssh/config 2>/dev/null || printf '\nHost github-pookie\n  HostName github.com\n  User git\n  IdentityFile %s\n  IdentitiesOnly yes\n' $K >> /root/.ssh/config
+ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null
+cat $K.pub
+
+# 2. add that line at github.com/barancandogan/pookiekitchen/settings/keys/new
+#    read-only — do NOT tick "Allow write access"
+
+# 3. clone and run the rest
+git clone git@github-pookie:barancandogan/pookiekitchen.git /srv/pookiekitchen
+bash /srv/pookiekitchen/deploy/bootstrap.sh
+```
+
+After that, every later deploy is one command:
+
+```bash
+/srv/pookiekitchen/deploy.sh
+```
+
+### One-time server setup, step by step
+
+The same thing spelled out, if you would rather do it by hand than run the
+script above.
 
 ```bash
 # 1. DNS: point an A record for pookie.nileapps.co.uk at this server first.
