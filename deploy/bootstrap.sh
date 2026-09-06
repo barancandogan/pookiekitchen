@@ -101,6 +101,14 @@ if [ -d "$REPO_DIR/.git" ]; then
   git -C "$REPO_DIR" fetch --quiet origin main
   git -C "$REPO_DIR" reset --hard --quiet origin/main
 else
+  # A directory can be sitting there from an interrupted attempt. git clone
+  # refuses a non-empty target, so move it aside rather than delete it: if it
+  # held anything, it is still there to look at.
+  if [ -e "$REPO_DIR" ]; then
+    aside="$REPO_DIR.aside.$(date +%s)"
+    say "$REPO_DIR exists but is not a clone; moving it to $aside"
+    mv "$REPO_DIR" "$aside"
+  fi
   say "cloning into $REPO_DIR"
   git clone --quiet "$REPO_SSH" "$REPO_DIR"
 fi
