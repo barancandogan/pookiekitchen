@@ -245,9 +245,8 @@ ${menuListing()}
   </div>
 </section>
 
-<section class="sec wrap" aria-labelledby="gallery-h">
+<section class="sec wrap" aria-label="The gallery">
   <p class="sec__kicker">The gallery</p>
-  <h2 id="gallery-h" class="hx"><span>The food, photographed.</span></h2>
   <ul class="gallery">
 ${galleryPhotos()}
   </ul>
@@ -264,17 +263,6 @@ ${galleryPhotos()}
     }</p>
   </div>
 </section>
-
-<section class="cta-band" aria-labelledby="cta-h">
-  <div class="wrap">
-    <p class="cta-band__wm" aria-hidden="true">Pookie</p>
-    <h2 id="cta-h" class="cta-band__h">${esc(D.copy.cta.headline)}</h2>
-    <p class="cta-band__p">${esc(D.copy.cta.body)}</p>
-    <a class="btn btn--dark" href="/menu/">See the full menu</a>
-  </div>
-</section>
-
-${bannerBlock()}
 
 <section class="sec wrap">
   <p class="sec__kicker">About us</p>
@@ -295,7 +283,9 @@ ${bannerBlock()}
     <a class="btn ${d.deliveryLive.length ? 'btn--ghost' : 'btn--primary'}" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
     ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">Call us</a>`)}
   </div>
-</section>`;
+</section>
+
+${bannerBlock()}`;
   },
 };
 

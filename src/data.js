@@ -401,10 +401,6 @@ const copy = {
   // ordering channel or a popularity we cannot stand behind.
   headline2: ['Deep marination.', 'Juicy perfection.'],
   banner: { file: 'banner', alt: 'Where every bite is a hug — Pookie Chicken' },
-  cta: {
-    headline: 'Come get some.',
-    body: 'Marinated overnight, seared to order, and a whole plate every time.',
-  },
 
   // Gated: this claim is unverified, so the section does not render until
   // someone at the kitchen signs it off and flips the flag.

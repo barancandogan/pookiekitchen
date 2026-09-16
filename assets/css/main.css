@@ -247,8 +247,6 @@ a:hover { text-decoration-thickness: 2px; }
   padding: 13px 22px; border-radius: 999px;
   text-decoration: none; cursor: pointer; border: 1px solid transparent;
 }
-.btn--dark { background: var(--dark); color: #FFFFFF; }
-.btn--dark:hover { filter: brightness(1.25); }
 .btn--primary { background: var(--brand); color: var(--brand-ink); }
 .btn--primary:hover { filter: brightness(1.08); }
 .btn--ghost { border-color: var(--line); color: var(--ink); background: none; }
@@ -443,9 +441,9 @@ a:hover { text-decoration-thickness: 2px; }
 /* --------------------------------------------------- home: artwork band */
 
 .artwork { margin-block: clamp(24px, 4vw, 48px); }
-/* Closing the CTA band, the artwork is a band itself: flush to the orange
-   above it, with nothing over it and no gap either side. */
-.cta-band + .artwork { margin-block: 0; }
+/* Last thing on the page, flush to the dark footer under it: the artwork is a
+   band in its own right, so it takes no margin at either edge. */
+.artwork:last-child { margin-block: 0; }
 .artwork__img { width: 100%; height: auto; display: block; }
 
 /* ---------------------------------------------------------- home: cards */
@@ -496,21 +494,6 @@ a:hover { text-decoration-thickness: 2px; }
 .prices__cell { border-radius: 999px; padding: var(--s2) var(--s4); flex-direction: row;
                 align-items: baseline; justify-content: space-between; gap: var(--s3); }
 .prices__cell dd { font-size: var(--t-md); }
-
-/* ------------------------------------------------------- home: CTA band */
-
-/* Bright logo orange as a ground with DARK text: 7.17:1. White on it would be
-   2.52:1, which fails even for the largest heading. */
-.cta-band { position: relative; isolation: isolate; overflow: hidden;
-            background: var(--logo-orange); color: #1A1512;
-            padding-block: clamp(56px, 10vw, 120px); text-align: center; }
-.cta-band__wm { position: absolute; inset: 0; z-index: -1; margin: 0;
-                display: grid; place-items: center; pointer-events: none;
-                font-family: var(--display); text-transform: uppercase;
-                font-size: clamp(8rem, 30vw, 26rem); line-height: 1;
-                color: rgba(255,255,255,.16); letter-spacing: .02em; user-select: none; }
-.cta-band__h { font-size: clamp(3rem, 1.6rem + 7vw, 7.5rem); line-height: .92; color: #1A1512; }
-.cta-band__p { margin: var(--s4) auto var(--s6); max-width: 46ch; font-size: var(--t-md); }
 
 /* --------------------------------------------------------- dark footer */
 

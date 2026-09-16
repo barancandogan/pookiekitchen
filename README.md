@@ -193,9 +193,9 @@ build if a listed clip or the poster is missing.
 The home page follows the client's own builder mock-up: a dark hero with a
 huge uppercase headline and an orange badge, a two-line "Deep marination.
 Juicy perfection." section (their words, from the neon-sign artwork), the menu
-and the photographs, an orange "Come get some." band closed by the "Where every
-bite is a hug" banner — their artwork, edge to edge with nothing over it — and a
-dark footer. Buttons are pills.
+and the photographs, and the "Where every bite is a hug" banner — their artwork,
+edge to edge with nothing over it — closing the page against the dark footer.
+Buttons are pills.
 
 What the mock-up contained and this site does **not**: a street address, opening
 hours, an "Order now" button and menu items that are not on the real menu. Those
@@ -225,8 +225,11 @@ dish name as their alt text. Every other photograph on the site keeps an empty
 alt, since the name is already there in the markup next to it.
 
 Unconfirmed prices print a dash in the listing exactly as they do on the menu
-page. The orange band uses dark text on the bright logo orange (7.17:1); white
-on it would be 2.52:1.
+page.
+
+The gallery carries no headline of its own: the pictures are the block, so the
+section is named for screen readers with `aria-label` rather than a heading
+nobody needs to read.
 
 ---
 
