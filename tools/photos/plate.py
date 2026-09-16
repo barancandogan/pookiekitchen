@@ -29,6 +29,19 @@ own colour — while rim shading and food keep their values; everything outside
 becomes the ground. The ground is deliberately not white: on white, the plate
 disappeared and the food looked as if it floated.
 
+Two fits, chosen per source in sources.json
+-------------------------------------------
+"float" (the default) is the norm above: the whole plate, smaller than the
+canvas, with ground and a shadow all round it.
+
+"fill" is for a source that is ITSELF cropped — where the photographer's frame
+cuts through the plate, and through the food on it. Floating such a plate is
+the worst of both worlds: the straight edge where the frame cut it reads as a
+sliced plate, which is what it looks like, because it is. Filling the frame
+instead puts those cut edges past the canvas edge, so the picture reads as what
+it honestly is — a close crop — and the food is whole within it. Nothing is
+painted back in: a plate that was not photographed is not invented here.
+
     pip install numpy pillow scipy
 """
 import argparse, json, os
@@ -105,14 +118,27 @@ def silhouette(a, food):
     return Image.fromarray(np.dstack([out, P * 255]).astype(np.uint8), 'RGBA'), nb
 
 
-def compose(rgba, ground):
+def compose(rgba, ground, fit='float'):
     al = rgba.split()[3]
     cut = rgba.crop(al.point(lambda v: 255 if v > 20 else 0).getbbox())
-    w, h = cut.size; s = min(.86 * CW / w, .78 * CH / h)
+    w, h = cut.size
+    canvas = Image.new('RGB', (CW, CH), ground)
+
+    if fit == 'fill':
+        # Cover the canvas, then align the plate's TOP edge. What overflows is
+        # spent at the bottom on purpose: on a plate shot from this angle the
+        # bottom of the frame is the empty front rim, and the back of the plate
+        # is where the food is. No shadow — a subject that runs off three sides
+        # of the frame has nothing to cast one onto.
+        s = max(CW / w, CH / h)
+        cut = cut.resize((round(w * s), round(h * s)), Image.LANCZOS)
+        canvas.paste(cut, ((CW - cut.width) // 2, 0), cut)
+        return canvas
+
+    s = min(.86 * CW / w, .78 * CH / h)
     cut = cut.resize((round(w * s), round(h * s)), Image.LANCZOS)
     x = (CW - cut.width) // 2; y = round(CH * .47 - cut.height / 2)
     a = cut.split()[3]
-    canvas = Image.new('RGB', (CW, CH), ground)
     dark = Image.new('RGB', (CW, CH), (58, 40, 26))
     def shadow(offset, blur, opacity):
         sh = Image.new('L', (CW, CH), 0); sh.paste(a, (x, y + offset))
@@ -132,16 +158,19 @@ def main():
     ground = tuple(int(args.ground[i:i + 2], 16) for i in (0, 2, 4))
     os.makedirs(args.out, exist_ok=True)
     sources = {k: v for k, v in json.load(open(os.path.join(HERE, 'sources.json'))).items() if k != '_'}
-    for slug, fname in sources.items():
+    for slug, src in sources.items():
+        # A source is either a filename or {"file": ..., "fit": ..., "note": ...}.
+        src = src if isinstance(src, dict) else {'file': src}
+        fname, fit = src['file'], src.get('fit', 'float')
         a = np.asarray(Image.open(os.path.join(args.originals, fname)).convert('RGB')).astype(np.float32)
         food = np.asarray(Image.open(os.path.join(args.work, 'masks', f'{slug}.png'))).astype(np.float32) / 255
         rgba, nb = silhouette(a, food)
-        final = compose(rgba, ground)
+        final = compose(rgba, ground, fit)
         for w in WIDTHS:
             im = final.resize((w, round(w * CH / CW)), Image.LANCZOS)
             im.save(os.path.join(args.out, f'{slug}-{w}.webp'), 'WEBP', quality=82, method=6)
             im.save(os.path.join(args.out, f'{slug}-{w}.jpg'), 'JPEG', quality=84, optimize=True, progressive=True)
-        print(f'{slug:26s} bowls={nb}', flush=True)
+        print(f'{slug:26s} fit={fit:5s} bowls={nb}', flush=True)
 
 
 if __name__ == '__main__':

@@ -108,7 +108,8 @@ somebody has checked them against the GB register. The weights above them
 
 Twelve of the fifteen photographs in the brand's Drive folder are wired in; the
 remaining three are marketing graphics (a banner, a price-tag advert, a neon
-sign mockup) rather than dishes.
+sign mockup) rather than dishes. A thirteenth plate came later, direct from the
+client, and is the exception described under **Two fits** below.
 
 The sources are studio plates on a near-white backdrop, 1024–1472px, named
 `image (4).png` … `image (64).png`. "Near-white" is the problem: each backdrop
@@ -149,6 +150,27 @@ real `width`/`height`. The pipeline is `tools/photos/cut.py` (masks) and
 `tools/photos/plate.py` (silhouette, ground and composition); re-run both to
 regenerate every file. The ISNet model (178 MB) is fetched by `cut.py` on
 first use and is not committed.
+
+**Two fits, chosen per source.** `sources.json` maps a slug to a filename, or
+to `{ "file", "fit", "note" }` when it needs more. `fit: "float"` is the norm
+above. `fit: "fill"` exists for one source and should stay rare: the client's
+own file for `triple-cheese-duo` is **cropped** — 1284 × 1549, with the plate
+running off both vertical edges, the pasta cut on the left and the fries on the
+right, and only 538 of its rows carrying plate edge to edge. Floated on the
+ground, those two straight edges read exactly as what they are: a sliced plate.
+Filled, they fall outside the canvas and the picture reads as the close crop it
+honestly is, with all the food whole inside it.
+
+Nothing is painted back in. Extending pasta and fries that were never
+photographed would be inventing a portion, and portion size is a claim this
+site makes in grams two sections above. The fix is a crop, not a retouch — and
+the real fix is the uncropped original, which is what to ask the client for.
+
+The consequence: a filled photograph is edge to edge in its box while every
+other one floats, so it does **not** go in the gallery, where one filled cell
+among twelve floating plates reads as a mistake. It has the home page's feature
+slot instead, where a close crop is the point. That is why Triple Cheese Grilled
+Chicken Duo carries no `photo` even though its photograph exists.
 
 **Alignment is a chapter-level property.** Where any dish in a chapter has a
 photograph, the photo-less rows in that chapter reserve the same column, so

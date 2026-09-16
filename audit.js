@@ -196,6 +196,35 @@ for (const ch of D.menu) {
   }
 }
 
+// ...and so must every SRCSET CANDIDATE and every POSTER in the built pages.
+// The loop above only sees slugs on menu items, and the internal-reference
+// check further up only follows href and src — so the widths a browser
+// actually picks on a wide screen, and the hero's poster frame, were the one
+// class of asset nothing verified. A slug a template names directly (the
+// feature plate, the hero poster, the banner) could ship half-broken with a
+// green audit: the 400 jpg in src exists, the 1200 webp in srcset does not.
+{
+  const missing = new Set();
+  for (const f of walk(DIST).filter(f => f.endsWith('.html'))) {
+    const html = fs.readFileSync(f, 'utf8');
+    const urls = [];
+    for (const m of html.matchAll(/\sposter="(\/[^"]+)"/g)) urls.push(m[1]);
+    for (const m of html.matchAll(/\ssrcset="([^"]+)"/g)) {
+      for (const cand of m[1].split(',')) {
+        const u = cand.trim().split(/\s+/)[0];
+        if (u.startsWith('/')) urls.push(u);
+      }
+    }
+    for (const u of urls) {
+      const rel = u.split('?')[0].split('#')[0];
+      if (!fs.existsSync(path.join(DIST, rel.slice(1)))) {
+        missing.add(`${rel} (referenced by ${path.relative(DIST, f)})`);
+      }
+    }
+  }
+  for (const m of missing) err('assets', `missing ${m}`);
+}
+
 // If per-item allergens are switched on, every item must carry them.
 if (D.allergens.perItem) {
   for (const ch of D.menu) {

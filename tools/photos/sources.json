@@ -12,5 +12,9 @@
   "boneless-peri-peri": "image_(28).png",
   "boneless-bbq": "image_(29).png",
   "boneless-mango-habanero": "image_(30).png",
-  "triple-cheese-duo": "triple-cheese-duo.jpg"
+  "triple-cheese-duo": {
+    "file": "triple-cheese-duo.jpg",
+    "fit": "fill",
+    "note": "The only cropped source we have. The file is 1284x1549 and the plate runs off BOTH vertical edges: the pasta is cut on the left, the fries on the right, and only 538 of the 1549 rows have plate touching edge to edge. Floated on the ground like the others, those two straight edges read as a sliced plate. Filled, they fall outside the canvas and the picture reads as the close crop it is. Replace this with the uncropped original if the client still has it, and drop the fit back to float."
+  }
 }
