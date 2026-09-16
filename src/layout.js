@@ -42,12 +42,37 @@ ${when(canonical, () => `<link rel="canonical" href="${esc(canonical)}">`)}
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(page.description)}">
 ${when(canonical, () => `<meta property="og:url" content="${esc(canonical)}">`)}
+${ogImage()}
 <meta name="theme-color" content="${D.brand.paper}">
 ${when(!D.site.indexable, () => `<meta name="robots" content="noindex, nofollow">`)}
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/anton-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/main.css">
 ${jsonLd(d)}`;
+}
+
+/**
+ * The share card.
+ *
+ * Emitted only when site.url is set, because og:image must be an ABSOLUTE URL
+ * — a relative one is silently ignored by most scrapers, which is worse than
+ * none at all since it looks correct in the markup. Width and height are
+ * declared so a scraper can lay the card out without fetching the file, and
+ * the alt is there for the platforms that read it.
+ *
+ * twitter:card is summary_large_image so the picture leads rather than sitting
+ * as a thumbnail beside the text.
+ */
+function ogImage() {
+  const img = D.site.socialImage;
+  if (!img || !D.site.url) return '';
+  const url = `${D.site.url}${img.path}`;
+  return `<meta property="og:image" content="${esc(url)}">
+<meta property="og:image:width" content="${img.width}">
+<meta property="og:image:height" content="${img.height}">
+<meta property="og:image:alt" content="${esc(img.alt)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${esc(url)}">`;
 }
 
 /* ------------------------------------------------------------- JSON-LD */

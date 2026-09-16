@@ -39,6 +39,27 @@ const site = {
   currency: 'GBP',
   currencySymbol: '£',
 
+  /**
+   * The share card: what WhatsApp, Instagram, Facebook and iMessage show when
+   * somebody sends this link to somebody else.
+   *
+   * It is the brand's own poster, which is exactly the job a poster is good
+   * at — it carries the logo, the dishes, the address and "come and taste the
+   * difference", and it never has to sit next to the site's own typography, so
+   * it cannot clash with it. Square, because the audience shares on WhatsApp
+   * and Instagram where square is native; the width and height below are
+   * declared so a scraper does not have to fetch the file to lay out the card.
+   *
+   * absolute: og:image must be an absolute URL. It is built from site.url, so
+   * when the real domain is bought this follows it with nothing to change.
+   */
+  socialImage: {
+    path: '/assets/img/brand/social-1200.jpg',
+    width: 1200,
+    height: 1200,
+    alt: 'Pookie Chicken — marinated chicken plates with pasta and fresh salad. Find us at Chapel Market, Angel.',
+  },
+
   instagram: 'thepookiechicken',
   instagramUrl: 'https://instagram.com/thepookiechicken',
 };
@@ -464,27 +485,37 @@ const copy = {
     ],
 
     // The four badges on the brand's card: "supports muscle growth", "keeps
-    // you energised", "nutritious & balanced", "a happier you".
-    //
-    // GATED, and this one is not fussiness. Under the retained EU Nutrition
-    // and Health Claims Regulation (1924/2006) a health claim on food may only
-    // be made in an authorised form, and a general wellbeing claim like "a
-    // happier you" is permitted only alongside a specific authorised one. The
-    // figures above are facts about the plate and carry no such burden; these
-    // four are claims. Flip `verified` once someone has checked them against
-    // the GB nutrition and health claims register — it is a one-word edit,
-    // exactly like copy.sauceStory.
-    claims: {
-      verified: false,
-      badges: ['Supports muscle growth', 'Keeps you energised', 'Nutritious and balanced', 'A happier you'],
-    },
+    // you energised", "nutritious & balanced", "a happier you". Gated behind
+    // copy.claimsVerified — see the note there.
+    badges: ['Supports muscle growth', 'Keeps you energised', 'Nutritious and balanced', 'A happier you'],
   },
+
+  /**
+   * ONE SWITCH FOR EVERY REGULATED CLAIM ON THE SITE.
+   *
+   * The brand's marketing carries lines like "supports muscle growth", "high
+   * protein" and "healthy choice". Under the retained EU Nutrition and Health
+   * Claims Regulation (1924/2006) those are not adjectives, they are claims:
+   * a health claim may only be made in an authorised form, "high in protein"
+   * is permitted only where protein supplies at least 20% of the food's
+   * energy, and a general wellbeing claim like "a healthier you" is allowed
+   * only alongside a specific authorised one.
+   *
+   * Every one of them is written into this file, and none of them renders
+   * until this is true. Facts about a plate — 250 g of chicken, homemade
+   * sauces, chicken that is marinated — are not claims and are not gated.
+   *
+   * Set this to true once somebody has checked the gated lines against the GB
+   * nutrition and health claims register. It is one word, and everything
+   * waiting on it appears at once.
+   */
+  claimsVerified: false,
 
   // The brand's own lines, verbatim from its posters and menu card. Used where
   // a line of theirs says a thing better than a line of mine would.
   lines: {
     brighterDays: 'Good food, brighter days.',
-    betterYou: 'More than chicken — it\u2019s a better you.',
+    betterYou: 'More than chicken \u2014 it\u2019s a better you.',
     tasteTheDifference: 'Come and taste the difference.',
     freshDaily: 'Fresh homemade fried chicken daily.',
   },

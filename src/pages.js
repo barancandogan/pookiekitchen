@@ -33,9 +33,9 @@ function dishPhoto(slug, sizes, widths, cls, alt = '') {
  * "All in one" card. The figure leads and the sentence follows it, because the
  * figure is the fact and the sentence is the colour.
  *
- * The four benefit badges beneath render only once copy.balance.claims.verified
- * is true — see the note in data.js. They are health claims, not facts about a
- * plate, and this site does not publish an unchecked claim.
+ * The four benefit badges beneath render only once copy.claimsVerified is true
+ * — see the note in data.js. They are health claims, not facts about a plate,
+ * and this site does not publish an unchecked claim.
  */
 function balanceBlock() {
   const b = D.copy.balance;
@@ -45,9 +45,9 @@ function balanceBlock() {
       ${when(x.amount, () => `<p class="balance__amount">${esc(x.amount)}</p>`)}
       <p>${esc(x.body)}</p>
     </li>`).join('')}
-  </ul>${when(b.claims.verified, () => `
+  </ul>${when(D.copy.claimsVerified, () => `
   <ul class="claims">${
-    b.claims.badges.map(t => `<li>${esc(t)}</li>`).join('')
+    b.badges.map(t => `<li>${esc(t)}</li>`).join('')
   }</ul>`)}`;
 }
 
