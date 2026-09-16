@@ -253,6 +253,66 @@ function galleryPhotos() {
   return out.join('\n');
 }
 
+/**
+ * The map.
+ *
+ * Renders nothing at all until there is a real address — a map of a place we
+ * cannot name in words is a guess with a pin on it.
+ *
+ * What ships in the HTML is a BUTTON, not a map. The OpenStreetMap iframe is
+ * inserted by main.js only when a visitor asks for it, because it is the one
+ * third-party request this site would otherwise make and it would be made on
+ * every page view by every visitor, most of whom never look at the map. With
+ * JavaScript off the same element is exactly what it appears to be — a link
+ * that opens the map on openstreetmap.org — so nothing is lost, and the label
+ * says where it goes before it is pressed either way.
+ *
+ * The address, the postcode and the maps link sit beside the map in plain
+ * text, never inside it. They are the answer; the map is the illustration. If
+ * openstreetmap.org is blocked, down, or changes this endpoint tomorrow, the
+ * block still tells a visitor exactly where to go.
+ */
+function mapBlock(d, opts = {}) {
+  if (!d.addressKnown) return '';
+  const a = D.contact.address;
+  const g = D.contact.geo;
+  const m = D.mapView;
+  // bbox is min-lon, min-lat, max-lon, max-lat — left, bottom, right, top.
+  const bbox = [g.lon - m.spanLon, g.lat - m.spanLat, g.lon + m.spanLon, g.lat + m.spanLat]
+    .map(n => n.toFixed(5)).join(',');
+  const embed = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${g.lat},${g.lon}`;
+  const osm = `https://www.openstreetmap.org/?mlat=${g.lat}&mlon=${g.lon}#map=17/${g.lat}/${g.lon}`;
+  const heading = opts.heading || 'Where to find us';
+
+  return `<section class="sec wrap" aria-labelledby="where-h">
+  <p class="sec__kicker">Find us</p>
+  <h2 id="where-h">${esc(heading)}</h2>
+  <div class="where">
+    <div class="where__text">
+      <address class="where__address">${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}</address>
+      ${when(D.contact.transit, () => `<p class="where__note">${esc(D.contact.transit)}</p>`)}
+      ${when(!d.isOpen, () => `<p class="where__note">The door is not open yet — the date goes up here and on
+      Instagram the moment it is fixed.</p>`)}
+      <div class="hero__actions">
+        ${when(a.mapsUrl, () => `<a class="btn btn--primary" href="${esc(a.mapsUrl)}" rel="noopener">Open in Maps</a>`)}
+        ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
+      </div>
+    </div>
+    <figure class="map" data-map data-map-embed="${esc(embed)}">
+      <a class="map__ask" href="${esc(osm)}" rel="noopener">
+        <span class="map__pin" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="28" height="28" focusable="false"><path fill="currentColor"
+            d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+        </span>
+        <span class="map__label">Show the map</span>
+        <span class="map__note">Loads from openstreetmap.org</span>
+      </a>
+      <figcaption class="map__credit">Map data © <a href="${esc(D.mapView.copyright)}" rel="noopener">OpenStreetMap contributors</a></figcaption>
+    </figure>
+  </div>
+</section>`;
+}
+
 const home = {
   path: '/',
   title: 'Home',
@@ -328,6 +388,8 @@ ${galleryPhotos()}
     ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">Call us</a>`)}
   </div>
 </section>
+
+${mapBlock(d, { heading: D.contact.neighbourhood })}
 
 ${bannerBlock()}`;
   },
@@ -428,18 +490,17 @@ const findUs = {
     }
 
     const a = D.contact.address;
+    // The hero says the street; the map block under it repeats the address in
+    // full beside the map, so the two are never read apart.
     return `
 <section class="hero wrap">
   <p class="hero__eyebrow">Find us</p>
-  <h1>${esc(a.locality)}</h1>
-  <address class="hero__lede" style="font-style:normal">
-    ${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}
-  </address>
-  <div class="hero__actions">
-    ${when(a.mapsUrl, () => `<a class="btn btn--primary" href="${esc(a.mapsUrl)}" rel="noopener">Open in Maps</a>`)}
-    ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
-  </div>
+  <h1>${esc(a.line1)}<em>.</em></h1>
+  <p class="hero__lede">${esc(D.contact.neighbourhood)}${
+    when(D.contact.transit, () => `. ${esc(D.contact.transit)}`)}</p>
 </section>
+
+${mapBlock(d, { heading: 'The address' })}
 
 ${when(d.hoursKnown, () => `
 <section class="sec wrap">

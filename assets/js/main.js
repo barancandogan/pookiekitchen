@@ -158,3 +158,58 @@
     stop();
   }, 4000);
 }());
+
+/**
+ * The map, loaded on request and not before.
+ *
+ * The markup ships a link to openstreetmap.org. This upgrades it into a button
+ * that swaps in the OSM iframe in place. So:
+ *
+ *   JavaScript off  the link works, opens the map in a new tab, nothing lost
+ *   JavaScript on   one click and the map appears inline, still nothing sent
+ *                   to openstreetmap.org until that click
+ *
+ * That ordering is the whole point. This site otherwise makes ZERO third-party
+ * requests, and an iframe in the HTML would hand every visitor's IP address to
+ * a third party on every page view — including the great majority who never
+ * look at the map — on a site with no cookie banner and nowhere to record a
+ * choice. One click is a choice. The label says where it loads from before it
+ * is pressed.
+ *
+ * Focus moves into the map once it is there, so a keyboard user who pressed
+ * the button is not left where the button used to be. `sandbox` is deliberately
+ * NOT set: OSM's embed needs scripts to pan and zoom, and a sandbox permissive
+ * enough to allow that buys nothing over the origin isolation an iframe has
+ * anyway. `referrerpolicy` keeps our URL out of their logs.
+ */
+(function () {
+  var figs = document.querySelectorAll('[data-map]');
+  for (var i = 0; i < figs.length; i++) arm(figs[i]);
+
+  function arm(fig) {
+    var src = fig.getAttribute('data-map-embed');
+    var ask = fig.querySelector('.map__ask');
+    if (!src || !ask) return;
+
+    // It is a link in the HTML so it works without this script. Now that the
+    // script is running it does something else, so it must SAY something else
+    // to anything that reads roles rather than pixels.
+    ask.setAttribute('role', 'button');
+
+    ask.addEventListener('click', function (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;  // let "open in new tab" be that
+      e.preventDefault();
+
+      var frame = document.createElement('iframe');
+      frame.className = 'map__frame';
+      frame.src = src;
+      frame.title = 'Map of 61 Chapel Market, London N1 9ER, on OpenStreetMap';
+      frame.loading = 'lazy';
+      frame.setAttribute('referrerpolicy', 'no-referrer');
+      frame.setAttribute('tabindex', '0');
+
+      ask.parentNode.replaceChild(frame, ask);
+      frame.focus();
+    });
+  }
+}());

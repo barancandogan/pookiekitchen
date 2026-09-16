@@ -497,6 +497,63 @@ a:hover { text-decoration-thickness: 2px; }
 .hx span { display: block; }
 .hx em { display: block; font-style: normal; color: var(--display-orange); }
 
+/* --------------------------------------------------------- where + map */
+
+/* Address left, map right; stacked under 900px, the same breakpoint .split
+   uses, so the two side-by-side blocks on the home page break together. */
+.where { margin-top: var(--s6); display: grid; gap: var(--s6);
+         grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: start; }
+@media (max-width: 900px) { .where { grid-template-columns: 1fr; } }
+
+.where__address {
+  font-style: normal; font-family: var(--display); font-weight: 400;
+  text-transform: uppercase; letter-spacing: .01em;
+  font-size: var(--t-xl); line-height: 1.12; color: var(--ink);
+}
+.where__note { margin-top: var(--s4); color: var(--ink-2); font-size: var(--t-sm); max-width: 40ch; }
+
+.map { margin: 0; }
+/* 3:2 like every other picture on the site, so the block sits in the same
+   rhythm whether it is showing the button or the loaded map. */
+.map__ask, .map__frame {
+  display: block; width: 100%; aspect-ratio: 3 / 2;
+  border: 1px solid var(--rule); border-radius: var(--r-lg);
+  background: var(--photo-ground);
+}
+.map__frame { border-style: solid; }
+
+/* The button state. It is an <a> in the HTML — with JavaScript off it opens
+   the map on openstreetmap.org, which is why it is styled as something you
+   press rather than as a broken image. */
+.map__ask {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--s2); text-decoration: none; text-align: center;
+  padding: var(--s5); color: var(--brand);
+  transition: background-color 160ms ease, border-color 160ms ease;
+  /* a faint street-grid hint, so the panel reads as "a map goes here" rather
+     than as an empty box. Decorative only — nothing is claimed by it. */
+  background-image:
+    linear-gradient(rgba(126, 106, 84, .13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 106, 84, .13) 1px, transparent 1px);
+  background-size: 52px 52px, 52px 52px;
+  background-position: -1px -1px;
+}
+.map__ask:hover { background-color: #EBE4DA; border-color: var(--line); }
+.map__pin { color: var(--brand); line-height: 0; }
+.map__label {
+  font-size: var(--t-xs); font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--brand);
+  background: var(--paper); border-radius: 999px; padding: 10px 18px;
+  border: 1px solid var(--line);
+}
+.map__note { font-size: var(--t-xs); color: var(--ink-3); background: var(--paper);
+             padding: 2px 8px; border-radius: 999px; }
+
+.map__credit { margin-top: var(--s2); font-size: var(--t-xs); color: var(--ink-3); }
+.map__credit a { color: var(--ink-3); }
+
+@media (prefers-reduced-motion: reduce) { .map__ask { transition: none; } }
+
 /* --------------------------------------------------- home: artwork band */
 
 .artwork { margin-block: clamp(24px, 4vw, 48px); }

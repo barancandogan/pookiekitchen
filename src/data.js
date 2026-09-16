@@ -60,25 +60,49 @@ const status = {
 /* --------------------------------------------------------------- contact */
 
 const contact = {
-  // Street address. All five parts must be present for the address to render
+  // Street address. All three parts must be present for the address to render
   // at all — a half address is worse than none.
+  //
+  // The door number came from the client. The postcode did not, so it was
+  // checked against three independent public records before being written
+  // here: an Acuitus commercial auction catalogue for 61 Chapel Market, a
+  // London restaurant directory listing a previous tenant at the same number,
+  // and a letting listing for 71 Chapel Market carrying the same code. All
+  // three say N1 9ER. If the client's own paperwork ever disagrees, their
+  // paperwork wins and this changes.
   address: {
-    line1: null,              // e.g. 'Unit 4, 120 Kingsland Road'
-    locality: null,           // e.g. 'London'
-    postcode: null,           // e.g. 'E2 8DP'
+    line1: '61 Chapel Market',
+    locality: 'London',       // the POST TOWN, which for N1 is London. Islington
+                              // is the borough and belongs in prose, not here.
+    postcode: 'N1 9ER',
     country: 'GB',
-    mapsUrl: null,            // Google Maps place link
+    // The documented Google Maps URL scheme, by query rather than by place ID:
+    // a place ID would have to be looked up and could go stale, the query
+    // cannot. Replace it with the real place link once the business is on the
+    // map under its own name.
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=61%20Chapel%20Market%2C%20London%20N1%209ER',
   },
 
-  // The part of London the shop is in, taken from the brand's own poster
-  // ("FIND US AT CHAPEL MARKET, ANGEL"). This is NOT an address and must
-  // never be treated as one: there is no street number and no postcode, so
-  // hasAddress() still returns false, the Restaurant schema is still withheld
-  // and the launch gate is still shut. It exists so the site can answer
-  // "roughly where?" with the one thing we actually know, instead of
-  // pretending to know nothing. Delete it the day address.* is filled in —
-  // by then the real address says it better.
+  // The informal area name, off the brand's own poster ("FIND US AT CHAPEL
+  // MARKET, ANGEL"). This is NOT a substitute for the address above and is
+  // never rendered as one; it is what goes in the ribbon, where the postal
+  // locality — "London" — would tell a Londoner precisely nothing.
   neighbourhood: 'Chapel Market, Angel',
+
+  // Where to centre the map, and the geo node in the Restaurant schema.
+  //
+  // This is the CENTROID OF THE POSTCODE, not a survey of the doorstep. A UK
+  // postcode covers a handful of delivery points, so on a short parade like
+  // this one the centroid lands on the right side of the street within a few
+  // doors — close enough to walk to, not close enough to claim as the exact
+  // spot. That is why the map is framed around the block rather than zoomed
+  // to a single pin, and why the address in words is always shown beside it.
+  geo: { lat: 51.533386, lon: -0.108736 },
+
+  // Verified alongside the postcode: Angel is the nearest Underground station,
+  // about 400 m away. Rendered as prose, so it stays a sentence and not a
+  // claim the schema has to carry.
+  transit: 'Angel station is about a five-minute walk.',
 
   phone: null,                // E.164 preferred, e.g. '+442071234567'
   email: null,                // general enquiries
@@ -478,6 +502,39 @@ const copy = {
   sauceStory: { verified: false, body: null },
 };
 
+/* ------------------------------------------------------------------ map */
+
+/**
+ * The embedded map.
+ *
+ * openstreetmap.org/export/embed.html is the page OSM's own "Share → HTML"
+ * button produces: no key, no account, no sign-up. It is used here rather than
+ * Google's because Google's documented Embed API needs an API key, and the
+ * undocumented output=embed trick is neither supported nor free of cookies.
+ *
+ * IT IS NOT LOADED UNTIL A VISITOR ASKS FOR IT. Today this site makes exactly
+ * zero third-party requests — every font, script, style and photograph is
+ * served from our own host — and an auto-loading iframe would end that for
+ * every visitor to every page, including the ones who never look at the map.
+ * It would also put the visitor's IP address in front of a third party before
+ * they have done anything, on a site with no cookie banner and nowhere to
+ * record a choice. So the map sits behind one click, the button says where it
+ * will load from before it loads, and the address and the maps link are in
+ * plain text beside it either way. See main.js.
+ *
+ * The span is a HALF-span in degrees either side of contact.geo. At this
+ * latitude a degree of longitude is about 69 km and a degree of latitude about
+ * 111 km, so these frame roughly 410 m across by 270 m down: the parade and
+ * both ends of it, not one rooftop. Deliberately not tighter — the coordinate
+ * is a postcode centroid, and a tight zoom would imply a precision it does not
+ * have.
+ */
+const mapView = {
+  spanLon: 0.00295,
+  spanLat: 0.00120,
+  copyright: 'https://www.openstreetmap.org/copyright',
+};
+
 /* ----------------------------------------------------------------- hero */
 
 /**
@@ -544,6 +601,6 @@ function derive() {
 
 module.exports = {
   site, status, contact, delivery, company, brand,
-  sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero,
+  sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero, mapView,
   derive, isFilled,
 };

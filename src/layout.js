@@ -85,6 +85,17 @@ function jsonLd(d) {
     },
     sameAs: [D.site.instagramUrl],
   };
+  // Coordinates are the postcode centroid, which is what a geo node is for:
+  // "this is where the place is", accurate to the parade rather than the
+  // doorstep. Emitted only alongside a full postal address, never instead of
+  // one — a lat/long with no street is how a listing ends up pinned in a road.
+  if (D.contact.geo) {
+    node.geo = {
+      '@type': 'GeoCoordinates',
+      latitude: D.contact.geo.lat,
+      longitude: D.contact.geo.lon,
+    };
+  }
   if (D.site.url) node.url = D.site.url;
   if (d.phoneKnown) node.telephone = D.contact.phone;
   if (d.hoursKnown) node.openingHours = hoursToSchema();
@@ -152,10 +163,11 @@ function header(page) {
 /* -------------------------------------------------------------- footer */
 
 function footer(d) {
-  // A full address renders as an address. A neighbourhood alone renders as a
-  // plain sentence in an ordinary <p>, never in an <address> element and never
-  // in the Restaurant schema — it is a hint, not a place you can post a letter
-  // to, and the markup should not claim otherwise.
+  // A full address renders as an address. Should one ever be removed from
+  // data.js, the neighbourhood alone renders as a plain sentence in an
+  // ordinary <p> — never in an <address> element and never in the Restaurant
+  // schema, because a district is a hint and not a place you can post a letter
+  // to, and the markup must not claim otherwise.
   const addr = d.addressKnown
     ? (() => {
         const a = D.contact.address;

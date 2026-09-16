@@ -70,7 +70,7 @@ hours does not open the site — it fails the audit instead.
 
 | Set this in `src/data.js` | And this appears |
 |---|---|
-| `contact.address` (all of line1, locality, postcode) | Footer address, Find us page, `Restaurant` JSON-LD instead of `Organization` — and it supersedes `contact.neighbourhood`, which can then be deleted |
+| `contact.address` (all of line1, locality, postcode) | Footer address, Find us page, the map block, `Restaurant` JSON-LD instead of `Organization` |
 | `contact.hours` (**all seven** days; a closed day is the string `'closed'`) | Footer hours table, Find us hours, `openingHours` in JSON-LD |
 | `contact.phone` | Footer link, hero "Call us", Find us button |
 | `contact.email` | Footer link |
@@ -86,14 +86,55 @@ hours does not open the site — it fails the audit instead.
 A partial week of hours renders nothing at all. "Tue: ?" tells a visitor to ring
 a number we also do not have, so the whole table waits until every day is decided.
 
-`contact.neighbourhood` is the one thing that sits *beside* this table rather
-than in it. It is "Chapel Market, Angel", off the brand's own poster: a district,
-not an address. It appears in the ribbon, the footer's "Where" block and the Find
-us page, always as plain prose and never inside an `<address>` element or the
-JSON-LD, and it does not move the launch gate one inch — `hasAddress()` still
-wants line1, locality and postcode. It exists so the site can answer "roughly
-where?" honestly instead of saying nothing, and it is deleted the day the real
-address lands.
+`contact.neighbourhood` sits *beside* this table rather than in it. It is
+"Chapel Market, Angel", off the brand's own poster: a district, not an address.
+It is not a fallback for `contact.address` and never renders as one — it is the
+short human "where" for the ribbon and for headings, because the postal
+locality is "London", which tells a Londoner precisely nothing. It never
+appears inside an `<address>` element or in the JSON-LD.
+
+---
+
+## The address
+
+`61 Chapel Market, London, N1 9ER`.
+
+The door number came from the client. The postcode did not, so it was checked
+against three independent public records before being written into `data.js`:
+a commercial auction catalogue for 61 Chapel Market, a London restaurant
+directory listing a previous tenant at the same number, and a letting listing
+for 71 Chapel Market carrying the same code. All three say N1 9ER. If the
+client's own paperwork ever disagrees, their paperwork wins.
+
+`contact.geo` is the **centroid of the postcode**, not a survey of the
+doorstep — a UK postcode covers a handful of delivery points, so on a short
+parade the centroid lands on the right side of the street within a few doors.
+That is why `mapView` frames about 410 m by 265 m rather than zooming to a
+single rooftop, and why the address in words is always printed beside the map
+rather than only inside it.
+
+### The map loads on request, not on page view
+
+The site makes **zero third-party requests**. Every font, script, style and
+photograph is served from our own host; the only external URLs in the built
+HTML are an Instagram link, our own canonical, and the schema.org namespace,
+none of which is fetched. The map is the one thing that would change that, so
+it does not:
+
+- The HTML ships a **link** to openstreetmap.org, styled as a button.
+- `main.js` upgrades it so a click swaps the OSM iframe in place.
+- With JavaScript off it is what it looks like: a link that opens the map.
+- Nothing reaches openstreetmap.org until a visitor asks. The label says where
+  it will load from before it is pressed.
+
+The reason is not ceremony. An iframe in the markup hands every visitor's IP
+address to a third party on every page view, including the great majority who
+never look at the map, on a site with no cookie banner and nowhere to record a
+choice. One click is a choice. OpenStreetMap rather than Google because the
+documented Google Maps Embed API needs an API key and the undocumented
+`output=embed` trick is neither supported nor cookie-free; `export/embed.html`
+is what OSM's own "Share → HTML" button produces. `© OpenStreetMap
+contributors` is printed under the frame either way, as ODbL requires.
 
 Two claim flags are gated the same way a price is: `copy.balance.claims.verified`
 covers the four benefit badges off the brand's "All in one" card ("supports muscle
