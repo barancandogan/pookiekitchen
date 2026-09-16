@@ -113,28 +113,56 @@ That is why `mapView` frames about 410 m by 265 m rather than zooming to a
 single rooftop, and why the address in words is always printed beside the map
 rather than only inside it.
 
-### The map loads on request, not on page view
+### The map
 
-The site makes **zero third-party requests**. Every font, script, style and
-photograph is served from our own host; the only external URLs in the built
-HTML are an Instagram link, our own canonical, and the schema.org namespace,
-none of which is fetched. The map is the one thing that would change that, so
-it does not:
+Google Maps, at the client's request. It is driven by the **address**, not by
+`contact.geo`: handing Google the postal address lets Google geocode it, which
+puts the pin on the building rather than on the postcode centroid we hold. So
+`contact.geo` is left to do the one job it is right for — the `GeoCoordinates`
+node in the schema.
 
-- The HTML ships a **link** to openstreetmap.org, styled as a button.
-- `main.js` upgrades it so a click swaps the OSM iframe in place.
+`mapView` in `data.js` picks the endpoint, in this order:
+
+| Field set | Endpoint | Notes |
+|---|---|---|
+| `apiKey` | `maps/embed/v1/place` | Google's **documented** Maps Embed API. Free with unlimited use, but needs a key from a Google Cloud project. |
+| `embedPb` | `maps/embed?pb=…` | The exact iframe Google's own "Share → Embed a map" dialog gives you. Keyless and stable — paste the `pb=` value. |
+| neither | `maps.google.com/maps?…&output=embed` | Keyless, works, used by half the web — and **not in Google's documentation**, so it is the one thing here that could stop working without notice. |
+
+The keyless form is the default only so the map works today with nothing to set
+up. Move off it when you can: either field above is a one-line edit and nothing
+else changes.
+
+#### It loads on request, not on page view
+
+The site otherwise makes **zero third-party requests**. Every font, script,
+style and photograph is served from our own host; the only external URLs in the
+built HTML are an Instagram link, our own canonical, and the schema.org
+namespace, none of which is fetched.
+
+- The HTML ships a **link** to Google Maps, styled as a button.
+- `main.js` upgrades it so a click swaps the iframe in place.
 - With JavaScript off it is what it looks like: a link that opens the map.
-- Nothing reaches openstreetmap.org until a visitor asks. The label says where
-  it will load from before it is pressed.
+- Nothing reaches Google until a visitor asks.
 
-The reason is not ceremony. An iframe in the markup hands every visitor's IP
-address to a third party on every page view, including the great majority who
-never look at the map, on a site with no cookie banner and nowhere to record a
-choice. One click is a choice. OpenStreetMap rather than Google because the
-documented Google Maps Embed API needs an API key and the undocumented
-`output=embed` trick is neither supported nor cookie-free; `export/embed.html`
-is what OSM's own "Share → HTML" button produces. `© OpenStreetMap
-contributors` is printed under the frame either way, as ODbL requires.
+This matters more with Google than it would with OpenStreetMap, not less:
+Google's embed sets cookies. An iframe sitting in the markup would hand every
+visitor's IP address, and a cookie, to Google on every page view — including
+for the great majority who never look at the map — on a site with no cookie
+banner and nowhere to record a choice. One click is a choice, and the button
+says where it loads from and that it sets cookies *before* it is pressed.
+
+To make it load automatically, delete the upgrade block at the end of
+`main.js` and put the iframe in `mapBlock()` instead. Do that with a cookie
+banner in place, or having decided the site does not need one.
+
+Measured in a real browser: zero third-party requests before the click, exactly
+one after it, and that one is the map. Focus moves into the frame, so a keyboard
+user is not left where the button used to be.
+
+Whatever happens to the embed, the address, the postcode, the transit line and
+the maps link are plain text beside the map and never inside it. They are the
+answer; the map illustrates it.
 
 Two claim flags are gated the same way a price is: `copy.balance.claims.verified`
 covers the four benefit badges off the brand's "All in one" card ("supports muscle

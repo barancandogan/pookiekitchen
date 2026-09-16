@@ -505,34 +505,51 @@ const copy = {
 /* ------------------------------------------------------------------ map */
 
 /**
- * The embedded map.
+ * The embedded map. Google Maps, at the client's request.
  *
- * openstreetmap.org/export/embed.html is the page OSM's own "Share → HTML"
- * button produces: no key, no account, no sign-up. It is used here rather than
- * Google's because Google's documented Embed API needs an API key, and the
- * undocumented output=embed trick is neither supported nor free of cookies.
+ * The map is driven by the ADDRESS, not by contact.geo: handing Google the
+ * postal address lets Google geocode it, which puts the pin on the building
+ * rather than on the postcode centroid we hold. So the pin here is as good as
+ * Google's own, and contact.geo is left to do the one job it is right for —
+ * the GeoCoordinates node in the schema.
  *
- * IT IS NOT LOADED UNTIL A VISITOR ASKS FOR IT. Today this site makes exactly
- * zero third-party requests — every font, script, style and photograph is
- * served from our own host — and an auto-loading iframe would end that for
- * every visitor to every page, including the ones who never look at the map.
- * It would also put the visitor's IP address in front of a third party before
- * they have done anything, on a site with no cookie banner and nowhere to
- * record a choice. So the map sits behind one click, the button says where it
- * will load from before it loads, and the address and the maps link are in
- * plain text beside it either way. See main.js.
+ * WHICH ENDPOINT, in order of preference:
  *
- * The span is a HALF-span in degrees either side of contact.geo. At this
- * latitude a degree of longitude is about 69 km and a degree of latitude about
- * 111 km, so these frame roughly 410 m across by 270 m down: the parade and
- * both ends of it, not one rooftop. Deliberately not tighter — the coordinate
- * is a postcode centroid, and a tight zoom would imply a precision it does not
- * have.
+ *   apiKey set    https://www.google.com/maps/embed/v1/place — Google's
+ *                 documented Maps Embed API. Supported, versioned, and free
+ *                 with unlimited use, but it needs a key from a Google Cloud
+ *                 project. Set apiKey below and this is used automatically;
+ *                 nothing else has to change.
+ *
+ *   embedPb set   https://www.google.com/maps/embed?pb=… — the exact iframe
+ *                 Google's own "Share → Embed a map" dialog hands you. Keyless
+ *                 and stable. Paste the value of its pb= parameter here and it
+ *                 wins over the fallback below.
+ *
+ *   neither       https://maps.google.com/maps?…&output=embed — the keyless
+ *                 form. It works and half the web uses it, but it is NOT in
+ *                 Google's documentation, so it is the one thing here that
+ *                 could stop working without notice. It is the default only so
+ *                 that the map works today with nothing to set up. Move off it
+ *                 when you can: either field above is a one-line edit.
+ *
+ * IT IS NOT LOADED UNTIL A VISITOR ASKS FOR IT, and with Google that matters
+ * more than it did with OpenStreetMap, not less. Google's embed sets cookies.
+ * This site has no cookie banner and nowhere to record a choice, and it
+ * otherwise makes exactly zero third-party requests — every font, script,
+ * style and photograph comes from our own host. An iframe sitting in the
+ * markup would hand a visitor's IP address, and a cookie, to Google on every
+ * page view, including for the great majority who never look at the map. So
+ * the map sits behind one click, the button says where it will load from
+ * before it loads, and the address and the maps link are plain text beside it
+ * either way. See main.js. To make it load automatically instead, delete the
+ * upgrade block in main.js — but read the note there first.
  */
 const mapView = {
-  spanLon: 0.00295,
-  spanLat: 0.00120,
-  copyright: 'https://www.openstreetmap.org/copyright',
+  apiKey: null,               // Maps Embed API key → the documented endpoint
+  embedPb: null,              // the pb= value from Google's Share → Embed dialog
+  zoom: 17,                   // street level: the parade, and both ends of it
+  language: 'en-GB',
 };
 
 /* ----------------------------------------------------------------- hero */

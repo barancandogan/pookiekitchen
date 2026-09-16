@@ -549,9 +549,6 @@ a:hover { text-decoration-thickness: 2px; }
 .map__note { font-size: var(--t-xs); color: var(--ink-3); background: var(--paper);
              padding: 2px 8px; border-radius: 999px; }
 
-.map__credit { margin-top: var(--s2); font-size: var(--t-xs); color: var(--ink-3); }
-.map__credit a { color: var(--ink-3); }
-
 @media (prefers-reduced-motion: reduce) { .map__ask { transition: none; } }
 
 /* --------------------------------------------------- home: artwork band */

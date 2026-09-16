@@ -162,25 +162,33 @@
 /**
  * The map, loaded on request and not before.
  *
- * The markup ships a link to openstreetmap.org. This upgrades it into a button
- * that swaps in the OSM iframe in place. So:
+ * The markup ships a link to Google Maps. This upgrades it into a button that
+ * swaps the Google Maps iframe in place. So:
  *
  *   JavaScript off  the link works, opens the map in a new tab, nothing lost
- *   JavaScript on   one click and the map appears inline, still nothing sent
- *                   to openstreetmap.org until that click
+ *   JavaScript on   one click and the map appears inline, and still nothing
+ *                   reaches Google until that click
  *
- * That ordering is the whole point. This site otherwise makes ZERO third-party
- * requests, and an iframe in the HTML would hand every visitor's IP address to
- * a third party on every page view — including the great majority who never
- * look at the map — on a site with no cookie banner and nowhere to record a
- * choice. One click is a choice. The label says where it loads from before it
- * is pressed.
+ * That ordering is the whole point, and it matters more with Google than it
+ * would with OpenStreetMap, not less: Google's embed sets cookies. This site
+ * otherwise makes ZERO third-party requests, has no cookie banner, and has
+ * nowhere to record a choice — so an iframe sitting in the HTML would hand
+ * every visitor's IP address, and a cookie, to Google on every page view,
+ * including for the great majority who never look at the map. One click is a
+ * choice. The label says where it loads from, and that it sets cookies, before
+ * it is pressed.
+ *
+ * TO MAKE THE MAP LOAD AUTOMATICALLY, delete this whole block and put the
+ * iframe in mapBlock() in src/pages.js instead. Do that only with a cookie
+ * banner in place, or having decided the site does not need one.
  *
  * Focus moves into the map once it is there, so a keyboard user who pressed
  * the button is not left where the button used to be. `sandbox` is deliberately
- * NOT set: OSM's embed needs scripts to pan and zoom, and a sandbox permissive
+ * NOT set: the embed needs scripts to pan and zoom, and a sandbox permissive
  * enough to allow that buys nothing over the origin isolation an iframe has
- * anyway. `referrerpolicy` keeps our URL out of their logs.
+ * anyway. `referrerpolicy` keeps our URL out of their logs. The iframe's
+ * accessible name comes from the markup, so the address lives in data.js and
+ * nowhere else.
  */
 (function () {
   var figs = document.querySelectorAll('[data-map]');
@@ -203,7 +211,7 @@
       var frame = document.createElement('iframe');
       frame.className = 'map__frame';
       frame.src = src;
-      frame.title = 'Map of 61 Chapel Market, London N1 9ER, on OpenStreetMap';
+      frame.title = fig.getAttribute('data-map-title') || 'Map';
       frame.loading = 'lazy';
       frame.setAttribute('referrerpolicy', 'no-referrer');
       frame.setAttribute('tabindex', '0');

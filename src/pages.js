@@ -272,16 +272,28 @@ function galleryPhotos() {
  * openstreetmap.org is blocked, down, or changes this endpoint tomorrow, the
  * block still tells a visitor exactly where to go.
  */
+function mapEmbedUrl() {
+  const m = D.mapView;
+  const a = D.contact.address;
+  const q = encodeURIComponent(`${a.line1}, ${a.locality} ${a.postcode}`);
+  if (m.apiKey) {
+    return `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(m.apiKey)}`
+      + `&q=${q}&zoom=${m.zoom}&language=${encodeURIComponent(m.language)}`;
+  }
+  if (m.embedPb) {
+    return `https://www.google.com/maps/embed?pb=${m.embedPb}`;
+  }
+  return `https://maps.google.com/maps?q=${q}&z=${m.zoom}&hl=${encodeURIComponent(m.language)}&output=embed`;
+}
+
 function mapBlock(d, opts = {}) {
   if (!d.addressKnown) return '';
   const a = D.contact.address;
-  const g = D.contact.geo;
-  const m = D.mapView;
-  // bbox is min-lon, min-lat, max-lon, max-lat — left, bottom, right, top.
-  const bbox = [g.lon - m.spanLon, g.lat - m.spanLat, g.lon + m.spanLon, g.lat + m.spanLat]
-    .map(n => n.toFixed(5)).join(',');
-  const embed = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${g.lat},${g.lon}`;
-  const osm = `https://www.openstreetmap.org/?mlat=${g.lat}&mlon=${g.lon}#map=17/${g.lat}/${g.lon}`;
+  const embed = mapEmbedUrl();
+  // Where the button goes with JavaScript off: the same documented Google
+  // Maps search URL the "Open in Maps" button uses, so both land in the same
+  // place and there is only one address string to get wrong.
+  const out = a.mapsUrl;
   const heading = opts.heading || 'Where to find us';
 
   return `<section class="sec wrap" aria-labelledby="where-h">
@@ -298,16 +310,16 @@ function mapBlock(d, opts = {}) {
         ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
       </div>
     </div>
-    <figure class="map" data-map data-map-embed="${esc(embed)}">
-      <a class="map__ask" href="${esc(osm)}" rel="noopener">
+    <figure class="map" data-map data-map-embed="${esc(embed)}"
+            data-map-title="Map showing ${esc(a.line1)}, ${esc(a.locality)} ${esc(a.postcode)}">
+      <a class="map__ask" href="${esc(out)}" rel="noopener">
         <span class="map__pin" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="28" height="28" focusable="false"><path fill="currentColor"
             d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
         </span>
         <span class="map__label">Show the map</span>
-        <span class="map__note">Loads from openstreetmap.org</span>
+        <span class="map__note">Loads from Google Maps, which sets cookies</span>
       </a>
-      <figcaption class="map__credit">Map data © <a href="${esc(D.mapView.copyright)}" rel="noopener">OpenStreetMap contributors</a></figcaption>
     </figure>
   </div>
 </section>`;
