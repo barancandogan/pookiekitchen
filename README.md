@@ -301,7 +301,6 @@ they do not have to be derived again:
 | `--brand` | `#F2795A` | 6.80 — takes a **dark** label on a fill, never white |
 | `--herb` / `--honey` | `#78C79C` / `#E9B14A` | 9.27 / 9.63 |
 | `--line` / `--rule` | `#8A7358` / `#544537` | 4.15 / 2.03 |
-| `--third-*` | `#E97848` / `#F0CE85` / `#78C79C` | chicken / pasta / salad |
 
 `assets/js/main.js` is deliberately empty now that the toggle is gone — every
 page is complete server-side, so there is nothing to enhance. It stays because
@@ -328,22 +327,6 @@ therefore needs no consent banner.
 
 Every price and calorie figure is set with `font-variant-numeric: tabular-nums
 lining` and right-aligned, so £12.90 stacks under £15.90 down all thirty rows.
-
----
-
-## The Three Thirds glyph
-
-`thirds: true` on a menu item marks a composed plate — chicken, pasta and salad
-— and is the only thing that renders the glyph. Its absence on the wings is
-information, not an omission.
-
-In light mode the three segments are separated by only 1.18:1, so **colour is
-explicitly not the carrying channel**. The meaning is coded four ways: fill
-texture (solid / 45° hatch / dot field), a gap of card ground between segments,
-a 1px edge, and a written label under each segment.
-
-The glyph is never rendered below 24px wide. Below that the labels cannot fit
-and the redundant coding collapses to colour alone, so there is no micro variant.
 
 ---
 

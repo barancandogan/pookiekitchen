@@ -5,16 +5,6 @@ const { esc, money, when } = require('./layout');
 
 /* ---------------------------------------------------- shared components */
 
-function thirdsGlyph(lead) {
-  // Never rendered below 24px wide — there is no micro variant. Below that the
-  // labels cannot fit and the redundant coding collapses to colour alone.
-  return `<div class="thirds${lead ? ' thirds--lead' : ''}" role="img" aria-label="A composed plate: chicken, pasta and salad">
-  <span class="thirds__seg"><span class="thirds__bar thirds__bar--chicken"></span><span class="thirds__lb">Chicken</span></span>
-  <span class="thirds__seg"><span class="thirds__bar thirds__bar--pasta"></span><span class="thirds__lb">Pasta</span></span>
-  <span class="thirds__seg"><span class="thirds__bar thirds__bar--salad"></span><span class="thirds__lb">Salad</span></span>
-</div>`;
-}
-
 function sauceDot(family) {
   if (!family) return '';
   const label = D.sauceFamilies[family].label;
@@ -65,7 +55,6 @@ function row(item, opts = {}) {
     ${priceOut}
     ${when(item.desc, () => `<p class="row__desc">${esc(item.desc)}</p>`)}
     ${kcal}
-    ${when(item.thirds && opts.showThirds !== false, () => `<div class="row__thirds">${thirdsGlyph()}</div>`)}
   </div>
 </div>`;
 }
@@ -235,8 +224,7 @@ ${heroBlock(d)}
     <p class="sec__kicker">Three things, one pan</p>
     <h2 class="hx"><span>${esc(D.copy.headline2[0])}</span> <em>${esc(D.copy.headline2[1])}</em></h2>
     <p class="sec__lede">Every composed plate is protein, carbohydrate and salad — not a portion of meat with
-    sides sold separately. The glyph marks every plate on the menu that arrives this way.</p>
-    <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
+    sides sold separately.</p>
     <div class="balance">
       ${D.copy.balance.map(b =>
         `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`
@@ -366,7 +354,6 @@ const about = {
 <section class="sec wrap">
   <p class="sec__kicker">What that means on the plate</p>
   <h2>Protein, carbohydrate, salad</h2>
-  <div style="margin-top:var(--s5)">${thirdsGlyph(true)}</div>
   <div class="balance">
     ${D.copy.balance.map(b =>
       `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`

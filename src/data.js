@@ -191,10 +191,6 @@ const sauceFamilies = {
 /* ----------------------------------------------------------------- menu */
 
 /**
- * `thirds: true` marks a composed plate — protein + carbohydrate + salad —
- * and is the ONLY thing that renders the Three Thirds glyph. Its absence on
- * wings and sides is information, not an omission.
- *
  * `photo` names a file in assets/img/dish/ — <slug>-400 and -800, each as
  * .webp and .jpg. A row without a photo is not a degraded card; it is simply a
  * row, so adding or removing one is a one-word edit.
@@ -218,13 +214,13 @@ const menu = [
     priceStatement: 'Everything here is £4.90',
     items: [
       { name: 'Jalapeño Poppers', price: 4.90, sauce: 'chilli', kcal: 250, kcalConfirmed: false,
-        desc: 'Crispy breaded jalapeño peppers, fried until golden and served with sweet chilli sauce.' },
+        desc: 'Breaded jalapeños, fried golden, sweet chilli to dip.' },
       { name: 'Chicken Nuggets', price: 4.90, sauce: null, kcal: 240, kcalConfirmed: false,
-        desc: 'Bite-sized tender chicken in a crisp golden crust, served with mayo.' },
+        desc: 'Bite-sized chicken, crisp golden crust, mayo to dip.' },
       { name: 'Mozzarella Sticks', price: 4.90, sauce: 'cream', kcal: 380, kcalConfirmed: false,
-        desc: 'Golden-fried mozzarella with a crisp coating and a molten centre, served with ketchup.' },
+        desc: 'Crisp on the outside, molten mozzarella in, ketchup to dip.' },
       { name: 'Chicken Poppers', price: 4.90, sauce: 'chilli', kcal: 420, kcalConfirmed: false,
-        desc: 'Chicken breast pieces in a crisp golden breadcrumb crust, served with sweet chilli sauce.' },
+        desc: 'Breast pieces, golden breadcrumb crust, sweet chilli to dip.' },
     ],
   },
 
@@ -234,18 +230,18 @@ const menu = [
     priceStatement: 'Every plate £12.90 — and that is with pasta and a fresh salad',
     lede: 'Marinated thigh, pan-seared to order. Never fried, never held.',
     items: [
-      { name: 'Teriyaki Chicken', price: 12.90, photo: 'teriyaki', photoConfirmed: false, sauce: 'glaze', thirds: true, kcal: 860, kcalConfirmed: false,
-        desc: 'Marinated fillet glazed in teriyaki and finished with toasted sesame, with homemade basil pesto pasta and a fresh mixed salad.' },
-      { name: 'Smoky Tomato Chicken', price: 12.90, sauce: 'smoke', thirds: true, kcal: 980, kcalConfirmed: false,
-        desc: 'Marinated fillet in a rich roasted pepper and tomato sauce, with pesto pasta and a fresh mixed salad.' },
-      { name: 'Sriracha Fire Chicken', price: 12.90, sauce: 'chilli', thirds: true, kcal: 820, kcalConfirmed: false,
-        desc: 'Marinated fillet glazed with our homemade hot sauce, with pasta and a fresh mixed salad.' },
-      { name: 'Cheesy Triple Blast Chicken', price: 12.90, photo: 'cheesy-triple-blast', photoConfirmed: false, sauce: 'cream', thirds: true, kcal: 920, kcalConfirmed: false,
-        desc: 'Pan-seared fillet under a rich homemade cheese sauce, with crisp potato wedges and a fresh mixed salad.' },
-      { name: 'Sweet Chilli Chicken', price: 12.90, photo: 'sweet-chilli', photoConfirmed: false, sauce: 'glaze', thirds: true, kcal: 890, kcalConfirmed: false,
-        desc: 'Fillet in a sweet chilli glaze finished with toasted sesame, with pasta and a fresh mixed salad.' },
-      { name: 'Creamy Curry Chicken', price: 12.90, photo: 'creamy-curry', photoConfirmed: false, sauce: 'cream', thirds: true, kcal: 840, kcalConfirmed: false,
-        desc: 'Fillet in a rich, aromatic curry sauce, with pasta and a fresh mixed salad.' },
+      { name: 'Teriyaki Chicken', price: 12.90, photo: 'teriyaki', photoConfirmed: false, sauce: 'glaze', kcal: 860, kcalConfirmed: false,
+        desc: 'Marinated fillet, teriyaki glaze, toasted sesame, basil pesto pasta, mixed salad.' },
+      { name: 'Smoky Tomato Chicken', price: 12.90, sauce: 'smoke', kcal: 980, kcalConfirmed: false,
+        desc: 'Marinated fillet, roasted pepper and tomato sauce, pesto pasta, mixed salad.' },
+      { name: 'Sriracha Fire Chicken', price: 12.90, sauce: 'chilli', kcal: 820, kcalConfirmed: false,
+        desc: 'Marinated fillet, our own hot sauce, pasta, mixed salad.' },
+      { name: 'Cheesy Triple Blast Chicken', price: 12.90, photo: 'cheesy-triple-blast', photoConfirmed: false, sauce: 'cream', kcal: 920, kcalConfirmed: false,
+        desc: 'Pan-seared fillet, homemade cheese sauce, potato wedges, mixed salad.' },
+      { name: 'Sweet Chilli Chicken', price: 12.90, photo: 'sweet-chilli', photoConfirmed: false, sauce: 'glaze', kcal: 890, kcalConfirmed: false,
+        desc: 'Fillet, sweet chilli glaze, toasted sesame, pasta, mixed salad.' },
+      { name: 'Creamy Curry Chicken', price: 12.90, photo: 'creamy-curry', photoConfirmed: false, sauce: 'cream', kcal: 840, kcalConfirmed: false,
+        desc: 'Fillet, aromatic curry sauce, pasta, mixed salad.' },
     ],
   },
 
@@ -254,10 +250,10 @@ const menu = [
     name: 'Duo plates',
     priceStatement: 'Both £15.90 — two thighs, pasta, fries and salad',
     items: [
-      { name: 'Spicy Grilled Chicken Duo', price: 15.90, sauce: 'chilli', thirds: true, kcal: 1050, kcalConfirmed: true,
-        desc: 'Two grilled chicken thighs glazed in a spicy sauce, with pasta, crisp fries and a fresh mixed salad.' },
-      { name: 'Triple Cheese Grilled Chicken Duo', price: 15.90, sauce: 'cream', thirds: true, kcal: 1150, kcalConfirmed: true,
-        desc: 'Two grilled chicken thighs under a homemade triple cheese sauce, with pasta, crisp fries and a fresh mixed salad.' },
+      { name: 'Spicy Grilled Chicken Duo', price: 15.90, sauce: 'chilli', kcal: 1050, kcalConfirmed: true,
+        desc: 'Two grilled thighs, spicy glaze, pasta, fries, mixed salad.' },
+      { name: 'Triple Cheese Grilled Chicken Duo', price: 15.90, sauce: 'cream', kcal: 1150, kcalConfirmed: true,
+        desc: 'Two grilled thighs, triple cheese sauce, pasta, fries, mixed salad.' },
     ],
   },
 
@@ -269,15 +265,15 @@ const menu = [
     priceStatement: null,
     items: [
       { name: 'Hot Honey Wings', price: 9.90, priceConfirmed: false, sauce: 'glaze', kcal: 720, kcalConfirmed: true,
-        desc: 'Crispy fried wings glazed in sweet hot honey and sriracha.' },
+        desc: 'Crispy wings, hot honey and sriracha.' },
       { name: 'Mango Habanero Wings', price: 9.90, priceConfirmed: false, sauce: 'chilli', kcal: 740, kcalConfirmed: true,
-        desc: 'Crispy fried wings in a bold mango habanero glaze — tropical sweetness with a fiery finish.' },
+        desc: 'Crispy wings, mango habanero glaze. Sweet first, fiery after.' },
       { name: 'Peri Peri Flame Wings', price: 8.90, photo: 'peri-peri-wings', photoConfirmed: false, priceConfirmed: false, sauce: 'chilli', kcal: 720, kcalConfirmed: false,
-        desc: 'Crispy wings glazed in peri peri.' },
+        desc: 'Crispy wings, peri peri glaze.' },
       { name: 'Buffalo Fire Wings', price: 8.90, photo: 'buffalo-wings', photoConfirmed: false, priceConfirmed: false, sauce: 'chilli', kcal: 810, kcalConfirmed: true,
-        desc: 'Golden crispy wings tossed in a rich buffalo sauce.' },
+        desc: 'Golden wings tossed in buffalo sauce.' },
       { name: 'Korean BBQ Wings', price: 8.90, photo: 'korean-bbq-wings', photoConfirmed: false, priceConfirmed: false, sauce: 'glaze', kcal: 740, kcalConfirmed: false,
-        desc: 'Eight pieces of crispy fried chicken tossed in smoky Korean BBQ sauce, served with salad.' },
+        desc: 'Eight crispy wings, smoky Korean BBQ, salad.' },
     ],
   },
 
@@ -287,11 +283,11 @@ const menu = [
     priceStatement: 'Everything here is £10.90',
     items: [
       { name: 'Golden Mango Habanero Boneless', price: 10.90, photo: 'boneless-mango-habanero', photoConfirmed: false, sauce: 'chilli', kcal: 860, kcalConfirmed: true,
-        desc: 'Boneless peri peri marinated thigh pieces in a light crisp batter, fried golden.' },
+        desc: 'Boneless thigh, light crisp batter, fried golden.' },
       { name: 'Crispy Peri Peri Boneless Thigh', price: 10.90, photo: 'boneless-peri-peri', photoConfirmed: false, sauce: 'chilli', kcal: 740, kcalConfirmed: true,
-        desc: 'Boneless thigh pieces in a light crisp batter, fried golden for a tender, crunchy bite.' },
+        desc: 'Boneless thigh, light crisp batter, crunchy outside and tender in.' },
       { name: 'BBQ Boneless Thigh', price: 10.90, photo: 'boneless-bbq', photoConfirmed: false, sauce: 'glaze', kcal: 810, kcalConfirmed: true,
-        desc: 'Crispy boneless thigh tossed in rich Korean BBQ sauce — smoky, sweet and savoury.' },
+        desc: 'Crispy boneless thigh, Korean BBQ. Smoky and sweet.' },
     ],
   },
 
@@ -301,11 +297,11 @@ const menu = [
     priceStatement: null,
     items: [
       { name: 'Grilled Chicken Wrap', price: 9.90, sauce: 'cream', kcal: 860, kcalConfirmed: true,
-        desc: 'Grilled chicken fillet, tomato, red pepper, onion, crisp lettuce and a creamy cheese sauce in a soft tortilla.' },
+        desc: 'Grilled fillet, tomato, red pepper, onion, lettuce, cheese sauce, soft tortilla.' },
       { name: 'Peri Peri Flame Burger', price: 9.90, sauce: 'chilli', kcal: null, kcalConfirmed: false,
-        desc: 'Grilled chicken fillet in a bold peri peri sauce, in a soft bun.' },
+        desc: 'Grilled fillet, peri peri sauce, soft bun.' },
       { name: 'Steak Royale Wrap', price: 12.90, sauce: 'cream', kcal: 840, kcalConfirmed: false,
-        desc: 'Grilled sirloin, tomato, red onion and homemade cheese sauce in a soft tortilla.' },
+        desc: 'Grilled sirloin, tomato, red onion, cheese sauce, soft tortilla.' },
     ],
   },
 
@@ -315,9 +311,9 @@ const menu = [
     priceStatement: 'Both £20.90 — 150g sirloin, fries and salad',
     items: [
       { name: 'Mediterranean Sirloin', price: 20.90, photo: 'mediterranean-sirloin', photoConfirmed: true, sauce: 'cream', kcal: null, kcalConfirmed: false,
-        desc: 'Grilled 150g sirloin over a creamy hummus blend, with fries and a fresh mixed salad.' },
+        desc: '150g sirloin, creamy hummus, fries, mixed salad.' },
       { name: 'Roasted Pepper Sirloin', price: 20.90, photo: 'roasted-pepper-sirloin', photoConfirmed: true, sauce: 'smoke', kcal: null, kcalConfirmed: false,
-        desc: 'Grilled 150g sirloin with a rich roasted pepper and tomato sauce, with crisp fries and a fresh mixed salad.' },
+        desc: '150g sirloin, roasted pepper and tomato sauce, fries, mixed salad.' },
     ],
   },
 
@@ -327,9 +323,9 @@ const menu = [
     priceStatement: 'Both £8.90, soft drink included',
     items: [
       { name: 'Chicken and Fries', price: 8.90, sauce: null, kcal: null, kcalConfirmed: false,
-        desc: 'Crispy chicken with golden fries and any soft drink.' },
+        desc: 'Crispy chicken, golden fries, any soft drink.' },
       { name: 'Chicken Thigh and Fries', price: 8.90, sauce: null, kcal: null, kcalConfirmed: false,
-        desc: 'Grilled chicken thigh with crisp fries. Portioned for children.' },
+        desc: 'Grilled thigh, crisp fries. Portioned for children.' },
     ],
   },
 
@@ -342,9 +338,9 @@ const menu = [
       { name: 'Potato Wedges', price: 3.90, sauce: null, kcal: null, kcalConfirmed: false, desc: null },
       { name: 'Mixed Salad', price: 3.90, sauce: null, kcal: null, kcalConfirmed: false, desc: null },
       { name: 'Pesto Penne', price: 3.90, sauce: 'cream', kcal: null, kcalConfirmed: false,
-        desc: 'Penne tossed in a rich basil pesto.' },
+        desc: 'Penne, basil pesto.' },
       { name: 'Marinated Pan-Fried Chicken', price: 3.90, sauce: null, kcal: null, kcalConfirmed: false,
-        desc: 'A side portion of the chicken from the plates.' },
+        desc: 'The chicken from the plates, on its own.' },
     ],
     extras: [
       { name: 'Cheese, on the chicken or the fries', price: 1.50 },

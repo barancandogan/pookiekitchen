@@ -88,11 +88,6 @@
   --sauce-smoke:  #8A4520;
   --sauce-cream:  #EFDCBB;   /* 1.25:1 — invisible alone, hence the ring */
 
-  /* -- three thirds ------------------------------------------------------ */
-  --third-chicken:#8F3A18;
-  --third-pasta:  #D9A441;
-  --third-salad:  #2E6A4A;
-
   /* -- scrim: guarantees AA over any photograph, sight unseen ------------- */
   --scrim: linear-gradient(to top, rgba(20,14,9,.86), rgba(20,14,9,.72) 45%, transparent);
 
@@ -269,31 +264,6 @@ a:hover { text-decoration-thickness: 2px; }
 .sec h2 { font-size: var(--t-2xl); letter-spacing: -0.014em; }
 .sec__lede { margin-top: var(--s4); max-width: var(--measure); color: var(--ink-2); }
 
-/* ------------------------------------------------------ three thirds */
-
-.thirds { display: flex; gap: 2px; width: 172px; }
-.thirds__seg { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.thirds__bar { height: 30px; border: 1px solid var(--line); }
-.thirds__lb {
-  font-size: 11px; letter-spacing: .05em; text-transform: uppercase;
-  color: var(--ink-3); font-weight: 600; text-align: center;
-}
-/* Four redundant channels: fill texture, a gap of ground, an edge, a label.
-   Pairwise hue separation is 1.18:1 in light mode — colour is deliberately
-   not the carrying channel. */
-.thirds__bar--chicken { background: var(--third-chicken); }
-.thirds__bar--pasta {
-  background: repeating-linear-gradient(45deg,
-    var(--third-pasta) 0 4px, transparent 4px 8px), var(--surface);
-}
-.thirds__bar--salad {
-  background: radial-gradient(circle at 3px 3px,
-    var(--third-salad) 1.6px, transparent 1.7px) 0 0 / 7px 7px, var(--surface);
-}
-
-.thirds--lead { width: 232px; }
-.thirds--lead .thirds__bar { height: 38px; }
-
 .balance { margin-top: var(--s6); display: grid; gap: var(--s5);
            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .balance__item h3 { font-size: var(--t-lg); margin-bottom: var(--s2); }
@@ -343,8 +313,11 @@ a:hover { text-decoration-thickness: 2px; }
   border-radius: var(--r-md);
 }
 /* The reserved slot in a photo-less row is empty space, never a grey box:
-   this must come after .row__thumb to win. */
-.row__thumb--empty { background: none; }
+   this must come after .row__thumb to win. Height 0, because the slot exists
+   to reserve the WIDTH that keeps every dish name on the same left edge —
+   given a height it would also set the row's, and a short row would be left
+   with a box of nothing under its text. */
+.row__thumb--empty { background: none; height: 0; }
 
 .row__name {
   /* Anton has one weight: asking for 600 made the browser synthesise a bold,
@@ -371,7 +344,6 @@ a:hover { text-decoration-thickness: 2px; }
   grid-column: 2; text-align: right; font-size: var(--t-xs);
   color: var(--ink-3); font-variant-numeric: tabular-nums;
 }
-.row__thirds { grid-column: 1; margin-top: var(--s3); }
 
 /* Every dot carries a ring, so its boundary clears 3:1 whatever the fill —
    --sauce-cream is 1.25:1 against the surface and invisible without it. */
