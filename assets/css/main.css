@@ -414,7 +414,7 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* ------------------------------------------------------------- footer */
 
-.foot { border-top: 1px solid var(--rule); padding-block: var(--s7) var(--s8);
+.foot { border-top: 1px solid var(--rule); padding-block: var(--s6) var(--s5);
         font-size: var(--t-sm); color: var(--ink-3); }
 .foot__grid { display: grid; gap: var(--s5);
               grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
@@ -422,7 +422,7 @@ a:hover { text-decoration-thickness: 2px; }
            letter-spacing: .08em; text-transform: uppercase;
            color: var(--ink-2); font-weight: 700; margin-bottom: var(--s3); }
 .foot a { color: var(--ink-2); }
-.foot__legal { margin-top: var(--s6); padding-top: var(--s4);
+.foot__legal { margin-top: var(--s4); padding-top: var(--s3);
                border-top: 1px solid var(--rule); font-size: var(--t-xs); }
 
 /* ------------------------------------------------------- home: split */
@@ -523,9 +523,14 @@ a:hover { text-decoration-thickness: 2px; }
   display: none;
 }
 @media (max-width: 640px) {
-  .actionbar { display: block; }
+  .actionbar { display: block; padding: var(--s2) 0; }
   .actionbar .wrap { display: flex; gap: var(--s2); }
-  .actionbar .btn { flex: 1; justify-content: center; }
+  .actionbar .btn {
+    justify-content: center; white-space: nowrap;
+    font-size: 12px; letter-spacing: .04em; padding: 12px 14px;
+  }
+  .actionbar .btn--ghost { flex: 0 0 auto; }    /* just the width of "Menu" */
+  .actionbar .btn--primary { flex: 1; }         /* the long label takes the rest */
   .nav { gap: var(--s3); }
   .nav__link--secondary { display: none; }
   .brandmark img { height: 40px; }
