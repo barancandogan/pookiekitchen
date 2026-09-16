@@ -221,3 +221,83 @@
     });
   }
 }());
+
+/**
+ * Back to top.
+ *
+ * The markup already carries a working in-page link at the foot of the page.
+ * This lifts it into the corner as a floating button, and shows it only once
+ * the visitor is a screen or so down — before that there is nothing above them
+ * to go back to, and a button that is always there is just clutter.
+ *
+ * As with the reveal, the arming class and the state class are both added
+ * here, so with JavaScript off, blocked, or still parsing, the CSS in main.css
+ * never matches and the link is exactly what it appears to be in the footer.
+ *
+ * The click is intercepted only to make the scroll smooth. Everything the
+ * browser would have done for a plain #top link is then done by hand: the
+ * focus moves to the header, so a keyboard user's next Tab starts from the top
+ * of the page rather than from the footer they were standing in. Without that
+ * the button moves the view and abandons the keyboard, which is worse than not
+ * having it. preventScroll keeps focus() from jumping the page and cancelling
+ * the animation it was asked to smooth.
+ */
+(function () {
+  var btn = document.querySelector('.totop');
+  if (!btn || !window.requestAnimationFrame) return;
+
+  var target = document.querySelector(btn.getAttribute('href'));
+  if (!target) return;
+
+  document.documentElement.classList.add('js-totop');
+
+  // Measure the sticky action bar rather than guessing at it, so the button
+  // clears it whatever the label inside it grows to — and re-measure on
+  // resize, because the bar only exists under 640px and its height changes
+  // when a label wraps.
+  var bar = document.querySelector('.actionbar');
+  function measureBar() {
+    if (!bar) return;
+    var h = Math.round(bar.getBoundingClientRect().height);
+    if (h) document.documentElement.style.setProperty('--actionbar-h', h + 'px');
+  }
+  measureBar();
+
+  var shown = false, ticking = false;
+
+  function sweep() {
+    ticking = false;
+    measureBar();
+    var want = window.pageYOffset > (window.innerHeight || 0) * 1.2;
+    if (want === shown) return;
+    shown = want;
+    btn.classList.toggle('is-in', want);
+  }
+
+  function request() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(sweep);
+  }
+
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', request, { passive: true });
+  request();
+
+  btn.addEventListener('click', function (e) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try {
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    } catch (err) {
+      window.scrollTo(0, 0);                       // older browsers: no options object
+    }
+    try {
+      target.focus({ preventScroll: true });
+    } catch (err) {
+      target.focus();
+    }
+  });
+}());

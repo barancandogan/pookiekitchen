@@ -145,7 +145,11 @@ function header(page) {
     `<a href="${href}"${page.path === href ? ' aria-current="page"' : ''}${
       secondary ? ' class="nav__link--secondary"' : ''}>${esc(label)}</a>`;
 
-  return `<header class="head">
+  // id + tabindex: the target of the "Back to top" link at the foot of the
+  // page. tabindex="-1" makes it focusable without putting it in the tab
+  // order, which is the standard skip-link-target technique — so following
+  // the link moves the keyboard's place to the top, not just the scrollbar's.
+  return `<header class="head" id="top" tabindex="-1">
   <div class="wrap head__in">
     <a class="brandmark" href="/">
       <img src="/assets/img/logo-lockup.svg" alt="Pookie Chicken" width="145" height="52">
@@ -214,6 +218,16 @@ function footer(d) {
     <div class="foot__legal">
       ${legal}
       <p>© ${new Date().getFullYear()} ${esc(D.site.name)}. ${esc(D.copy.lines.brighterDays)}</p>
+      <!-- A plain in-page link, which is all it is without JavaScript: the last
+           line of the footer, and it works. main.js lifts it out of the flow
+           and turns it into the floating button that appears once you are a
+           screen or so down the page. -->
+      <a class="totop" href="#top">
+        <svg class="totop__arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"
+          ><path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+             d="M12 19V5m0 0-7 7m7-7 7 7"/></svg>
+        <span class="totop__label">Back to top</span>
+      </a>
     </div>
   </div>
 </footer>`;

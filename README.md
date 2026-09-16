@@ -173,6 +173,41 @@ somebody has checked them against the GB register. The weights above them
 
 ---
 
+## Back to top
+
+A floating button, bottom right, once the visitor is about a screen and a bit
+down the page. Before that there is nothing above them to go back to and the
+button would be clutter.
+
+Like the scroll reveal, it is built the same way round as everything else here:
+what ships in the HTML is an **ordinary in-page link on the last line of the
+footer**, and `main.js` lifts it out of the flow into the corner. Both the
+arming class and the shown state come from the script, so with JavaScript off,
+blocked, or still parsing, the CSS never matches and the footer link is exactly
+what it appears to be. Nothing is hidden by a transition that never ran.
+
+Three details that are easy to get wrong and are not:
+
+- **`visibility`, not just `opacity`.** A button faded to zero is still in the
+  tab order — a keyboard user would hit a control they cannot see. It is
+  `visibility: hidden` until it is wanted.
+- **Focus follows the scroll.** The click is intercepted only to make the
+  scroll smooth, so everything the browser would have done for a plain `#top`
+  link is then done by hand: focus moves to the header, which carries
+  `tabindex="-1"` for the purpose. Without that the button moves the view and
+  abandons the keyboard in the footer, which is worse than not having it.
+- **Paper, not `--dark` and not `--brand`.** It floats over two grounds: the
+  white page for most of the scroll and the dark footer at the end, which is
+  exactly where someone reaches for it. A dark button vanished into that
+  footer. `--brand` would have worked on both, but it is the colour of the
+  action-bar button directly below it on a phone, and two orange pills stacked
+  read as one.
+
+On a phone it sits above the sticky action bar, clearing a height the script
+**measures** rather than guesses, and re-measures on resize.
+
+---
+
 ## Photography
 
 Twelve of the fifteen photographs in the brand's Drive folder are wired in; the
