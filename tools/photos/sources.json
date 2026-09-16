@@ -1,5 +1,5 @@
 {
-  "_": "dish slug -> file in the brand's Drive folder (Pookie Chicken / photos). The originals are not committed.",
+  "_": "dish slug -> source file. Most are in the brand's Drive folder (Pookie Chicken / photos); ones named after their slug came from the client directly. The originals are not committed.",
   "mediterranean-sirloin": "image_(17).png",
   "roasted-pepper-sirloin": "image_(18).png",
   "cheesy-triple-blast": "image_(5).png",
@@ -11,5 +11,6 @@
   "korean-bbq-wings": "image_(27).png",
   "boneless-peri-peri": "image_(28).png",
   "boneless-bbq": "image_(29).png",
-  "boneless-mango-habanero": "image_(30).png"
+  "boneless-mango-habanero": "image_(30).png",
+  "triple-cheese-duo": "triple-cheese-duo.jpg"
 }

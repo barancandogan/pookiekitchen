@@ -262,10 +262,37 @@ a:hover { text-decoration-thickness: 2px; }
 .sec h2 { font-size: var(--t-2xl); letter-spacing: -0.014em; }
 .sec__lede { margin-top: var(--s4); max-width: var(--measure); color: var(--ink-2); }
 
+/* The three parts of a composed plate, with the weights off the brand's own
+   "All in one" card. The figure is set in the display face and leads, because
+   it is the one hard number on the page and the sentence under it is colour.
+   .balance__amount starts at 28px so --display-orange (3.28:1) is always in
+   its permitted large-text range — never let this clamp fall below 24px. */
 .balance { margin-top: var(--s6); display: grid; gap: var(--s5);
-           grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-.balance__item h3 { font-size: var(--t-lg); margin-bottom: var(--s2); }
-.balance__item p { color: var(--ink-2); font-size: var(--t-sm); }
+           grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+           list-style: none; margin-inline: 0; padding: 0; }
+.balance__item { margin: 0; padding-top: var(--s4); border-top: 2px solid var(--rule); }
+.balance__item h3 {
+  font-family: var(--sans); font-size: var(--t-xs); font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: var(--s1);
+}
+.balance__amount {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(1.625rem, 1.35rem + 1vw, 2.375rem);
+  line-height: 1; letter-spacing: .01em; text-transform: uppercase;
+  color: var(--display-orange); margin-bottom: var(--s3);
+}
+.balance__item p:not(.balance__amount) { color: var(--ink-2); font-size: var(--t-sm); }
+
+/* Gated behind copy.balance.claims.verified — see data.js. Styled now so
+   turning them on is a one-word edit there and nothing here. */
+.claims { display: flex; flex-wrap: wrap; gap: var(--s2);
+          margin-top: var(--s5); list-style: none; margin-inline: 0; padding: 0; }
+.claims li {
+  margin: 0; border: 1px solid var(--rule); border-radius: 999px;
+  padding: 6px 14px; font-size: var(--t-xs); font-weight: 700;
+  letter-spacing: .04em; color: var(--brand); background: var(--sunken);
+}
 
 /* ----------------------------------------------------------- menu block */
 
@@ -341,7 +368,21 @@ a:hover { text-decoration-thickness: 2px; }
 .row__meta {
   grid-column: 2; text-align: right; font-size: var(--t-xs);
   color: var(--ink-3); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
+.row__meta-sep { margin-inline: 6px; color: var(--rule); }
+
+/* Heat, on the brand's own five-chilli scale. The pips are aria-hidden and
+   redundant: the row already carries "Heat 3 out of 5" for a screen reader,
+   so colour is never the only carrier here. The unfilled pips keep a --line
+   ring (5.15:1) so the denominator is visible, not implied. */
+.heat { display: inline-block; vertical-align: -1px; }
+.heat__pips { display: inline-flex; gap: 3px; }
+.heat__pip {
+  width: 7px; height: 7px; border-radius: 50%;
+  border: 1px solid var(--line); background: none;
+}
+.heat__pip.is-on { background: var(--sauce-chilli); border-color: var(--sauce-chilli); }
 
 /* Every dot carries a ring, so its boundary clears 3:1 whatever the fill —
    --sauce-cream is 1.25:1 against the surface and invisible without it. */
@@ -389,6 +430,21 @@ a:hover { text-decoration-thickness: 2px; }
   color: var(--brand);
 }
 
+/* ------------------------------------------------------------- statement */
+
+/* One line of the brand's own neon-sign copy, full bleed on the dark ground,
+   between the gallery and the lunch band. It is decoration, not navigation:
+   the aria-label on the section repeats the line so it is announced once and
+   the <p> inside is not mistaken for a heading. White here is 18.79:1 and
+   --logo-amber is 9.78:1, so both pass AA at any size. */
+.statement { background: var(--dark); padding-block: clamp(36px, 6vw, 72px); }
+.statement p {
+  font-family: var(--display); font-weight: 400; text-transform: uppercase;
+  font-size: clamp(2rem, 1.2rem + 4vw, 4.25rem);
+  line-height: .95; letter-spacing: .005em; color: #FFFFFF; margin: 0;
+}
+.statement em { font-style: normal; color: var(--logo-amber); display: block; }
+
 /* ------------------------------------------------------------------ band */
 
 .band { background: var(--sunken); border-block: 1px solid var(--rule);
@@ -424,6 +480,9 @@ a:hover { text-decoration-thickness: 2px; }
 .foot a { color: var(--ink-2); }
 .foot__legal { margin-top: var(--s4); padding-top: var(--s3);
                border-top: 1px solid var(--rule); font-size: var(--t-xs); }
+/* The line under a neighbourhood-only "Where": quieter than the thing it
+   qualifies, because it is the caveat and not the answer. */
+.foot__note { font-size: var(--t-xs); opacity: .72; margin-top: var(--s2); }
 
 /* ------------------------------------------------------- home: split */
 
@@ -577,6 +636,58 @@ a:hover { text-decoration-thickness: 2px; }
 @media (prefers-reduced-motion: reduce) {
   /* the poster is the hero; nothing moves */
   .hero__video { display: none; }
+}
+
+/* --------------------------------------------------------------- motion */
+
+/* No global smooth scrolling. The only in-page link on the site is the skip
+   link, and a skip link that glides is a skip link that fails: a keyboard user
+   pressing it wants to be at the content, now. scroll-padding-top is the fix
+   that is actually needed here — it keeps the sticky header from covering
+   whatever an anchor lands on. */
+html { scroll-padding-top: 88px; }
+
+/* Buttons: a small, fast press. Transform only, so nothing reflows and the
+   hit area never moves under a finger mid-tap. */
+.btn { transition: filter 160ms ease, color 160ms ease,
+                   border-color 160ms ease, transform 160ms ease; }
+.btn:active { transform: translateY(1px); }
+
+/* Section reveal on scroll.
+   ARMED BY JAVASCRIPT AND ONLY BY JAVASCRIPT. Both halves of it — the
+   `js-reveal` class on <html> and the `reveal` class on each block — are
+   added by main.js at runtime, so with JavaScript off, before the script
+   runs, or if IntersectionObserver is missing, not one selector below
+   matches and every section is simply visible. There is no state of this
+   stylesheet in which content can be left hidden.
+   Only blocks that start below the fold are armed; anything already on
+   screen at load is never hidden, so the page does not flash. */
+.js-reveal .reveal {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 620ms cubic-bezier(.22, .61, .36, 1),
+              transform 620ms cubic-bezier(.22, .61, .36, 1);
+  will-change: opacity, transform;
+}
+.js-reveal .reveal.is-in { opacity: 1; transform: none; will-change: auto; }
+
+/* A menu printed off this page must be the whole menu. Anything the visitor
+   had not scrolled to is still armed at print time, and a half-faded chapter
+   on paper is a bug, not a flourish. */
+@media print {
+  /* transition:none too — without it the print is taken mid-fade and the
+     block lands on paper at whatever opacity the animation had reached. */
+  .js-reveal .reveal {
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Not "faster" — off. The reveal exists to add rhythm, and to a visitor who
+     has asked for no motion its whole contribution is nausea. */
+  .js-reveal .reveal, .js-reveal .reveal.is-in {
+    opacity: 1; transform: none; transition: none;
+  }
+  .btn:active { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

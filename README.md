@@ -70,7 +70,7 @@ hours does not open the site — it fails the audit instead.
 
 | Set this in `src/data.js` | And this appears |
 |---|---|
-| `contact.address` (all of line1, locality, postcode) | Footer address, Find us page, `Restaurant` JSON-LD instead of `Organization` |
+| `contact.address` (all of line1, locality, postcode) | Footer address, Find us page, `Restaurant` JSON-LD instead of `Organization` — and it supersedes `contact.neighbourhood`, which can then be deleted |
 | `contact.hours` (**all seven** days; a closed day is the string `'closed'`) | Footer hours table, Find us hours, `openingHours` in JSON-LD |
 | `contact.phone` | Footer link, hero "Call us", Find us button |
 | `contact.email` | Footer link |
@@ -85,6 +85,22 @@ hours does not open the site — it fails the audit instead.
 
 A partial week of hours renders nothing at all. "Tue: ?" tells a visitor to ring
 a number we also do not have, so the whole table waits until every day is decided.
+
+`contact.neighbourhood` is the one thing that sits *beside* this table rather
+than in it. It is "Chapel Market, Angel", off the brand's own poster: a district,
+not an address. It appears in the ribbon, the footer's "Where" block and the Find
+us page, always as plain prose and never inside an `<address>` element or the
+JSON-LD, and it does not move the launch gate one inch — `hasAddress()` still
+wants line1, locality and postcode. It exists so the site can answer "roughly
+where?" honestly instead of saying nothing, and it is deleted the day the real
+address lands.
+
+Two claim flags are gated the same way a price is: `copy.balance.claims.verified`
+covers the four benefit badges off the brand's "All in one" card ("supports muscle
+growth" and the rest). Those are health claims under the retained EU Nutrition and
+Health Claims Regulation, not facts about a plate, so they do not render until
+somebody has checked them against the GB register. The weights above them
+(250 g chicken, 180 g pasta) are measurements and render unconditionally.
 
 ---
 

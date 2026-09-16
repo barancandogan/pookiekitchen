@@ -76,3 +76,85 @@
     }, { threshold: 0.1 }).observe(hero);
   }
 })();
+
+/**
+ * Section reveal on scroll.
+ *
+ * Both halves of the effect are added here and nowhere else: `js-reveal` on
+ * <html> arms the stylesheet, and `reveal` marks each block. So with this
+ * script absent, blocked, or stopped by an error above this line, no selector
+ * in main.css matches and every section renders exactly as it always did. The
+ * page cannot end up with content hidden by a transition that never ran.
+ *
+ * It stands down entirely for prefers-reduced-motion — the CSS neutralises it
+ * too, belt and braces.
+ *
+ * Only blocks that begin below the fold are armed. Anything already on screen
+ * at load is left alone, so the first paint is the finished page rather than a
+ * fade-in of what the visitor is already looking at.
+ *
+ * A rAF-throttled scroll sweep, not an IntersectionObserver. An observer only
+ * fires on a threshold crossing, and a jump — End, a scrollbar drag, a restored
+ * scroll position — takes a block from "below the fold" to "above the fold"
+ * without it ever intersecting, so no callback arrives and the block stays
+ * invisible. The sweep asks the only question that matters (is it above the
+ * fold line yet?) and cannot miss. It runs at most once a frame over at most a
+ * handful of elements, and unbinds itself the moment the last one is revealed.
+ */
+(function () {
+  if (!window.requestAnimationFrame) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var blocks = document.querySelectorAll('.sec, .band, .statement, .artwork');
+  if (!blocks.length) return;
+
+  var fold = window.innerHeight || document.documentElement.clientHeight;
+  var pending = [];
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].getBoundingClientRect().top > fold * 0.9) pending.push(blocks[i]);
+  }
+  if (!pending.length) return;
+
+  document.documentElement.classList.add('js-reveal');
+  for (var j = 0; j < pending.length; j++) pending[j].classList.add('reveal');
+
+  var ticking = false;
+
+  function reveal(el) { el.classList.add('is-in'); }
+
+  function stop() {
+    window.removeEventListener('scroll', request);
+    window.removeEventListener('resize', request);
+  }
+
+  function sweep() {
+    ticking = false;
+    var h = window.innerHeight || document.documentElement.clientHeight;
+    var line = h * 0.88;                       // a little before the bottom edge
+    var rest = [];
+    for (var k = 0; k < pending.length; k++) {
+      if (pending[k].getBoundingClientRect().top < line) reveal(pending[k]);
+      else rest.push(pending[k]);
+    }
+    pending = rest;
+    if (!pending.length) stop();
+  }
+
+  function request() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(sweep);
+  }
+
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', request, { passive: true });
+  request();
+
+  // Last resort. If the sweep somehow never runs, everything is visible a few
+  // seconds in. The reveal is decoration; the content is not negotiable.
+  setTimeout(function () {
+    for (var n = 0; n < pending.length; n++) reveal(pending[n]);
+    pending = [];
+    stop();
+  }, 4000);
+}());

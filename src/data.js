@@ -70,6 +70,16 @@ const contact = {
     mapsUrl: null,            // Google Maps place link
   },
 
+  // The part of London the shop is in, taken from the brand's own poster
+  // ("FIND US AT CHAPEL MARKET, ANGEL"). This is NOT an address and must
+  // never be treated as one: there is no street number and no postcode, so
+  // hasAddress() still returns false, the Restaurant schema is still withheld
+  // and the launch gate is still shut. It exists so the site can answer
+  // "roughly where?" with the one thing we actually know, instead of
+  // pretending to know nothing. Delete it the day address.* is filled in —
+  // by then the real address says it better.
+  neighbourhood: 'Chapel Market, Angel',
+
   phone: null,                // E.164 preferred, e.g. '+442071234567'
   email: null,                // general enquiries
   cateringEmail: null,        // gates /catering/ — omit and the page is not built
@@ -172,6 +182,7 @@ const photoDims = {
   'roasted-pepper-sirloin': [1200, 800],
   'sweet-chilli': [1200, 800],
   'teriyaki': [1200, 800],
+  'triple-cheese-duo': [1200, 800],
 };
 
 /* --------------------------------------------------------------- sauces */
@@ -253,6 +264,7 @@ const menu = [
       { name: 'Spicy Grilled Chicken Duo', price: 15.90, sauce: 'chilli', kcal: 1050, kcalConfirmed: true,
         desc: 'Two grilled thighs, spicy glaze, pasta, fries, mixed salad.' },
       { name: 'Triple Cheese Grilled Chicken Duo', price: 15.90, sauce: 'cream', kcal: 1150, kcalConfirmed: true,
+        photo: 'triple-cheese-duo', photoConfirmed: true,
         desc: 'Two grilled thighs, triple cheese sauce, pasta, fries, mixed salad.' },
     ],
   },
@@ -265,6 +277,7 @@ const menu = [
     priceStatement: null,
     items: [
       { name: 'Hot Honey Wings', price: 9.90, priceConfirmed: false, sauce: 'glaze', kcal: 720, kcalConfirmed: true,
+        heat: 3,
         desc: 'Crispy wings, hot honey and sriracha.' },
       { name: 'Mango Habanero Wings', price: 9.90, priceConfirmed: false, sauce: 'chilli', kcal: 740, kcalConfirmed: true,
         desc: 'Crispy wings, mango habanero glaze. Sweet first, fiery after.' },
@@ -347,6 +360,19 @@ const menu = [
       { name: 'Extra 100g chicken', price: 1.90, priceConfirmed: false },
     ],
   },
+
+  {
+    id: 'drinks',
+    // The brand's menu card lists these two and prints no price beside either,
+    // so neither does the site. The chapter still earns its place: "do they do
+    // drinks" is a question a menu should answer, and now it does.
+    name: 'Drinks',
+    priceStatement: null,
+    items: [
+      { name: 'Cola', price: null, priceConfirmed: false, sauce: null, kcal: null, kcalConfirmed: false, desc: null },
+      { name: 'Orange Juice', price: null, priceConfirmed: false, sauce: null, kcal: null, kcalConfirmed: false, desc: null },
+    ],
+  },
 ];
 
 /* -------------------------------------------------------------- lunch */
@@ -388,11 +414,50 @@ const copy = {
     'We believe the best chicken comes from freshness, attention to detail, and recipes made with care. Freshly prepared daily, and made for chicken lovers.',
   ],
 
-  balance: [
-    { title: 'Chicken', body: 'Thigh, marinated in our own blend and seared in a pan to order. Not fried, not held under a lamp.' },
-    { title: 'Pasta', body: 'Tossed in homemade basil pesto, or swapped for wedges or fries depending on the plate.' },
-    { title: 'Salad', body: 'A fresh mixed salad on every composed plate. Included, not an upsell.' },
-  ],
+  // The three parts of a composed plate, with the weights the brand prints on
+  // its own "All in one" card. `amount` is rendered large and `body` small, so
+  // the figure is the thing the eye lands on — it is the one hard fact here
+  // and the reason this block is worth a visitor's time.
+  //
+  // Weights are for the £12.90 composed plate. A null amount renders the row
+  // without a figure rather than inventing one.
+  balance: {
+    kicker: 'All in one',
+    heading: ['Real ingredients.', 'Real balance.'],
+    parts: [
+      { title: 'Chicken', amount: '250g',
+        body: 'Thigh, marinated in our own blend and seared in a pan to order. Not fried, not held under a lamp.' },
+      { title: 'Pasta', amount: '180g',
+        body: 'Cooked weight. Tossed in homemade basil pesto, or swapped for wedges or fries depending on the plate.' },
+      { title: 'Salad', amount: 'Fresh mix',
+        body: 'A fresh mixed salad on every composed plate. Included, not an upsell.' },
+    ],
+
+    // The four badges on the brand's card: "supports muscle growth", "keeps
+    // you energised", "nutritious & balanced", "a happier you".
+    //
+    // GATED, and this one is not fussiness. Under the retained EU Nutrition
+    // and Health Claims Regulation (1924/2006) a health claim on food may only
+    // be made in an authorised form, and a general wellbeing claim like "a
+    // happier you" is permitted only alongside a specific authorised one. The
+    // figures above are facts about the plate and carry no such burden; these
+    // four are claims. Flip `verified` once someone has checked them against
+    // the GB nutrition and health claims register — it is a one-word edit,
+    // exactly like copy.sauceStory.
+    claims: {
+      verified: false,
+      badges: ['Supports muscle growth', 'Keeps you energised', 'Nutritious and balanced', 'A happier you'],
+    },
+  },
+
+  // The brand's own lines, verbatim from its posters and menu card. Used where
+  // a line of theirs says a thing better than a line of mine would.
+  lines: {
+    brighterDays: 'Good food, brighter days.',
+    betterYou: 'More than chicken — it\u2019s a better you.',
+    tasteTheDifference: 'Come and taste the difference.',
+    freshDaily: 'Fresh homemade fried chicken daily.',
+  },
 
   // Home page, redesigned after the client's builder mock-up. The lines below
   // are the brand's own words where they exist — "Deep marination. Juicy

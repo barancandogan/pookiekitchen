@@ -108,11 +108,16 @@ function ribbon(d) {
       when(d.addressKnown, () => ` · ${esc(D.contact.address.locality)}`)}</div>`;
   }
   // Pre-opening. Says only what is true: we are not open yet. A date appears
-  // only once there is one.
-  const date = d.dateKnown
-    ? ` — opening ${esc(formatDate(D.status.openingDate))}`
+  // only once there is one, and the neighbourhood only once the brand has
+  // named one in its own materials. Neither is a postal address and neither
+  // opens the site — see contact.neighbourhood in data.js.
+  const where = D.isFilled(D.contact.neighbourhood)
+    ? `${esc(D.contact.neighbourhood)} · `
     : '';
-  return `<div class="ribbon">Not open yet${date}. Follow along for the opening date.</div>`;
+  const tail = d.dateKnown
+    ? `Opening ${esc(formatDate(D.status.openingDate))}.`
+    : 'Not open yet. Follow along for the opening date.';
+  return `<div class="ribbon">${where}${tail}</div>`;
 }
 
 function formatDate(iso) {
@@ -147,13 +152,21 @@ function header(page) {
 /* -------------------------------------------------------------- footer */
 
 function footer(d) {
-  const addr = when(d.addressKnown, () => {
-    const a = D.contact.address;
-    const inner = `${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}`;
-    return `<div><h2>Where</h2><address style="font-style:normal">${
-      a.mapsUrl ? `<a href="${esc(a.mapsUrl)}" rel="noopener">${inner}</a>` : inner
-    }</address></div>`;
-  });
+  // A full address renders as an address. A neighbourhood alone renders as a
+  // plain sentence in an ordinary <p>, never in an <address> element and never
+  // in the Restaurant schema — it is a hint, not a place you can post a letter
+  // to, and the markup should not claim otherwise.
+  const addr = d.addressKnown
+    ? (() => {
+        const a = D.contact.address;
+        const inner = `${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}`;
+        return `<div><h2>Where</h2><address style="font-style:normal">${
+          a.mapsUrl ? `<a href="${esc(a.mapsUrl)}" rel="noopener">${inner}</a>` : inner
+        }</address></div>`;
+      })()
+    : when(D.isFilled(D.contact.neighbourhood), () =>
+        `<div><h2>Where</h2><p>${esc(D.contact.neighbourhood)}</p>
+        <p class="foot__note">The full address goes here the day it is fixed.</p></div>`);
 
   const hours = when(d.hoursKnown, () =>
     `<div><h2>Hours</h2><dl style="display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:0">${
@@ -188,7 +201,7 @@ function footer(d) {
     </div>
     <div class="foot__legal">
       ${legal}
-      <p>© ${new Date().getFullYear()} ${esc(D.site.name)}.</p>
+      <p>© ${new Date().getFullYear()} ${esc(D.site.name)}. ${esc(D.copy.lines.brighterDays)}</p>
     </div>
   </div>
 </footer>`;

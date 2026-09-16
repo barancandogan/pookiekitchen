@@ -28,6 +28,42 @@ function dishPhoto(slug, sizes, widths, cls, alt = '') {
 </picture>`;
 }
 
+/**
+ * The three parts of a composed plate, with the weights off the brand's own
+ * "All in one" card. The figure leads and the sentence follows it, because the
+ * figure is the fact and the sentence is the colour.
+ *
+ * The four benefit badges beneath render only once copy.balance.claims.verified
+ * is true — see the note in data.js. They are health claims, not facts about a
+ * plate, and this site does not publish an unchecked claim.
+ */
+function balanceBlock() {
+  const b = D.copy.balance;
+  return `<ul class="balance">
+    ${b.parts.map(x => `<li class="balance__item">
+      <h3>${esc(x.title)}</h3>
+      ${when(x.amount, () => `<p class="balance__amount">${esc(x.amount)}</p>`)}
+      <p>${esc(x.body)}</p>
+    </li>`).join('')}
+  </ul>${when(b.claims.verified, () => `
+  <ul class="claims">${
+    b.claims.badges.map(t => `<li>${esc(t)}</li>`).join('')
+  }</ul>`)}`;
+}
+
+/**
+ * Heat, on the brand's own five-chilli scale. Only the dishes whose level is
+ * printed on their menu card carry one; the rest say nothing rather than guess,
+ * so an absent scale here means "not stated", never "mild".
+ */
+function heatMeter(level) {
+  if (!level) return '';
+  const pips = Array.from({ length: 5 }, (_, i) =>
+    `<span class="heat__pip${i < level ? ' is-on' : ''}"></span>`).join('');
+  return `<span class="heat"><span class="visually-hidden">Heat ${level} out of 5.</span>` +
+    `<span class="heat__pips" aria-hidden="true">${pips}</span></span>`;
+}
+
 function row(item, opts = {}) {
   // A price whose mapping we could not read is not printed. Ditto a calorie
   // figure. Silence is recoverable; a wrong price on a menu is not.
@@ -35,8 +71,14 @@ function row(item, opts = {}) {
     ? `<span class="row__price" aria-label="Price to be confirmed">—</span>`
     : `<span class="row__price">${money(item.price)}</span>`;
 
-  const kcal = (item.kcal && item.kcalConfirmed)
-    ? `<span class="row__meta">${item.kcal} kcal</span>`
+  // Calories and heat share one meta line so a dish that has both does not
+  // grow a second right-aligned row for the sake of five dots.
+  const meta = [
+    (item.kcal && item.kcalConfirmed) ? `${item.kcal} kcal` : '',
+    heatMeter(item.heat),
+  ].filter(Boolean);
+  const kcal = meta.length
+    ? `<span class="row__meta">${meta.join('<span class="row__meta-sep">·</span>')}</span>`
     : '';
 
   // Alignment is a property of the CHAPTER, not the row. Where any dish in a
@@ -221,17 +263,13 @@ ${heroBlock(d)}
 
 <section class="sec wrap split">
   <div>
-    <p class="sec__kicker">Three things, one pan</p>
-    <h2 class="hx"><span>${esc(D.copy.headline2[0])}</span> <em>${esc(D.copy.headline2[1])}</em></h2>
-    <p class="sec__lede">Every composed plate is protein, carbohydrate and salad — not a portion of meat with
-    sides sold separately.</p>
-    <div class="balance">
-      ${D.copy.balance.map(b =>
-        `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`
-      ).join('')}
-    </div>
+    <p class="sec__kicker">${esc(D.copy.balance.kicker)}</p>
+    <h2 class="hx"><span>${esc(D.copy.balance.heading[0])}</span> <em>${esc(D.copy.balance.heading[1])}</em></h2>
+    <p class="sec__lede">Every composed plate is protein, carbohydrate and salad on one plate — not a
+    portion of meat with sides sold separately.</p>
+    ${balanceBlock()}
   </div>
-  <div>${dishPhoto('boneless-bbq', '(max-width: 900px) 100vw, 520px', [400, 800], 'split__img')}</div>
+  <div>${dishPhoto('triple-cheese-duo', '(max-width: 900px) 100vw, 520px', [400, 800], 'split__img')}</div>
 </section>
 
 <section class="sec wrap">
@@ -252,6 +290,10 @@ ${galleryPhotos()}
   </ul>
 </section>
 
+<section class="statement" aria-label="${esc(D.copy.headline2.join(' '))}">
+  <p class="wrap"><span>${esc(D.copy.headline2[0])}</span> <em>${esc(D.copy.headline2[1])}</em></p>
+</section>
+
 <section class="band">
   <div class="wrap">
     <p class="sec__kicker">${esc(D.lunchDeal.from)}–${esc(D.lunchDeal.to)}</p>
@@ -265,8 +307,8 @@ ${galleryPhotos()}
 </section>
 
 <section class="sec wrap">
-  <p class="sec__kicker">About us</p>
-  <h2>Freshly prepared daily, made for chicken lovers</h2>
+  <p class="sec__kicker">${esc(D.copy.lines.freshDaily)}</p>
+  <h2>Made for chicken lovers</h2>
   <div class="sec__lede" style="display:flex;flex-direction:column;gap:var(--s4)">
     ${D.copy.about.map(p => `<p>${esc(p)}</p>`).join('')}
   </div>
@@ -274,7 +316,7 @@ ${galleryPhotos()}
 
 <section class="sec wrap">
   <p class="sec__kicker">${d.isOpen ? 'Order' : 'Be first to know'}</p>
-  <h2>${d.isOpen ? 'Hungry now?' : 'We are not open yet.'}</h2>
+  <h2>${d.isOpen ? esc(D.copy.lines.tasteTheDifference) : 'We are not open yet.'}</h2>
   <p class="sec__lede">${d.isOpen
     ? 'Come in, or order for delivery.'
     : 'The date is not fixed yet. Instagram is where it will be announced first — no email list, no forms, nothing to unsubscribe from.'}</p>
@@ -332,7 +374,7 @@ const about = {
     return `
 <section class="hero wrap">
   <p class="hero__eyebrow">About</p>
-  <h1>A complete plate, made fresh every day.</h1>
+  <h1>${esc(D.copy.lines.betterYou)}</h1>
 </section>
 
 <section class="sec wrap">
@@ -344,11 +386,7 @@ const about = {
 <section class="sec wrap">
   <p class="sec__kicker">What that means on the plate</p>
   <h2>Protein, carbohydrate, salad</h2>
-  <div class="balance">
-    ${D.copy.balance.map(b =>
-      `<div class="balance__item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p></div>`
-    ).join('')}
-  </div>
+  ${balanceBlock()}
 </section>
 
 ${when(D.copy.sauceStory.verified, () => `
@@ -367,14 +405,19 @@ const findUs = {
   title: 'Find us',
   description: 'Where to find Pookie Chicken, the hours we are open, and how to reach the restaurant by phone or email once we have opened our doors.',
   body(d) {
+    // No address yet. If the brand has named a neighbourhood, say that and be
+    // explicit that it is all we have — a visitor who reads "Chapel Market"
+    // and turns up looking for a door has been misled, so the page says in as
+    // many words that there is not a door to find yet.
     if (!d.addressKnown) {
+      const hood = D.isFilled(D.contact.neighbourhood);
       return `
 <section class="hero wrap">
   <p class="hero__eyebrow">Find us</p>
-  <h1>We do not have a door to point you at yet.</h1>
-  <p class="hero__lede">The site is up before the restaurant is. When the address and the
-  opening date are fixed they will be published here first, and announced on Instagram
-  the same day.</p>
+  <h1>${hood ? `We are coming to <em>${esc(D.contact.neighbourhood)}</em>.` : 'We do not have a door to point you at yet.'}</h1>
+  <p class="hero__lede">${hood
+    ? 'That is the whole of what we can tell you today — the neighbourhood, not the number on the door. The street address and the opening date are published here the moment they are fixed, and announced on Instagram the same day.'
+    : 'The site is up before the restaurant is. When the address and the opening date are fixed they will be published here first, and announced on Instagram the same day.'}</p>
   <div class="hero__actions">
     <a class="btn btn--primary" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
     <a class="btn btn--ghost" href="/menu/">Read the menu</a>
