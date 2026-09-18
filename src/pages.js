@@ -361,7 +361,7 @@ ${heroBlock(d)}
   <div class="listing">
 ${menuListing()}
   </div>
-  <div class="hero__actions" style="margin-top:var(--s6)">
+  <div class="hero__actions hero__actions--after">
     <a class="btn btn--primary" href="/menu/">The menu, with descriptions</a>
   </div>
 </section>
@@ -392,7 +392,7 @@ ${galleryPhotos()}
 <section class="sec wrap">
   <p class="sec__kicker">${esc(D.copy.lines.freshDaily)}</p>
   <h2>Made for chicken lovers</h2>
-  <div class="sec__lede" style="display:flex;flex-direction:column;gap:var(--s4)">
+  <div class="sec__lede stack">
     ${D.copy.about.map(p => `<p>${esc(p)}</p>`).join('')}
   </div>
 </section>
@@ -435,7 +435,7 @@ const menuPage = {
   ${dishPhoto('feature-plate', '100vw', [900, 1600], 'interstitial__img')}
 </section>
 
-<section class="wrap" style="padding-bottom:clamp(40px,6vw,72px)">
+<section class="wrap sec--tail">
   <div class="menu">
     ${D.menu.map(chapter).join('\n')}
   </div>
@@ -463,7 +463,7 @@ const about = {
 </section>
 
 <section class="sec wrap">
-  <div class="measure" style="display:flex;flex-direction:column;gap:var(--s4)">
+  <div class="measure stack">
     ${D.copy.about.map(p => `<p>${esc(p)}</p>`).join('')}
   </div>
 </section>
@@ -527,11 +527,11 @@ ${when(d.hoursKnown, () => `
 <section class="sec wrap">
   <p class="sec__kicker">Hours</p>
   <h2>When we are here</h2>
-  <dl class="prices" style="margin-top:var(--s5)">
+  <dl class="prices prices--after">
     ${require('./layout').DAY_ORDER.map(k => {
       const L = require('./layout');
       const v = D.contact.hours[k];
-      return `<div class="prices__cell"><dt>${L.DAY_LABEL[k]}</dt><dd style="font-size:var(--t-lg)">${
+      return `<div class="prices__cell"><dt>${L.DAY_LABEL[k]}</dt><dd class="prices__big">${
         v === 'closed' ? 'Closed' : `${esc(v[0])}–${esc(v[1])}`}</dd></div>`;
     }).join('')}
   </dl>

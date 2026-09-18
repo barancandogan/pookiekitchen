@@ -24,6 +24,29 @@ STAGE="/srv/pookie-deploy"
 WEB_ROOT="/var/www/pookie"
 VHOST="/etc/nginx/sites-available/pookie"
 
+# The CSP lives in deploy/nginx.conf, but the live vhost is certbot's file
+# now — it was installed once and then rewritten in place with the TLS
+# block, so it must never be overwritten wholesale. This copies exactly one
+# directive across: the Content-Security-Policy line, whenever the
+# repository's differs from the server's. nginx -t below is the guard.
+sync_csp() {
+  local src="$1" vhost="$2"
+  [ -f "$vhost" ] || return 0
+  local want have
+  want="$(grep -A1 'add_header Content-Security-Policy' "$src" | tail -1 | sed 's/^[[:space:]]*//')"
+  have="$(grep -A1 'add_header Content-Security-Policy' "$vhost" | tail -1 | sed 's/^[[:space:]]*//')"
+  [ -n "$want" ] && [ "$want" != "$have" ] || return 0
+  echo "→ updating Content-Security-Policy in $vhost"
+  python3 - "$vhost" "$want" <<'PYEOF'
+import io, re, sys
+p, want = sys.argv[1], sys.argv[2]
+s = io.open(p, encoding='utf-8').read()
+s2, n = re.subn(r'(add_header Content-Security-Policy\n)[ \t]*[^\n]*', lambda m: m.group(1) + '        ' + want, s, count=1)
+assert n == 1, 'CSP directive not found in the live vhost'
+io.open(p, 'w', encoding='utf-8').write(s2)
+PYEOF
+}
+
 [ "$(id -u)" -eq 0 ] || { echo "remote.sh must run as root" >&2; exit 1; }
 [ -f "$STAGE/dist/index.html" ] || { echo "no build in $STAGE/dist" >&2; exit 1; }
 command -v nginx >/dev/null || { echo "nginx is not installed" >&2; exit 1; }
@@ -42,7 +65,8 @@ mkdir -p "$WEB_ROOT"
 rsync -a --delete "$STAGE/dist/" "$WEB_ROOT/"
 chown -R www-data:www-data "$WEB_ROOT"
 
-# 3. reload, guarded
+# 3. the one directive we keep in step with the repo, then reload, guarded
+sync_csp "$STAGE/deploy/nginx.conf" "$VHOST"
 echo "→ reloading nginx"
 nginx -t
 systemctl reload nginx

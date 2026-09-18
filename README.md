@@ -549,6 +549,30 @@ other sites on that host.
 | nginx vhost | `/etc/nginx/sites-available/pookie` (from `deploy/nginx.conf`) |
 | TLS | Let's Encrypt via certbot, auto-renewed |
 
+### Two things the live server learned the hard way
+
+**CSS and JS URLs carry a content hash** — `/assets/js/main.js?v=3f2a…` —
+appended by `src/layout.js` from the file's bytes. nginx caches `/assets/` for
+a year as `immutable`, which it must or every page view re-fetches them; the
+hash is what makes that safe. Without it a visitor's browser kept an old
+`main.js` against new HTML for up to seven days, so a script a deploy had
+added did not exist for them: the back-to-top button rendered as its no-JS
+footer link on the live site while the build said it worked.
+
+**The CSP in the live vhost is kept in step by the deploy scripts.** The vhost
+is installed once from `deploy/nginx.conf` and certbot then rewrites it in
+place with the TLS block, so it can never be overwritten wholesale again. Both
+`deploy.sh` and `deploy/remote.sh` therefore copy exactly one directive across
+on every deploy — the `Content-Security-Policy` line — whenever the
+repository's differs from the server's, with `nginx -t` as the guard. Changing
+the policy in `deploy/nginx.conf` is changing it on the server. This mattered:
+the policy had no `frame-src`, so `default-src 'self'` silently blocked the
+Google Maps iframe and the map was an empty box on the live site — that, not
+the map endpoint, was why it could not be seen. It also has `style-src 'self'`
+with no `'unsafe-inline'`, which is correct, and which is why no template
+carries a `style=""` attribute: an inline style is dropped on the live site
+and only there.
+
 ### Deploys run from GitHub Actions
 
 `.github/workflows/deploy.yml` runs on every push to `main`, and by hand from

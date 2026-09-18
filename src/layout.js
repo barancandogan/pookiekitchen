@@ -1,5 +1,9 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
 const D = require('./data');
 
 /* ------------------------------------------------------------- helpers */
@@ -24,6 +28,26 @@ function when(cond, fn) {
   return cond ? fn() : '';
 }
 
+/* ------------------------------------------------------------- versions */
+
+/**
+ * ?v=<content hash> on the stylesheet and the script.
+ *
+ * Their filenames carry no hash, and nginx caches /assets/ hard — which it
+ * must, or every page view re-fetches them. The cost of that without this
+ * was real and was seen on the live site: a visitor's browser kept an old
+ * main.js against new HTML for up to seven days, so a script a deploy had
+ * added simply did not exist for them. The hash is of the file's bytes, so
+ * an unchanged file keeps its URL across deploys and a changed one cannot.
+ */
+function version(rel) {
+  const file = path.join(__dirname, '..', rel);
+  const h = crypto.createHash('sha1').update(fs.readFileSync(file)).digest('hex').slice(0, 10);
+  return `/${rel}?v=${h}`;
+}
+const CSS_URL = version('assets/css/main.css');
+const JS_URL = version('assets/js/main.js');
+
 /* ---------------------------------------------------------------- head */
 
 function head(page, d) {
@@ -47,7 +71,7 @@ ${ogImage()}
 ${when(!D.site.indexable, () => `<meta name="robots" content="noindex, nofollow">`)}
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/anton-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="${CSS_URL}">
 ${jsonLd(d)}`;
 }
 
@@ -201,7 +225,7 @@ function footer(d) {
     ? (() => {
         const a = D.contact.address;
         const inner = `${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}`;
-        return `<div><h2>Where</h2><address style="font-style:normal">${
+        return `<div><h2>Where</h2><address>${
           a.mapsUrl ? `<a href="${esc(a.mapsUrl)}" rel="noopener">${inner}</a>` : inner
         }</address></div>`;
       })()
@@ -210,8 +234,8 @@ function footer(d) {
         <p class="foot__note">The full address goes here the day it is fixed.</p></div>`);
 
   const hours = when(d.hoursKnown, () =>
-    `<div><h2>Hours</h2><dl style="display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:0">${
-      DAY_ORDER.map(k => `<dt>${DAY_LABEL[k]}</dt><dd style="margin:0;font-variant-numeric:tabular-nums">${
+    `<div><h2>Hours</h2><dl class="foot__hours">${
+      DAY_ORDER.map(k => `<dt>${DAY_LABEL[k]}</dt><dd>${
         D.contact.hours[k] === 'closed' ? 'Closed'
           : `${esc(D.contact.hours[k][0])}–${esc(D.contact.hours[k][1])}`
       }</dd>`).join('')
@@ -288,7 +312,7 @@ ${page.body(d)}
 </main>
 ${footer(d)}
 ${actionBar(d)}
-<script src="/assets/js/main.js" defer></script>
+<script src="${JS_URL}" defer></script>
 </body>
 </html>
 `;

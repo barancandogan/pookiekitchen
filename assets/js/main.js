@@ -1,6 +1,19 @@
 'use strict';
 
 /**
+ * Every block below is one independent enhancement — the video hero, the
+ * scroll reveal, the back-to-top button. None of them needs another, and none
+ * of them is the page: the page is complete before this file loads. So an
+ * error in one must not take the others with it, which is what a bare
+ * exception at the top level of a script does — it stops the file. guard()
+ * runs each block on its own and reports rather than aborts.
+ */
+function guard(fn) {
+  try { fn(); }
+  catch (err) { if (window.console && console.error) console.error('main.js:', err); }
+}
+
+/**
  * The only script on the site: rotating the home-page video hero.
  *
  * Without it the first clip simply loops — the markup carries autoplay muted
@@ -12,7 +25,7 @@
  * a data-saver connection, autoplay refused by the browser, the tab hidden, the
  * hero scrolled out of view. In every one of those the poster is the hero.
  */
-(function () {
+guard(function () {
   var hero = document.querySelector('[data-hero-video]');
   if (!hero) return;
 
@@ -75,7 +88,7 @@
       if (entries[0].isIntersecting) resume(); else pauseAll();
     }, { threshold: 0.1 }).observe(hero);
   }
-})();
+});
 
 /**
  * Section reveal on scroll.
@@ -101,7 +114,7 @@
  * fold line yet?) and cannot miss. It runs at most once a frame over at most a
  * handful of elements, and unbinds itself the moment the last one is revealed.
  */
-(function () {
+guard(function () {
   if (!window.requestAnimationFrame) return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -157,7 +170,7 @@
     pending = [];
     stop();
   }, 4000);
-}());
+});
 
 /**
  * Back to top.
@@ -179,7 +192,7 @@
  * having it. preventScroll keeps focus() from jumping the page and cancelling
  * the animation it was asked to smooth.
  */
-(function () {
+guard(function () {
   var btn = document.querySelector('.totop');
   if (!btn || !window.requestAnimationFrame) return;
 
@@ -237,4 +250,4 @@
       target.focus();
     }
   });
-}());
+});
