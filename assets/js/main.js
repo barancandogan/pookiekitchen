@@ -160,69 +160,6 @@
 }());
 
 /**
- * The map, loaded on request and not before.
- *
- * The markup ships a link to Google Maps. This upgrades it into a button that
- * swaps the Google Maps iframe in place. So:
- *
- *   JavaScript off  the link works, opens the map in a new tab, nothing lost
- *   JavaScript on   one click and the map appears inline, and still nothing
- *                   reaches Google until that click
- *
- * That ordering is the whole point, and it matters more with Google than it
- * would with OpenStreetMap, not less: Google's embed sets cookies. This site
- * otherwise makes ZERO third-party requests, has no cookie banner, and has
- * nowhere to record a choice — so an iframe sitting in the HTML would hand
- * every visitor's IP address, and a cookie, to Google on every page view,
- * including for the great majority who never look at the map. One click is a
- * choice. The label says where it loads from, and that it sets cookies, before
- * it is pressed.
- *
- * TO MAKE THE MAP LOAD AUTOMATICALLY, delete this whole block and put the
- * iframe in mapBlock() in src/pages.js instead. Do that only with a cookie
- * banner in place, or having decided the site does not need one.
- *
- * Focus moves into the map once it is there, so a keyboard user who pressed
- * the button is not left where the button used to be. `sandbox` is deliberately
- * NOT set: the embed needs scripts to pan and zoom, and a sandbox permissive
- * enough to allow that buys nothing over the origin isolation an iframe has
- * anyway. `referrerpolicy` keeps our URL out of their logs. The iframe's
- * accessible name comes from the markup, so the address lives in data.js and
- * nowhere else.
- */
-(function () {
-  var figs = document.querySelectorAll('[data-map]');
-  for (var i = 0; i < figs.length; i++) arm(figs[i]);
-
-  function arm(fig) {
-    var src = fig.getAttribute('data-map-embed');
-    var ask = fig.querySelector('.map__ask');
-    if (!src || !ask) return;
-
-    // It is a link in the HTML so it works without this script. Now that the
-    // script is running it does something else, so it must SAY something else
-    // to anything that reads roles rather than pixels.
-    ask.setAttribute('role', 'button');
-
-    ask.addEventListener('click', function (e) {
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;  // let "open in new tab" be that
-      e.preventDefault();
-
-      var frame = document.createElement('iframe');
-      frame.className = 'map__frame';
-      frame.src = src;
-      frame.title = fig.getAttribute('data-map-title') || 'Map';
-      frame.loading = 'lazy';
-      frame.setAttribute('referrerpolicy', 'no-referrer');
-      frame.setAttribute('tabindex', '0');
-
-      ask.parentNode.replaceChild(frame, ask);
-      frame.focus();
-    });
-  }
-}());
-
-/**
  * Back to top.
  *
  * The markup already carries a working in-page link at the foot of the page.

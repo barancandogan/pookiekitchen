@@ -133,43 +133,22 @@ The keyless form is the default only so the map works today with nothing to set
 up. Move off it when you can: either field above is a one-line edit and nothing
 else changes.
 
-#### It loads on request, not on page view
+#### It loads with the page
 
-The site otherwise makes **zero third-party requests**. Every font, script,
-style and photograph is served from our own host; the only external URLs in the
-built HTML are an Instagram link, our own canonical, and the schema.org
-namespace, none of which is fetched.
+The iframe is in the markup: no button, no script, nothing to press. It is
+the one third-party request the site makes, and Google's embed sets cookies —
+a UK PECR consideration for a site with no cookie banner. The client chose the
+map regardless; `data.js` records the choice.
 
-- The HTML ships a **link** to Google Maps, styled as a button.
-- `main.js` upgrades it so a click swaps the iframe in place.
-- With JavaScript off it is what it looks like: a link that opens the map.
-- Nothing reaches Google until a visitor asks.
+The address, the postcode, the transit line and the maps link are plain text
+beside the map and never inside it. They are the answer; the map illustrates
+it.
 
-This matters more with Google than it would with OpenStreetMap, not less:
-Google's embed sets cookies. An iframe sitting in the markup would hand every
-visitor's IP address, and a cookie, to Google on every page view — including
-for the great majority who never look at the map — on a site with no cookie
-banner and nowhere to record a choice. One click is a choice, and the button
-says where it loads from and that it sets cookies *before* it is pressed.
-
-To make it load automatically, delete the upgrade block at the end of
-`main.js` and put the iframe in `mapBlock()` instead. Do that with a cookie
-banner in place, or having decided the site does not need one.
-
-Measured in a real browser: zero third-party requests before the click, exactly
-one after it, and that one is the map. Focus moves into the frame, so a keyboard
-user is not left where the button used to be.
-
-Whatever happens to the embed, the address, the postcode, the transit line and
-the maps link are plain text beside the map and never inside it. They are the
-answer; the map illustrates it.
-
-Two claim flags are gated the same way a price is: `copy.balance.claims.verified`
-covers the four benefit badges off the brand's "All in one" card ("supports muscle
-growth" and the rest). Those are health claims under the retained EU Nutrition and
-Health Claims Regulation, not facts about a plate, so they do not render until
-somebody has checked them against the GB register. The weights above them
-(250 g chicken, 180 g pasta) are measurements and render unconditionally.
+**If the map is blank on the live site**, the keyless endpoint is the reason —
+it could not be tested from the build environment, which cannot reach Google.
+Open the address in Google Maps, Share → Embed a map, copy the snippet, and
+paste the whole thing into `mapView.embedPb`. That is Google's own embed and
+it wins over the fallback the moment it is non-null.
 
 ---
 

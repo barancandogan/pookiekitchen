@@ -536,49 +536,40 @@ const copy = {
 /* ------------------------------------------------------------------ map */
 
 /**
- * The embedded map. Google Maps, at the client's request.
+ * The embedded map. Google Maps, at the client's request, loaded with the page.
  *
- * The map is driven by the ADDRESS, not by contact.geo: handing Google the
- * postal address lets Google geocode it, which puts the pin on the building
- * rather than on the postcode centroid we hold. So the pin here is as good as
- * Google's own, and contact.geo is left to do the one job it is right for —
- * the GeoCoordinates node in the schema.
+ * Driven by the ADDRESS, not by contact.geo: handing Google the postal
+ * address lets Google geocode it, which puts the pin on the building rather
+ * than on the postcode centroid we hold.
  *
  * WHICH ENDPOINT, in order of preference:
  *
  *   apiKey set    https://www.google.com/maps/embed/v1/place — Google's
- *                 documented Maps Embed API. Supported, versioned, and free
- *                 with unlimited use, but it needs a key from a Google Cloud
- *                 project. Set apiKey below and this is used automatically;
- *                 nothing else has to change.
+ *                 documented Maps Embed API. Supported, versioned, free with
+ *                 unlimited use, but it needs a key from a Google Cloud
+ *                 project.
  *
  *   embedPb set   https://www.google.com/maps/embed?pb=… — the exact iframe
- *                 Google's own "Share → Embed a map" dialog hands you. Keyless
- *                 and stable. Paste the value of its pb= parameter here and it
- *                 wins over the fallback below.
+ *                 Google's own "Share → Embed a map" dialog hands out. Keyless
+ *                 and stable. PASTE THE WHOLE THING: the <iframe …> snippet,
+ *                 the URL, or just the pb value all work, and this wins over
+ *                 the fallback below the moment it is non-null.
  *
  *   neither       https://maps.google.com/maps?…&output=embed — the keyless
- *                 form. It works and half the web uses it, but it is NOT in
- *                 Google's documentation, so it is the one thing here that
- *                 could stop working without notice. It is the default only so
- *                 that the map works today with nothing to set up. Move off it
- *                 when you can: either field above is a one-line edit.
+ *                 form. Widely used, but NOT in Google's documentation, so it
+ *                 is the one thing here that could stop working without
+ *                 notice — and it could not be tested from the build
+ *                 environment, which cannot reach Google. If the map is blank
+ *                 on the live site, this is why: fill embedPb.
  *
- * IT IS NOT LOADED UNTIL A VISITOR ASKS FOR IT, and with Google that matters
- * more than it did with OpenStreetMap, not less. Google's embed sets cookies.
- * This site has no cookie banner and nowhere to record a choice, and it
- * otherwise makes exactly zero third-party requests — every font, script,
- * style and photograph comes from our own host. An iframe sitting in the
- * markup would hand a visitor's IP address, and a cookie, to Google on every
- * page view, including for the great majority who never look at the map. So
- * the map sits behind one click, the button says where it will load from
- * before it loads, and the address and the maps link are plain text beside it
- * either way. See main.js. To make it load automatically instead, delete the
- * upgrade block in main.js — but read the note there first.
+ * It is the only third-party request the site makes, and Google's embed sets
+ * cookies on every page view of the two pages that carry it. That is a UK
+ * PECR consideration for a site with no cookie banner; the client has chosen
+ * the map regardless, and this note is the record of the choice.
  */
 const mapView = {
   apiKey: null,               // Maps Embed API key → the documented endpoint
-  embedPb: null,              // the pb= value from Google's Share → Embed dialog
+  embedPb: null,              // paste Google's Share → Embed snippet here, whole
   zoom: 17,                   // street level: the parade, and both ends of it
   language: 'en-GB',
 };

@@ -277,18 +277,17 @@ function galleryPhotos() {
  * Renders nothing at all until there is a real address — a map of a place we
  * cannot name in words is a guess with a pin on it.
  *
- * What ships in the HTML is a BUTTON, not a map. The OpenStreetMap iframe is
- * inserted by main.js only when a visitor asks for it, because it is the one
- * third-party request this site would otherwise make and it would be made on
- * every page view by every visitor, most of whom never look at the map. With
- * JavaScript off the same element is exactly what it appears to be — a link
- * that opens the map on openstreetmap.org — so nothing is lost, and the label
- * says where it goes before it is pressed either way.
+ * The iframe is in the markup and loads with the page: no button, no script,
+ * nothing to press. It is the one third-party request the site makes, and
+ * Google's embed sets cookies — see the note on mapView in data.js — but the
+ * client asked for the map to be simply there, and it is. loading="lazy" so
+ * that it is fetched when the visitor gets near the bottom of the page
+ * rather than before the hero has painted.
  *
  * The address, the postcode and the maps link sit beside the map in plain
  * text, never inside it. They are the answer; the map is the illustration. If
- * openstreetmap.org is blocked, down, or changes this endpoint tomorrow, the
- * block still tells a visitor exactly where to go.
+ * the embed is blocked, down, or changes tomorrow, the block still tells a
+ * visitor exactly where to go.
  */
 function mapEmbedUrl() {
   const m = D.mapView;
@@ -299,7 +298,10 @@ function mapEmbedUrl() {
       + `&q=${q}&zoom=${m.zoom}&language=${encodeURIComponent(m.language)}`;
   }
   if (m.embedPb) {
-    return `https://www.google.com/maps/embed?pb=${m.embedPb}`;
+    // Accepts the bare pb value, the full embed URL, or the whole <iframe>
+    // snippet Google's Share dialog hands out — whatever was pasted.
+    const pb = (String(m.embedPb).match(/pb=([^"'&\s]+)/) || [null, m.embedPb])[1];
+    return `https://www.google.com/maps/embed?pb=${pb}`;
   }
   return `https://maps.google.com/maps?q=${q}&z=${m.zoom}&hl=${encodeURIComponent(m.language)}&output=embed`;
 }
@@ -308,10 +310,6 @@ function mapBlock(d, opts = {}) {
   if (!d.addressKnown) return '';
   const a = D.contact.address;
   const embed = mapEmbedUrl();
-  // Where the button goes with JavaScript off: the same documented Google
-  // Maps search URL the "Open in Maps" button uses, so both land in the same
-  // place and there is only one address string to get wrong.
-  const out = a.mapsUrl;
   const heading = opts.heading || 'Where to find us';
 
   return `<section class="sec wrap" aria-labelledby="where-h">
@@ -328,16 +326,9 @@ function mapBlock(d, opts = {}) {
         ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
       </div>
     </div>
-    <figure class="map" data-map data-map-embed="${esc(embed)}"
-            data-map-title="Map showing ${esc(a.line1)}, ${esc(a.locality)} ${esc(a.postcode)}">
-      <a class="map__ask" href="${esc(out)}" rel="noopener">
-        <span class="map__pin" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="28" height="28" focusable="false"><path fill="currentColor"
-            d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
-        </span>
-        <span class="map__label">Show the map</span>
-        <span class="map__note">Loads from Google Maps, which sets cookies</span>
-      </a>
+    <figure class="map">
+      <iframe class="map__frame" src="${esc(embed)}" loading="lazy" allowfullscreen
+              title="Map showing ${esc(a.line1)}, ${esc(a.locality)} ${esc(a.postcode)}"></iframe>
     </figure>
   </div>
 </section>`;
