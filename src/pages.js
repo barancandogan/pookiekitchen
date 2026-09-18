@@ -163,10 +163,24 @@ function heroBlock(d) {
     <a class="btn btn--ghost" href="${esc(D.site.instagramUrl)}" rel="noopener">@${esc(D.site.instagram)}</a>
   </div>`;
 
-  const poster = `/assets/img/dish/${D.hero.poster}-1600.jpg`;
   const src = slug => `/assets/video/${slug}-720.mp4`;
-  const dim = D.photoDims[D.hero.poster] || [1600, 765];
-  const h = Math.round(dim[1] * 1600 / dim[0]);
+
+  // WITH CLIPS, THE POSTER IS THE FIRST CLIP'S FIRST FRAME — not a photograph.
+  // Whatever is in the poster is what a visitor sees until the browser can
+  // start the clip, and then the first decoded frame replaces it in one step
+  // with no transition, because that swap is the browser's and not ours. A
+  // different picture there is a visible jump between two scenes and reads as
+  // a glitch; the same picture simply starts to move. tools/video/poster.py
+  // makes the file from the clip, so the two cannot drift apart.
+  //
+  // Without clips there is no swap to hide, and the studio photograph — the
+  // better still — is the hero.
+  const clips = D.hero.clips;
+  const poster = clips.length
+    ? `/assets/video/${clips[0]}-poster.jpg`
+    : `/assets/img/dish/${D.hero.poster}-1600.jpg`;
+  const dim = clips.length ? [1280, 720] : (D.photoDims[D.hero.poster] || [1600, 765]);
+  const w = dim[0], h = dim[1];
 
   // No clips: the same dark composition over the poster, with no <video> at
   // all — so the page never looks different depending on whether a clip
@@ -174,7 +188,7 @@ function heroBlock(d) {
   if (!D.hero.clips.length) {
     return `<section class="hero hero--video">
   <div class="hero__media" aria-hidden="true">
-    <img class="hero__poster" src="${poster}" alt="" width="1600" height="${h}" decoding="async">
+    <img class="hero__poster" src="${poster}" alt="" width="${w}" height="${h}" decoding="async">
     <div class="hero__scrim"></div>
   </div>
   <div class="hero__text wrap">${inner}
@@ -182,11 +196,15 @@ function heroBlock(d) {
 </section>`;
   }
 
-  return `<section class="hero hero--video" data-hero-video data-clips="${esc(D.hero.clips.map(src).join(' '))}">
+  // preload="auto", not "metadata": this clip autoplays, so the browser
+  // should be fetching it from the first byte of the page, not deciding to
+  // once it has read the headers. Every moment saved there is a moment less
+  // of the poster.
+  return `<section class="hero hero--video" data-hero-video data-clips="${esc(clips.map(src).join(' '))}">
   <div class="hero__media" aria-hidden="true">
-    <img class="hero__poster" src="${poster}" alt="" width="1600" height="${h}" decoding="async">
-    <video class="hero__video is-active" autoplay muted loop playsinline preload="metadata" poster="${poster}">
-      <source src="${src(D.hero.clips[0])}" type="video/mp4">
+    <img class="hero__poster" src="${poster}" alt="" width="${w}" height="${h}" decoding="async">
+    <video class="hero__video is-active" autoplay muted loop playsinline preload="auto" poster="${poster}">
+      <source src="${src(clips[0])}" type="video/mp4">
     </video>
     <video class="hero__video" muted playsinline preload="none"></video>
     <div class="hero__scrim"></div>

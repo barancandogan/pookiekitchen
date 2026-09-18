@@ -303,13 +303,31 @@ content edit:
 
 ```js
 const hero = {
-  poster: 'feature-plate',                       // assets/img/dish/feature-plate-1600.jpg
+  poster: 'feature-plate',                       // assets/img/dish/feature-plate-1600.jpg — used only with NO clips
   clips: ['sweet-chilli', 'buffalo-wings'],      // assets/video/<slug>-720.mp4
 };
 ```
 
 Clips are 16:9 H.264 MP4, muted, about five seconds, 720p. The name carries the
 variant so a replaced clip is a renamed clip, and nginx caches them hard.
+
+**With clips, the poster is the first clip's first frame**, not a photograph:
+`assets/video/<slug>-poster.jpg`, made from the clip by
+
+```bash
+python3 tools/video/poster.py assets/video/brand-5-720.mp4
+```
+
+Whatever is in the poster is what a visitor sees until the browser can start
+the clip — a moment on fibre, seconds on a phone — and then the first decoded
+frame replaces it in one step with no transition, because that swap is the
+browser's and not ours. A different picture there is a visible jump from one
+scene to another and reads as a glitch; the same picture simply starts to
+move. Re-run the script whenever the clip changes, and `audit.js` fails the
+build if the file is missing. The first `<video>` carries `preload="auto"` for
+the same reason: it autoplays, so it should be fetching from the first byte of
+the page. `hero.poster` — the studio photograph — is the hero only when there
+are no clips, where there is no swap to hide.
 
 **The poster is the page; the video is an enhancement.** The markup's first
 `<video>` has `autoplay muted loop playsinline`, so with JavaScript off one
