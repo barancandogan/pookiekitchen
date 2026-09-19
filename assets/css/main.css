@@ -158,6 +158,7 @@ h1, h2, h3, h4 {
 h1, .sec h2, .band h2 { color: var(--display-orange); }
 
 p, ul, ol { margin: 0; }
+address { font-style: normal; }   /* an address is a fact, not an aside; nowhere on this site is it italic */
 img, video { max-width: 100%; height: auto; display: block; }
 
 a { color: var(--brand); text-underline-offset: 2px; }
@@ -508,7 +509,6 @@ a:hover { text-decoration-thickness: 2px; }
 .sec--tail { padding-bottom: clamp(40px, 6vw, 72px); }
 .prices--after { margin-top: var(--s5); }
 .prices__big { font-size: var(--t-lg); }
-.foot address { font-style: normal; }
 .foot__hours { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; }
 .foot__hours dd { margin: 0; font-variant-numeric: tabular-nums; }
 
@@ -595,12 +595,74 @@ a:hover { text-decoration-thickness: 2px; }
 
 .map { margin: 0; }
 /* 3:2 like every other picture on the site, so the block sits in the same
-   rhythm as the plates. The border keeps a still-loading or blocked frame
-   from reading as a hole in the page. */
-.map__frame {
-  display: block; width: 100%; aspect-ratio: 3 / 2; border: 1px solid var(--rule);
-  border-radius: var(--r-lg); background: var(--photo-ground);
+   rhythm whether it is showing the panel or the loaded map. */
+.map__ask, .map__frame {
+  display: block; width: 100%; aspect-ratio: 3 / 2;
+  border: 1px solid var(--rule); border-radius: var(--r-lg);
+  background: var(--photo-ground);
 }
+
+/* The panel. It is an <a> in the HTML — with JavaScript off it opens the map
+   on Google's site — and main.js turns it into the yes-button for the map. */
+.map__ask {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--s2); text-decoration: none; text-align: center;
+  padding: var(--s5); color: var(--brand);
+  transition: background-color 160ms ease, border-color 160ms ease;
+  /* a faint street-grid hint, so the panel reads as "a map goes here" rather
+     than as an empty box. Decorative only — nothing is claimed by it. */
+  background-image:
+    linear-gradient(rgba(126, 106, 84, .13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 106, 84, .13) 1px, transparent 1px);
+  background-size: 52px 52px, 52px 52px;
+  background-position: -1px -1px;
+}
+.map__ask:hover { background-color: #EBE4DA; border-color: var(--line); }
+.map__pin { color: var(--brand); line-height: 0; }
+.map__label {
+  font-size: var(--t-xs); font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--brand);
+  background: var(--paper); border-radius: 999px; padding: 10px 18px;
+  border: 1px solid var(--line);
+}
+.map__note { font-size: var(--t-xs); color: var(--ink-3); background: var(--paper);
+             padding: 2px 8px; border-radius: 999px; }
+@media (prefers-reduced-motion: reduce) { .map__ask { transition: none; } }
+
+/* ------------------------------------------------------------ consent */
+
+/* The banner: a bar along the bottom, not a modal. It takes no focus and
+   covers nothing that matters — the map it is about is a link until you
+   answer. z-index above the back-to-top button, which steps aside while the
+   banner is up (two things in the corner is one too many). */
+.consent {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+  background: var(--paper); border-top: 1px solid var(--rule);
+  box-shadow: 0 -8px 30px -12px rgba(26,21,18,.28);
+  padding-block: var(--s4);
+}
+.consent__in { display: flex; align-items: center; justify-content: space-between;
+               gap: var(--s4) var(--s6); flex-wrap: wrap; }
+.consent__text { font-size: var(--t-sm); color: var(--ink-2); max-width: 62ch; margin: 0; }
+.consent__text a { color: var(--brand); }
+/* Accept and Reject: the same button, twice. Equal prominence is the rule,
+   and the cheapest way to be sure of it is to give them nothing to differ by. */
+.consent__actions { display: flex; gap: var(--s3); flex: none; }
+.has-consent .totop { display: none; }
+@media (max-width: 640px) {
+  .consent { bottom: var(--actionbar-h, 62px); }    /* above the sticky action bar */
+  .consent__actions { width: 100%; }
+  .consent__actions .btn { flex: 1; justify-content: center; }
+}
+
+/* /cookies/: the same controls, in the flow of the page */
+.consent__page { border: 1px solid var(--rule); border-radius: var(--r-lg);
+                 padding: var(--s5); background: var(--sunken); }
+.consent__status { margin: 0 0 var(--s4); font-weight: 600; color: var(--ink); }
+.consent__page .consent__actions { flex-wrap: wrap; }
+.foot__sep { margin-inline: 6px; opacity: .5; }
+code { font-size: .92em; background: var(--sunken); border: 1px solid var(--rule);
+       border-radius: var(--r-sm); padding: 1px 5px; }
 
 /* --------------------------------------------------- home: artwork band */
 

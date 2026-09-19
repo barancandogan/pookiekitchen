@@ -133,22 +133,43 @@ The keyless form is the default only so the map works today with nothing to set
 up. Move off it when you can: either field above is a one-line edit and nothing
 else changes.
 
-#### It loads with the page
+#### It loads only after a yes
 
-The iframe is in the markup: no button, no script, nothing to press. It is
-the one third-party request the site makes, and Google's embed sets cookies —
-a UK PECR consideration for a site with no cookie banner. The client chose the
-map regardless; `data.js` records the choice.
+The site sets no cookies of its own — no analytics, no tracking, no font
+host — so "cookie consent" here means consent for the map, which is the one
+thing that sets any: Google's embed sends the visitor's IP address to Google
+and sets Google's `NID` cookie (about six months). Under PECR regulation 6
+consent has to come *before* that, so the iframe is not in the markup. Each
+map ships as a panel with a link and the embed URL in a data attribute;
+`main.js` swaps the iframe in after a yes, which can come from three places
+that are all the same consent:
 
-The address, the postcode, the transit line and the maps link are plain text
-beside the map and never inside it. They are the answer; the map illustrates
-it.
+- the **banner**, shown only on a page that has a map and only while no valid
+  choice is stored — asking on the menu page about a cookie the menu page
+  cannot set would be noise;
+- the **panel's own button**, which is consent given in context;
+- **/cookies/**, which explains all of this and carries the same two buttons,
+  so withdrawing consent is a click and not a support ticket.
 
-**If the map is blank on the live site**, the keyless endpoint is the reason —
-it could not be tested from the build environment, which cannot reach Google.
-Open the address in Google Maps, Share → Embed a map, copy the snippet, and
-paste the whole thing into `mapView.embedPb`. That is Google's own embed and
-it wins over the fallback the moment it is non-null.
+Accept and Reject are the same button twice, side by side — the ICO's line is
+that rejecting must be as easy as accepting, and giving the two nothing to
+differ by is the cheapest way to be sure of it. Rejecting costs the visitor
+nothing: the address is printed beside the map and "Open in Maps" is a link.
+
+The choice is stored in `localStorage` under `privacy.storageKey`, with a
+timestamp, and treated as expired after `privacy.consentMonths` (six — the
+ICO's own worked example). Storing the choice is exempt from consent because
+it *is* the record of consent, and it is the only thing this site ever writes
+to a visitor's browser. With JavaScript off nothing is stored, no banner
+appears and no map ever loads: the panel is a link to Google Maps.
+
+`/cookies/` also covers the nginx access logs — IP, time, page, browser, kept
+`privacy.logRetentionDays` days — which are personal data under UK GDPR
+whether or not anyone thinks of them as cookies. Confirm the figure against
+`/etc/logrotate.d/nginx` on the server; Ubuntu's stock rotation keeps 14. The
+notice names the company and a contact address only once `company.*` and
+`contact.email` exist in `data.js` — and a privacy notice legally needs a
+contact route, so `contact.email` is now on the launch list twice over.
 
 ---
 

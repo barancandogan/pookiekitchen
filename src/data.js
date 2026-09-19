@@ -574,6 +574,30 @@ const mapView = {
   language: 'en-GB',
 };
 
+/* -------------------------------------------------------------- privacy */
+
+/**
+ * What the cookie notice at /cookies/ says, and how long a choice lasts.
+ *
+ * The site sets nothing itself: no analytics, no tracking, no font host. The
+ * one thing that does is the Google Maps embed, so "cookie consent" here is
+ * consent for the map, asked before the map loads (PECR reg. 6 — consent
+ * first, never after) with Accept and Reject side by side and identical.
+ *
+ * The choice is kept in localStorage under privacy.storageKey. Storing the
+ * choice itself is strictly necessary and exempt — it IS the record of what
+ * the visitor asked for — and it is the only thing this site ever writes to
+ * a visitor's browser.
+ */
+const privacy = {
+  storageKey: 'pookie:consent',
+  consentMonths: 6,           // the ICO's own worked example re-asks after six months
+  // nginx access logs: IP address, time, page, browser. Ubuntu's stock
+  // logrotate keeps 14 daily files. VERIFY on the server before relying on
+  // this figure in the notice: cat /etc/logrotate.d/nginx
+  logRetentionDays: 14,
+};
+
 /* ----------------------------------------------------------------- hero */
 
 /**
@@ -640,6 +664,6 @@ function derive() {
 
 module.exports = {
   site, status, contact, delivery, company, brand,
-  sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero, mapView,
+  sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero, mapView, privacy,
   derive, isFilled,
 };

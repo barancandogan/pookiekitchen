@@ -251,3 +251,105 @@ guard(function () {
     }
   });
 });
+
+/**
+ * Cookie consent — for the one thing on this site that sets any: the map.
+ *
+ * The site itself stores nothing and calls nobody. The Google Maps embed
+ * does both, so it is not in the markup; each map is a panel with a link,
+ * and this block swaps the iframe in only after a yes. A yes can come from
+ * the banner, from the buttons on /cookies/, or from the panel's own button —
+ * the same consent, given in context.
+ *
+ * The choice lives in localStorage under the key the banner carries, with
+ * the time it was made, and is treated as expired after the number of months
+ * the banner carries (six: the ICO's own worked example). Storing the choice
+ * is the one thing this site ever writes to a visitor's browser, and it is
+ * exempt from consent because it IS the record of consent.
+ *
+ * The banner shows only on a page that has a map and only while no valid
+ * choice is stored: asking on the menu page about a cookie the menu page
+ * cannot set would be noise. It is not a modal and takes no focus.
+ */
+guard(function () {
+  var banner = document.querySelector('.consent');
+  if (!banner) return;
+  var KEY = banner.getAttribute('data-consent-key') || 'pookie:consent';
+  var MONTHS = parseInt(banner.getAttribute('data-consent-months'), 10) || 6;
+  var MAX_AGE = MONTHS * 30.44 * 86400000;
+  var maps = document.querySelectorAll('[data-map]');
+  var root = document.documentElement;
+
+  function read() {
+    try {
+      var v = JSON.parse(localStorage.getItem(KEY));
+      if (!v || typeof v.at !== 'number') return null;
+      if (Date.now() - v.at > MAX_AGE) return null;          // expired: ask again
+      return { maps: !!v.maps, at: v.at };
+    } catch (e) { return null; }                             // private mode, blocked storage
+  }
+  function write(maps) {
+    try { localStorage.setItem(KEY, JSON.stringify({ maps: !!maps, at: Date.now() })); } catch (e) {}
+  }
+
+  function loadMap(fig) {
+    var ask = fig.querySelector('.map__ask');
+    var src = fig.getAttribute('data-map-embed');
+    if (!ask || !src) return;
+    var frame = document.createElement('iframe');
+    frame.className = 'map__frame';
+    frame.src = src;
+    frame.title = fig.getAttribute('data-map-title') || 'Map';
+    frame.loading = 'lazy';
+    frame.setAttribute('allowfullscreen', '');
+    ask.parentNode.replaceChild(frame, ask);
+  }
+  function loadMaps() { for (var i = 0; i < maps.length; i++) loadMap(maps[i]); }
+
+  function show() { banner.hidden = false; root.classList.add('has-consent'); }
+  function hide() { banner.hidden = true; root.classList.remove('has-consent'); }
+
+  function status() {
+    var el = document.querySelector('[data-consent-status]');
+    if (!el) return;
+    var c = read();
+    el.textContent = !c ? 'You have not chosen yet, or the choice has expired.'
+      : c.maps ? 'Your current choice: the map may load.'
+      : 'Your current choice: the map stays a link.';
+  }
+
+  function decide(yes) {
+    write(yes);
+    hide();
+    if (yes) loadMaps();
+    status();
+  }
+
+  // Buttons: on the banner and on /cookies/.
+  var buttons = document.querySelectorAll('[data-consent]');
+  for (var b = 0; b < buttons.length; b++) {
+    buttons[b].addEventListener('click', function () {
+      decide(this.getAttribute('data-consent') === 'yes');
+    });
+  }
+
+  // The panel's own button: it is a link in the HTML so that it works without
+  // this script; with it, pressing it is a yes, given in context.
+  for (var m = 0; m < maps.length; m++) {
+    (function (fig) {
+      var ask = fig.querySelector('.map__ask');
+      if (!ask) return;
+      ask.setAttribute('role', 'button');
+      ask.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;   // let "open in new tab" be that
+        e.preventDefault();
+        decide(true);
+      });
+    })(maps[m]);
+  }
+
+  var choice = read();
+  if (choice && choice.maps) loadMaps();
+  else if (!choice && maps.length) show();
+  status();
+});

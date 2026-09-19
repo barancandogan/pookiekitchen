@@ -266,7 +266,8 @@ function footer(d) {
     </div>
     <div class="foot__legal">
       ${legal}
-      <p>© ${new Date().getFullYear()} ${esc(D.site.name)}. ${esc(D.copy.lines.brighterDays)}</p>
+      <p>© ${new Date().getFullYear()} ${esc(D.site.name)}. ${esc(D.copy.lines.brighterDays)}
+        <span class="foot__sep" aria-hidden="true">·</span> <a href="/cookies/">Cookies</a></p>
       <!-- A plain in-page link, which is all it is without JavaScript: the last
            line of the footer, and it works. main.js lifts it out of the flow
            and turns it into the floating button that appears once you are a
@@ -280,6 +281,34 @@ function footer(d) {
     </div>
   </div>
 </footer>`;
+}
+
+/* ------------------------------------------------------------ consent */
+
+/**
+ * The cookie banner. In every page's markup, hidden, and shown by main.js
+ * only on a page that carries the map and only while no valid choice is
+ * stored. It is not a modal and takes no focus: the page behind it works, the
+ * map simply stays a link until the visitor answers. Accept and Reject are
+ * the same button in the same place — the ICO's line is that rejecting must
+ * be as easy as accepting, and here it is the same gesture.
+ *
+ * With JavaScript off it stays hidden, because without JavaScript nothing
+ * could load a map anyway and there would be nothing to consent to.
+ */
+function consentBanner() {
+  const P = D.privacy;
+  return `<div class="consent" hidden role="region" aria-label="Cookies"
+     data-consent-key="${esc(P.storageKey)}" data-consent-months="${P.consentMonths}">
+  <div class="wrap consent__in">
+    <p class="consent__text">We set no cookies of our own. The map on this page comes from Google Maps,
+    which does. Load it? <a href="/cookies/">What that means</a></p>
+    <div class="consent__actions">
+      <button type="button" class="btn btn--ghost" data-consent="no">Reject</button>
+      <button type="button" class="btn btn--ghost" data-consent="yes">Accept</button>
+    </div>
+  </div>
+</div>`;
 }
 
 /* --------------------------------------------------------- action bar */
@@ -311,6 +340,7 @@ ${header(page)}
 ${page.body(d)}
 </main>
 ${footer(d)}
+${consentBanner()}
 ${actionBar(d)}
 <script src="${JS_URL}" defer></script>
 </body>

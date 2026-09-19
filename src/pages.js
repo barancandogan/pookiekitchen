@@ -277,17 +277,20 @@ function galleryPhotos() {
  * Renders nothing at all until there is a real address — a map of a place we
  * cannot name in words is a guess with a pin on it.
  *
- * The iframe is in the markup and loads with the page: no button, no script,
- * nothing to press. It is the one third-party request the site makes, and
- * Google's embed sets cookies — see the note on mapView in data.js — but the
- * client asked for the map to be simply there, and it is. loading="lazy" so
- * that it is fetched when the visitor gets near the bottom of the page
- * rather than before the hero has painted.
+ * WHAT SHIPS IN THE HTML IS NOT THE MAP. It is a link to Google Maps, styled
+ * as a panel with a button, carrying the embed URL in a data attribute. The
+ * iframe is put in by main.js only once the visitor has said yes — on the
+ * cookie banner, on /cookies/, or by pressing this panel's own button, which
+ * is the same consent given in context. Nothing reaches Google before that:
+ * not the frame, not their IP address, not the NID cookie Google's embed
+ * sets. PECR regulation 6 wants consent before, never after, and this is the
+ * only thing on the site that sets a cookie at all.
+ *
+ * With JavaScript off the panel is exactly what it looks like — a link that
+ * opens the map on Google's site, which is a navigation the visitor chose.
  *
  * The address, the postcode and the maps link sit beside the map in plain
- * text, never inside it. They are the answer; the map is the illustration. If
- * the embed is blocked, down, or changes tomorrow, the block still tells a
- * visitor exactly where to go.
+ * text, never inside it. They are the answer; the map is the illustration.
  */
 function mapEmbedUrl() {
   const m = D.mapView;
@@ -326,9 +329,16 @@ function mapBlock(d, opts = {}) {
         ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
       </div>
     </div>
-    <figure class="map">
-      <iframe class="map__frame" src="${esc(embed)}" loading="lazy" allowfullscreen
-              title="Map showing ${esc(a.line1)}, ${esc(a.locality)} ${esc(a.postcode)}"></iframe>
+    <figure class="map" data-map data-map-embed="${esc(embed)}"
+            data-map-title="Map showing ${esc(a.line1)}, ${esc(a.locality)} ${esc(a.postcode)}">
+      <a class="map__ask" href="${esc(a.mapsUrl)}" rel="noopener">
+        <span class="map__pin" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="28" height="28" focusable="false"><path fill="currentColor"
+            d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+        </span>
+        <span class="map__label">Show the map</span>
+        <span class="map__note">Loads from Google Maps, which sets cookies</span>
+      </a>
     </figure>
   </div>
 </section>`;
@@ -539,6 +549,79 @@ ${when(d.hoursKnown, () => `
   },
 };
 
+/* -------------------------------------------------------------- cookies */
+
+/**
+ * The cookie notice, and the place to change your mind.
+ *
+ * Short because there is little to say: the site sets nothing, the map
+ * does, and the choice is stored. Written in the second person and in plain
+ * words, as PECR asks — "clear and comprehensive information" — and with
+ * the controls on the page itself, so withdrawing consent is one click and
+ * not a support ticket. The company line and the contact address render only
+ * once they exist in data.js, like everywhere else; a notice that named a
+ * company we have not confirmed would be a fiction in a legal document.
+ */
+const cookies = {
+  path: '/cookies/',
+  title: 'Cookies',
+  description: 'What this website stores on your device — which is nothing of its own — and how the Google map asks before it loads.',
+  body(d) {
+    const a = D.contact.address;
+    const P = D.privacy;
+    return `
+<section class="hero wrap">
+  <p class="hero__eyebrow">Cookies</p>
+  <h1>We set none of our own.</h1>
+  <p class="hero__lede">No analytics, no tracking, no fonts from anyone else’s server. One thing on this
+  site does set cookies, and it asks first.</p>
+</section>
+
+<section class="sec wrap">
+  <div class="measure stack">
+    <h2>The map</h2>
+    <p>The map on the home page and on <a href="/find-us/">Find us</a> comes from Google Maps. When it
+    loads, your browser connects to Google: Google receives your IP address and sets its own cookies
+    (its <code>NID</code> cookie, for example, which lasts about six months), under
+    <a href="https://policies.google.com/privacy" rel="noopener">Google’s privacy policy</a>. We
+    have no access to what Google collects.</p>
+    <p>So the map does not load until you say so — on the banner, here, or by pressing
+    “Show the map” on the map itself. Rejecting it costs you nothing: the address is written
+    beside it, and the “Open in Maps” button takes you to Google in a new page, which is a
+    visit you chose to make.</p>
+
+    <h2>Your choice</h2>
+    <div class="consent__page" data-consent-page>
+      <p class="consent__status" data-consent-status>You have not chosen yet, or your browser does not
+      keep the choice.</p>
+      <div class="consent__actions">
+        <button type="button" class="btn btn--ghost" data-consent="no">Reject the map</button>
+        <button type="button" class="btn btn--ghost" data-consent="yes">Allow the map</button>
+      </div>
+    </div>
+    <p>Your answer is kept in your browser’s local storage, under the name <code>${esc(P.storageKey)}</code>. It
+    is the only thing this site ever writes to your device, and it is there so that we do not ask you
+    on every page. It expires after ${P.consentMonths} months, and then we ask again. Clearing your
+    browser’s site data removes it sooner.</p>
+    <noscript><p>The buttons above need JavaScript. Without it nothing is stored and no map ever loads:
+    the map panel is simply a link to Google Maps.</p></noscript>
+
+    <h2>Server logs</h2>
+    <p>Like every web server, ours writes a line to a log for each request: your IP address, the time,
+    the page asked for and the name of your browser. We keep those logs to keep the site up and to
+    notice abuse — that is our legitimate interest under UK GDPR — and they are deleted
+    automatically after ${P.logRetentionDays} days.</p>
+
+    <h2>Who we are</h2>
+    <address>${esc(D.site.name)}${when(d.companyKnown, () => ` (${esc(D.company.companyName)}, company number ${esc(D.company.companyNumber)})`)}<br>${esc(a.line1)}<br>${esc(a.locality)} ${esc(a.postcode)}</address>
+    ${when(d.emailKnown, () => `<p>Questions about any of this: <a href="mailto:${esc(D.contact.email)}">${esc(D.contact.email)}</a>.</p>`)}
+    <p>You can also complain to the UK’s regulator, the
+    <a href="https://ico.org.uk/make-a-complaint/" rel="noopener">Information Commissioner’s Office</a>.</p>
+  </div>
+</section>`;
+  },
+};
+
 /* ------------------------------------------------------------------ 404 */
 
 const notFound = {
@@ -565,8 +648,8 @@ const notFound = {
 // /catering/ is gated: without an inbox to send an enquiry to, the page would
 // be a dead end. It appears in this list only once cateringEmail is set.
 function allPages() {
-  const pages = [home, menuPage, about, findUs, notFound];
+  const pages = [home, menuPage, about, findUs, cookies, notFound];
   return pages;
 }
 
-module.exports = { allPages, home, menuPage, about, findUs, notFound };
+module.exports = { allPages, home, menuPage, about, findUs, cookies, notFound };
