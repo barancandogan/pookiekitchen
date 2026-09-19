@@ -536,7 +536,8 @@ const copy = {
 /* ------------------------------------------------------------------ map */
 
 /**
- * The embedded map. Google Maps, at the client's request, loaded with the page.
+ * The embedded map. Google Maps, at the client's request, loaded after the
+ * visitor accepts cookies on the banner — see `privacy` below and main.js.
  *
  * Driven by the ADDRESS, not by contact.geo: handing Google the postal
  * address lets Google geocode it, which puts the pin on the building rather
@@ -563,9 +564,8 @@ const copy = {
  *                 on the live site, this is why: fill embedPb.
  *
  * It is the only third-party request the site makes, and Google's embed sets
- * cookies on every page view of the two pages that carry it. That is a UK
- * PECR consideration for a site with no cookie banner; the client has chosen
- * the map regardless, and this note is the record of the choice.
+ * cookies — which is why it waits for a yes on the cookie banner. A no leaves
+ * the find-us block as the address and the buttons, with no map and no hole.
  */
 const mapView = {
   apiKey: null,               // Maps Embed API key → the documented endpoint

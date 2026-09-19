@@ -594,40 +594,19 @@ a:hover { text-decoration-thickness: 2px; }
 .where__note { margin-top: var(--s4); color: var(--ink-2); font-size: var(--t-sm); max-width: 40ch; }
 
 .map { margin: 0; }
-/* 3:2 like every other picture on the site, so the block sits in the same
-   rhythm whether it is showing the panel or the loaded map. */
-.map__ask, .map__frame {
+/* Empty until a yes, and empty is not shown: a visitor who said no, or has
+   no JavaScript, sees a plain find-us block with no hole in it. Modern
+   browsers also collapse the grid to one column; older ones leave a blank
+   second track, which is harmless. */
+.map:empty { display: none; }
+.where:has(.map:empty) { grid-template-columns: 1fr; }
+/* 3:2 like every other picture on the site, so the map sits in the same
+   rhythm as the plates. */
+.map__frame {
   display: block; width: 100%; aspect-ratio: 3 / 2;
   border: 1px solid var(--rule); border-radius: var(--r-lg);
   background: var(--photo-ground);
 }
-
-/* The panel. It is an <a> in the HTML — with JavaScript off it opens the map
-   on Google's site — and main.js turns it into the yes-button for the map. */
-.map__ask {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: var(--s2); text-decoration: none; text-align: center;
-  padding: var(--s5); color: var(--brand);
-  transition: background-color 160ms ease, border-color 160ms ease;
-  /* a faint street-grid hint, so the panel reads as "a map goes here" rather
-     than as an empty box. Decorative only — nothing is claimed by it. */
-  background-image:
-    linear-gradient(rgba(126, 106, 84, .13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(126, 106, 84, .13) 1px, transparent 1px);
-  background-size: 52px 52px, 52px 52px;
-  background-position: -1px -1px;
-}
-.map__ask:hover { background-color: #EBE4DA; border-color: var(--line); }
-.map__pin { color: var(--brand); line-height: 0; }
-.map__label {
-  font-size: var(--t-xs); font-weight: 700; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--brand);
-  background: var(--paper); border-radius: 999px; padding: 10px 18px;
-  border: 1px solid var(--line);
-}
-.map__note { font-size: var(--t-xs); color: var(--ink-3); background: var(--paper);
-             padding: 2px 8px; border-radius: 999px; }
-@media (prefers-reduced-motion: reduce) { .map__ask { transition: none; } }
 
 /* ------------------------------------------------------------ consent */
 
@@ -643,7 +622,8 @@ a:hover { text-decoration-thickness: 2px; }
 }
 .consent__in { display: flex; align-items: center; justify-content: space-between;
                gap: var(--s4) var(--s6); flex-wrap: wrap; }
-.consent__text { font-size: var(--t-sm); color: var(--ink-2); max-width: 62ch; margin: 0; }
+.consent__text { font-size: var(--t-sm); color: var(--ink-2); max-width: 64ch; margin: 0; }
+.consent__text strong { color: var(--ink); }
 .consent__text a { color: var(--brand); }
 /* Accept and Reject: the same button, twice. Equal prominence is the rule,
    and the cheapest way to be sure of it is to give them nothing to differ by. */

@@ -277,17 +277,14 @@ function galleryPhotos() {
  * Renders nothing at all until there is a real address — a map of a place we
  * cannot name in words is a guess with a pin on it.
  *
- * WHAT SHIPS IN THE HTML IS NOT THE MAP. It is a link to Google Maps, styled
- * as a panel with a button, carrying the embed URL in a data attribute. The
- * iframe is put in by main.js only once the visitor has said yes — on the
- * cookie banner, on /cookies/, or by pressing this panel's own button, which
- * is the same consent given in context. Nothing reaches Google before that:
- * not the frame, not their IP address, not the NID cookie Google's embed
- * sets. PECR regulation 6 wants consent before, never after, and this is the
- * only thing on the site that sets a cookie at all.
- *
- * With JavaScript off the panel is exactly what it looks like — a link that
- * opens the map on Google's site, which is a navigation the visitor chose.
+ * WHAT SHIPS IN THE HTML IS AN EMPTY FIGURE carrying the embed URL in a data
+ * attribute. main.js puts the iframe in once the visitor has accepted cookies
+ * on the banner they met when they arrived (or on /cookies/). Until then the
+ * figure is empty, and an empty figure is display:none, so a visitor who said
+ * no — or has no JavaScript — sees a plain find-us block: the address, the
+ * transit line and "Open in Maps". No placeholder, no button on the map, no
+ * box asking to be clicked. Nothing reaches Google before a yes: not the
+ * frame, not their IP address, not the NID cookie Google's embed sets.
  *
  * The address, the postcode and the maps link sit beside the map in plain
  * text, never inside it. They are the answer; the map is the illustration.
@@ -330,16 +327,7 @@ function mapBlock(d, opts = {}) {
       </div>
     </div>
     <figure class="map" data-map data-map-embed="${esc(embed)}"
-            data-map-title="Map showing ${esc(a.line1)}, ${esc(a.locality)} ${esc(a.postcode)}">
-      <a class="map__ask" href="${esc(a.mapsUrl)}" rel="noopener">
-        <span class="map__pin" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="28" height="28" focusable="false"><path fill="currentColor"
-            d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
-        </span>
-        <span class="map__label">Show the map</span>
-        <span class="map__note">Loads from Google Maps, which sets cookies</span>
-      </a>
-    </figure>
+            data-map-title="Map showing ${esc(a.line1)}, ${esc(a.locality)} ${esc(a.postcode)}"></figure>
   </div>
 </section>`;
 }
@@ -585,10 +573,9 @@ const cookies = {
     (its <code>NID</code> cookie, for example, which lasts about six months), under
     <a href="https://policies.google.com/privacy" rel="noopener">Google’s privacy policy</a>. We
     have no access to what Google collects.</p>
-    <p>So the map does not load until you say so — on the banner, here, or by pressing
-    “Show the map” on the map itself. Rejecting it costs you nothing: the address is written
-    beside it, and the “Open in Maps” button takes you to Google in a new page, which is a
-    visit you chose to make.</p>
+    <p>So the map does not load until you say so — on the banner when you first arrive, or here.
+    Rejecting it costs you nothing: the address is written on the page, and the “Open in Maps”
+    button takes you to Google in a new page, which is a visit you chose to make.</p>
 
     <h2>Your choice</h2>
     <div class="consent__page" data-consent-page>
@@ -603,8 +590,8 @@ const cookies = {
     is the only thing this site ever writes to your device, and it is there so that we do not ask you
     on every page. It expires after ${P.consentMonths} months, and then we ask again. Clearing your
     browser’s site data removes it sooner.</p>
-    <noscript><p>The buttons above need JavaScript. Without it nothing is stored and no map ever loads:
-    the map panel is simply a link to Google Maps.</p></noscript>
+    <noscript><p>The buttons above need JavaScript. Without it nothing is stored and no map ever loads;
+    the address and the “Open in Maps” button are there regardless.</p></noscript>
 
     <h2>Server logs</h2>
     <p>Like every web server, ours writes a line to a log for each request: your IP address, the time,

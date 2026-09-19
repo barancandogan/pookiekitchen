@@ -140,28 +140,25 @@ host — so "cookie consent" here means consent for the map, which is the one
 thing that sets any: Google's embed sends the visitor's IP address to Google
 and sets Google's `NID` cookie (about six months). Under PECR regulation 6
 consent has to come *before* that, so the iframe is not in the markup. Each
-map ships as a panel with a link and the embed URL in a data attribute;
-`main.js` swaps the iframe in after a yes, which can come from three places
-that are all the same consent:
+map ships as an **empty figure** with the embed URL in a data attribute, and
+`main.js` puts the iframe in after a yes. An empty figure is `display:none`,
+so a no — or no JavaScript — leaves a plain find-us block: address, transit
+line, "Open in Maps". No placeholder and nothing on the map to press.
 
-- the **banner**, shown only on a page that has a map and only while no valid
-  choice is stored — asking on the menu page about a cookie the menu page
-  cannot set would be noise;
-- the **panel's own button**, which is consent given in context;
-- **/cookies/**, which explains all of this and carries the same two buttons,
-  so withdrawing consent is a click and not a support ticket.
-
-Accept and Reject are the same button twice, side by side — the ICO's line is
-that rejecting must be as easy as accepting, and giving the two nothing to
-differ by is the cheapest way to be sure of it. Rejecting costs the visitor
-nothing: the address is printed beside the map and "Open in Maps" is a link.
+The yes comes from the **banner**, the conventional bar along the bottom that
+a visitor meets on arrival, on whichever page they land, while no valid
+choice is stored — or later from **/cookies/**, which explains all of this and
+carries the same two buttons, so withdrawing consent is a click and not a
+support ticket. Accept and Reject are the same button twice, side by side —
+the ICO's line is that rejecting must be as easy as accepting, and giving the
+two nothing to differ by is the cheapest way to be sure of it.
 
 The choice is stored in `localStorage` under `privacy.storageKey`, with a
 timestamp, and treated as expired after `privacy.consentMonths` (six — the
 ICO's own worked example). Storing the choice is exempt from consent because
 it *is* the record of consent, and it is the only thing this site ever writes
 to a visitor's browser. With JavaScript off nothing is stored, no banner
-appears and no map ever loads: the panel is a link to Google Maps.
+appears and no map ever loads.
 
 `/cookies/` also covers the nginx access logs — IP, time, page, browser, kept
 `privacy.logRetentionDays` days — which are personal data under UK GDPR

@@ -286,12 +286,13 @@ function footer(d) {
 /* ------------------------------------------------------------ consent */
 
 /**
- * The cookie banner. In every page's markup, hidden, and shown by main.js
- * only on a page that carries the map and only while no valid choice is
- * stored. It is not a modal and takes no focus: the page behind it works, the
- * map simply stays a link until the visitor answers. Accept and Reject are
- * the same button in the same place — the ICO's line is that rejecting must
- * be as easy as accepting, and here it is the same gesture.
+ * The cookie banner. In every page's markup, hidden, and shown by main.js on
+ * arrival while no valid choice is stored — the conventional bar along the
+ * bottom that every visitor recognises, asked once, on whichever page they
+ * land on. It is not a modal and takes no focus: the page behind it works,
+ * and the map simply waits for the answer. Accept and Reject are the same
+ * button in the same place — the ICO's line is that rejecting must be as
+ * easy as accepting, and here it is the same gesture.
  *
  * With JavaScript off it stays hidden, because without JavaScript nothing
  * could load a map anyway and there would be nothing to consent to.
@@ -301,8 +302,8 @@ function consentBanner() {
   return `<div class="consent" hidden role="region" aria-label="Cookies"
      data-consent-key="${esc(P.storageKey)}" data-consent-months="${P.consentMonths}">
   <div class="wrap consent__in">
-    <p class="consent__text">We set no cookies of our own. The map on this page comes from Google Maps,
-    which does. Load it? <a href="/cookies/">What that means</a></p>
+    <p class="consent__text"><strong>Cookies.</strong> We use cookies only to show the Google map of where
+    we are. Nothing is stored until you choose. <a href="/cookies/">Cookie policy</a></p>
     <div class="consent__actions">
       <button type="button" class="btn btn--ghost" data-consent="no">Reject</button>
       <button type="button" class="btn btn--ghost" data-consent="yes">Accept</button>

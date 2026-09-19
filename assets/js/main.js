@@ -256,10 +256,11 @@ guard(function () {
  * Cookie consent — for the one thing on this site that sets any: the map.
  *
  * The site itself stores nothing and calls nobody. The Google Maps embed
- * does both, so it is not in the markup; each map is a panel with a link,
- * and this block swaps the iframe in only after a yes. A yes can come from
- * the banner, from the buttons on /cookies/, or from the panel's own button —
- * the same consent, given in context.
+ * does both, so it is not in the markup: each map is an empty figure with the
+ * embed URL on it, and this block puts the iframe in only after a yes — on
+ * the banner a visitor meets when they arrive, on whichever page that is, or
+ * on /cookies/. A no leaves the figure empty, and an empty figure is not
+ * displayed, so the find-us block is simply the address and the buttons.
  *
  * The choice lives in localStorage under the key the banner carries, with
  * the time it was made, and is treated as expired after the number of months
@@ -267,9 +268,7 @@ guard(function () {
  * is the one thing this site ever writes to a visitor's browser, and it is
  * exempt from consent because it IS the record of consent.
  *
- * The banner shows only on a page that has a map and only while no valid
- * choice is stored: asking on the menu page about a cookie the menu page
- * cannot set would be noise. It is not a modal and takes no focus.
+ * The banner is not a modal and takes no focus.
  */
 guard(function () {
   var banner = document.querySelector('.consent');
@@ -293,18 +292,22 @@ guard(function () {
   }
 
   function loadMap(fig) {
-    var ask = fig.querySelector('.map__ask');
+    if (fig.querySelector('iframe')) return;
     var src = fig.getAttribute('data-map-embed');
-    if (!ask || !src) return;
+    if (!src) return;
     var frame = document.createElement('iframe');
     frame.className = 'map__frame';
     frame.src = src;
     frame.title = fig.getAttribute('data-map-title') || 'Map';
     frame.loading = 'lazy';
     frame.setAttribute('allowfullscreen', '');
-    ask.parentNode.replaceChild(frame, ask);
+    fig.appendChild(frame);
   }
-  function loadMaps() { for (var i = 0; i < maps.length; i++) loadMap(maps[i]); }
+  function unloadMap(fig) {
+    var f = fig.querySelector('iframe');
+    if (f) fig.removeChild(f);
+  }
+  function applyMaps(yes) { for (var i = 0; i < maps.length; i++) (yes ? loadMap : unloadMap)(maps[i]); }
 
   function show() { banner.hidden = false; root.classList.add('has-consent'); }
   function hide() { banner.hidden = true; root.classList.remove('has-consent'); }
@@ -314,14 +317,14 @@ guard(function () {
     if (!el) return;
     var c = read();
     el.textContent = !c ? 'You have not chosen yet, or the choice has expired.'
-      : c.maps ? 'Your current choice: the map may load.'
-      : 'Your current choice: the map stays a link.';
+      : c.maps ? 'Your current choice: the map is shown.'
+      : 'Your current choice: the map is not shown.';
   }
 
   function decide(yes) {
     write(yes);
     hide();
-    if (yes) loadMaps();
+    applyMaps(yes);
     status();
   }
 
@@ -333,23 +336,8 @@ guard(function () {
     });
   }
 
-  // The panel's own button: it is a link in the HTML so that it works without
-  // this script; with it, pressing it is a yes, given in context.
-  for (var m = 0; m < maps.length; m++) {
-    (function (fig) {
-      var ask = fig.querySelector('.map__ask');
-      if (!ask) return;
-      ask.setAttribute('role', 'button');
-      ask.addEventListener('click', function (e) {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;   // let "open in new tab" be that
-        e.preventDefault();
-        decide(true);
-      });
-    })(maps[m]);
-  }
-
   var choice = read();
-  if (choice && choice.maps) loadMaps();
-  else if (!choice && maps.length) show();
+  if (choice) applyMaps(choice.maps);
+  else show();
   status();
 });
