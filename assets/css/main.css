@@ -678,16 +678,52 @@ code { font-size: .92em; background: var(--sunken); border: 1px solid var(--rule
 
 /* -------------------------------------------------- home: the gallery */
 
-/* Photographs and nothing else — no caption, no price, no link. Every one is
-   the same 3:2 canvas on --photo-ground, so the cells line up whatever shape
-   the plate is and nothing needs cropping. */
+/* Photographs, each with its name held back. Every one is the same 3:2 canvas
+   on --photo-ground, so the cells line up whatever shape the plate is and
+   nothing needs cropping. Hover a plate and it comes forward a little and its
+   name rises along the bottom edge on a paper band; a tap does the same where
+   nothing can hover (main.js sets .is-open). The name is a real figcaption,
+   so it is in the document whether or not it is on the screen. */
 .gallery { margin-top: var(--s6); display: grid; gap: var(--s4);
            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
            list-style: none; margin-inline: 0; padding: 0; }
 .gallery li { margin: 0; }
+.gallery__cell {
+  position: relative; margin: 0; overflow: hidden; border-radius: 12px;
+  background: var(--photo-ground);
+  transition: box-shadow 260ms ease;
+}
 .gallery__img {
   width: 100%; aspect-ratio: 3 / 2; object-fit: contain; display: block;
-  background: var(--photo-ground); border-radius: 12px;
+  transition: transform 420ms cubic-bezier(.22, .61, .36, 1);
+}
+.gallery__name {
+  position: absolute; inset: auto 0 0 0; margin: 0;
+  padding: var(--s2) var(--s3);
+  background: rgba(255, 255, 255, .92); border-top: 1px solid var(--rule);
+  font-family: var(--display); font-size: var(--t-md); line-height: var(--lh-snug);
+  letter-spacing: .03em; text-transform: uppercase; color: var(--brand);
+  transform: translateY(100%); opacity: 0;
+  transition: transform 320ms cubic-bezier(.22, .61, .36, 1), opacity 220ms ease;
+}
+.gallery__cell.is-open .gallery__name { transform: none; opacity: 1; }
+.gallery__cell.is-open .gallery__img { transform: scale(1.06); }
+.gallery__cell.is-open { box-shadow: var(--shadow); }
+/* :hover only where a pointer can hover. A phone's browser holds :hover on
+   whatever was last tapped, which would fight the tap-to-toggle below. */
+@media (hover: hover) {
+  .gallery__cell:hover .gallery__name { transform: none; opacity: 1; }
+  .gallery__cell:hover .gallery__img { transform: scale(1.06); }
+  .gallery__cell:hover { box-shadow: var(--shadow); }
+}
+/* No hover and no script to catch a tap: every name, always. Nothing is ever
+   left unreachable. */
+@media (hover: none) {
+  html:not(.js-gallery) .gallery__name { transform: none; opacity: 1; }
+}
+@media print {
+  .gallery__name { position: static; transform: none; opacity: 1; }
+  .gallery__cell { box-shadow: none; }
 }
 /* On a phone auto-fill drops to one column, and twelve full-width plates is a
    very long scroll for a block whose whole job is to be glanced at. Two

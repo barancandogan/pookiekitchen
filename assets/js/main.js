@@ -14,6 +14,32 @@ function guard(fn) {
 }
 
 /**
+ * The gallery's names on a touch screen. Where a pointer can hover, the
+ * stylesheet shows a plate's name on hover and this block stands down. Where
+ * none can — a phone — a tap stands in: it opens the name on that plate and
+ * closes any other, and a tap anywhere else closes it. Without this script a
+ * phone shows every name, always (see .gallery__name in main.css).
+ */
+guard(function () {
+  var cells = document.querySelectorAll('.gallery__cell');
+  if (!cells.length) return;
+  if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) return;
+  if (!document.documentElement.closest) return;
+
+  document.documentElement.classList.add('js-gallery');
+  var open = null;
+  function close() { if (open) { open.classList.remove('is-open'); open = null; } }
+
+  document.addEventListener('click', function (e) {
+    var cell = e.target && e.target.closest ? e.target.closest('.gallery__cell') : null;
+    if (!cell || cell === open) { close(); return; }
+    close();
+    cell.classList.add('is-open');
+    open = cell;
+  });
+});
+
+/**
  * The only script on the site: rotating the home-page video hero.
  *
  * Without it the first clip simply loops — the markup carries autoplay muted

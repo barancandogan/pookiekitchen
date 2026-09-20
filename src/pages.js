@@ -252,11 +252,13 @@ ${ch.items.map(it => `      <li><span class="listing__name">${esc(it.name)}</spa
 }
 
 /**
- * Every dish photograph, once, in menu order. No caption, no price, no link:
- * the pictures are the whole of the block. That makes the alt text the only
- * thing naming each plate, so — unlike every other photograph on the site,
- * where the dish name sits right beside the image and a second reading of it
- * would be noise — these carry the dish name rather than an empty alt.
+ * Every dish photograph, once, in menu order. No price, no link: the pictures
+ * are the block. Each carries its name in a figcaption that the stylesheet
+ * holds back until the plate is hovered — or tapped, where nothing can hover
+ * (main.js) — so the name is always in the document and only sometimes on
+ * the screen. The alt is empty for the same reason it is on every other
+ * photograph on the site: the name sits right beside the image, and a second
+ * reading of it would be noise.
  */
 function galleryPhotos() {
   const seen = new Set();
@@ -265,7 +267,10 @@ function galleryPhotos() {
     for (const it of ch.items) {
       if (!it.photo || seen.has(it.photo)) continue;
       seen.add(it.photo);
-      out.push(`    <li>${dishPhoto(it.photo, '(max-width: 600px) 50vw, 280px', [400, 800], 'gallery__img', it.name)}</li>`);
+      out.push(`    <li><figure class="gallery__cell">
+      ${dishPhoto(it.photo, '(max-width: 600px) 50vw, 280px', [400, 800], 'gallery__img')}
+      <figcaption class="gallery__name">${esc(it.name)}</figcaption>
+    </figure></li>`);
     }
   }
   return out.join('\n');
