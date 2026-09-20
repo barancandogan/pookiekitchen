@@ -163,6 +163,11 @@ function hoursToSchema() {
 /* -------------------------------------------------------------- ribbon */
 
 function ribbon(d) {
+  // The owner's own line, from the panel, wins over the status line while it
+  // is set: it is the one thing they can say to every visitor on every page.
+  if (D.isFilled(D.site.announcement)) {
+    return `<div class="ribbon${d.isOpen ? ' ribbon--open' : ''}">${esc(D.site.announcement)}</div>`;
+  }
   if (d.isOpen) {
     return `<div class="ribbon ribbon--open">Open today${
       when(d.addressKnown, () => ` · ${esc(D.contact.address.locality)}`)}</div>`;

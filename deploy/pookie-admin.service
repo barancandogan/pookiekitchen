@@ -1,0 +1,28 @@
+# systemd unit for the owner's panel. Installed by deploy.sh to
+# /etc/systemd/system/pookie-admin.service and refreshed on every deploy.
+[Unit]
+Description=Pookie Chicken admin panel
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/srv/pookiekitchen
+Environment=POOKIE_CONTENT_DIR=/srv/pookie-content
+Environment=POOKIE_WEB_ROOT=/var/www/pookie
+Environment=POOKIE_ADMIN_SECURE=1
+Environment=POOKIE_ADMIN_PORT=8787
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /srv/pookiekitchen/admin/server.js
+Restart=always
+RestartSec=3
+# the service may write only where it must
+ReadWritePaths=/srv/pookie-content /var/www/pookie
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

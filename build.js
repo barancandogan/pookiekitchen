@@ -16,7 +16,9 @@ const { document_ } = require('./src/layout');
 const { allPages } = require('./src/pages');
 
 const ROOT = __dirname;
-const DIST = path.join(ROOT, 'dist');
+// The panel builds somewhere it may write — never inside the repository, which
+// it cannot and should not touch. Everything else builds to ./dist as before.
+const DIST = process.env.POOKIE_DIST_DIR ? path.resolve(process.env.POOKIE_DIST_DIR) : path.join(ROOT, 'dist');
 
 /* ----------------------------------------------------------------- fs */
 
@@ -62,7 +64,10 @@ function build() {
     fs.writeFileSync(out, html);
   }
 
-  const assets = copyDir(path.join(ROOT, 'assets'), path.join(DIST, 'assets'));
+  let assets = copyDir(path.join(ROOT, 'assets'), path.join(DIST, 'assets'));
+  // Photographs the owner uploaded through the panel live beside content.json,
+  // outside the repository, and land next to the repository's own.
+  assets += copyDir(path.join(D.CONTENT_DIR, 'photos'), path.join(DIST, 'assets/img/dish'));
 
   writeSitemap(pages, d);
   writeRobots(d);

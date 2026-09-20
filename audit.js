@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const D = require('./src/data');
 
-const DIST = path.join(__dirname, 'dist');
+const DIST = process.env.POOKIE_DIST_DIR ? path.resolve(process.env.POOKIE_DIST_DIR) : path.join(__dirname, 'dist');
 const errors = [];
 const warns = [];
 
@@ -261,6 +261,13 @@ for (const [token, value] of [
 }
 
 /* -------------------------------------------------------------- report */
+
+// --json: the same verdict as one object, for the panel. The exit code is the
+// same either way — the audit is the gate whoever is asking.
+if (process.argv.includes('--json')) {
+  process.stdout.write(JSON.stringify({ pages: htmlFiles.length, errors, warnings: warns }) + '\n');
+  process.exit(errors.length ? 1 : 0);
+}
 
 console.log(`\n  audited ${htmlFiles.length} pages\n`);
 for (const w of warns) console.log(`  WARN   ${w}`);

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Pookie Chicken — Panel</title>
+<link rel="icon" href="/admin/ui/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/admin/ui/main.css">
+<link rel="stylesheet" href="/admin/ui/admin.css">
+</head>
+<body class="adm">
+
+<!-- Sign in -->
+<section class="adm-login" id="login" hidden>
+  <form class="adm-login__card" id="login-form" autocomplete="off">
+    <img src="/admin/ui/logo.svg" alt="Pookie Chicken" width="145" height="52" class="adm-login__logo">
+    <h1>Panel</h1>
+    <label class="adm-field"><span>Password</span><input type="password" name="password" required autocomplete="current-password"></label>
+    <p class="adm-error" id="login-error" hidden></p>
+    <button class="btn btn--primary" type="submit">Sign in</button>
+  </form>
+</section>
+
+<!-- The panel -->
+<div class="adm-app" id="app" hidden>
+  <header class="adm-head">
+    <a class="adm-brand" href="#overview"><img src="/admin/ui/logo.svg" alt="Pookie Chicken" width="109" height="39"></a>
+    <nav class="adm-nav" aria-label="Sections">
+      <a href="#overview" data-nav="overview">Overview</a>
+      <a href="#menu" data-nav="menu">Menu</a>
+      <a href="#photos" data-nav="photos">Photos</a>
+      <a href="#opening" data-nav="opening">Opening &amp; hours</a>
+      <a href="#contact" data-nav="contact">Contact</a>
+      <a href="#history" data-nav="history">History</a>
+      <a href="#settings" data-nav="settings">Settings</a>
+    </nav>
+    <div class="adm-head__actions">
+      <span class="adm-status" id="save-status" aria-live="polite"></span>
+      <button class="btn btn--ghost" type="button" id="save">Save</button>
+      <button class="btn btn--primary" type="button" id="publish">Publish</button>
+    </div>
+  </header>
+
+  <main class="adm-main" id="main">
+
+    <section class="adm-sec" data-sec="overview">
+      <p class="sec__kicker">Overview</p>
+      <h2 id="ov-title">Not open yet</h2>
+      <p class="adm-lede" id="ov-lede"></p>
+      <div class="adm-cards">
+        <div class="adm-card">
+          <h3>Last published</h3>
+          <p class="adm-big" id="ov-published">Never</p>
+          <p class="adm-muted" id="ov-result"></p>
+        </div>
+        <div class="adm-card">
+          <h3>Before the site can say “open”</h3>
+          <ul class="adm-checks" id="ov-checks"></ul>
+        </div>
+        <div class="adm-card">
+          <h3>Quick numbers</h3>
+          <p class="adm-muted" id="ov-numbers"></p>
+        </div>
+      </div>
+      <div class="adm-notice" id="ov-warnings" hidden></div>
+    </section>
+
+    <section class="adm-sec" data-sec="menu" hidden>
+      <p class="sec__kicker">Menu</p>
+      <h2>Everything you cook</h2>
+      <p class="adm-lede">Chapters and dishes, in the order they appear. A price left blank shows as a dash on the site; a hidden dish stays here but leaves the site.</p>
+      <div id="menu-editor"></div>
+      <button class="btn btn--ghost" type="button" id="add-chapter">+ Add a chapter</button>
+    </section>
+
+    <section class="adm-sec" data-sec="photos" hidden>
+      <p class="sec__kicker">Photos</p>
+      <h2>Photographs</h2>
+      <p class="adm-lede">Upload a photograph of a dish, then pick it on the dish in the Menu tab. Your browser sizes it to the site’s three widths before it uploads; nothing else is needed.</p>
+      <form class="adm-upload" id="upload-form">
+        <label class="adm-field"><span>Photograph</span><input type="file" id="upload-file" accept="image/jpeg,image/png,image/webp" required></label>
+        <label class="adm-field"><span>Name (letters, digits, dashes)</span><input type="text" id="upload-slug" pattern="[a-z0-9][a-z0-9\-]{1,40}" placeholder="peri-peri-plate" required></label>
+        <button class="btn btn--primary" type="submit" id="upload-go">Upload</button>
+        <p class="adm-muted" id="upload-status" aria-live="polite"></p>
+      </form>
+      <div class="adm-preview" id="upload-preview" hidden><canvas id="upload-canvas" width="600" height="400"></canvas><p class="adm-muted">How it will sit on the site.</p></div>
+      <h3>Uploaded</h3>
+      <ul class="adm-photos" id="photos-uploaded"></ul>
+      <h3>Built in</h3>
+      <p class="adm-muted">The studio photographs the site shipped with. They cannot be removed here, only unassigned from a dish.</p>
+      <ul class="adm-photos" id="photos-repo"></ul>
+    </section>
+
+    <section class="adm-sec" data-sec="opening" hidden>
+      <p class="sec__kicker">Opening &amp; hours</p>
+      <h2>When</h2>
+      <div class="adm-grid2">
+        <div class="adm-card">
+          <h3>Opening</h3>
+          <label class="adm-field"><span>Opening date</span><input type="date" id="f-openingDate"></label>
+          <label class="adm-check"><input type="checkbox" id="f-announcedOpen"> <span>We are open for business</span></label>
+          <p class="adm-muted">The site only says “open” once this is ticked <em>and</em> the address and every day’s hours are filled in.</p>
+        </div>
+        <div class="adm-card">
+          <h3>Lunch deal</h3>
+          <label class="adm-field"><span>Name</span><input type="text" id="f-lunchName"></label>
+          <label class="adm-field"><span>Line</span><input type="text" id="f-lunchClaim"></label>
+          <div class="adm-row">
+            <label class="adm-field"><span>From</span><input type="time" id="f-lunchFrom"></label>
+            <label class="adm-field"><span>To</span><input type="time" id="f-lunchTo"></label>
+          </div>
+          <label class="adm-field"><span>Prices (comma-separated)</span><input type="text" id="f-lunchPrices" placeholder="12.90, 15.90"></label>
+          <label class="adm-check"><input type="checkbox" id="f-lunchConfirmed"> <span>Prices confirmed</span></label>
+        </div>
+      </div>
+      <div class="adm-card">
+        <h3>Hours</h3>
+        <p class="adm-muted">Every day must be decided — a time or “closed” — before the hours appear on the site.</p>
+        <table class="adm-hours" id="hours"></table>
+      </div>
+    </section>
+
+    <section class="adm-sec" data-sec="contact" hidden>
+      <p class="sec__kicker">Contact</p>
+      <h2>Reach us</h2>
+      <div class="adm-grid2">
+        <div class="adm-card">
+          <h3>Details</h3>
+          <label class="adm-field"><span>Phone</span><input type="tel" id="f-phone" placeholder="+44 20 …"></label>
+          <label class="adm-field"><span>Email</span><input type="email" id="f-email"></label>
+          <label class="adm-field"><span>Catering email (opens the catering page)</span><input type="email" id="f-cateringEmail"></label>
+          <label class="adm-field"><span>Jobs email</span><input type="email" id="f-jobsEmail"></label>
+          <label class="adm-field"><span>Announcement (top of every page)</span><input type="text" id="f-announcement" maxlength="140" placeholder="Closed 25 December"></label>
+        </div>
+        <div class="adm-card">
+          <h3>Address</h3>
+          <label class="adm-field"><span>Street</span><input type="text" id="f-line1"></label>
+          <label class="adm-field"><span>Town</span><input type="text" id="f-locality"></label>
+          <label class="adm-field"><span>Postcode</span><input type="text" id="f-postcode"></label>
+          <label class="adm-field"><span>Google Maps link</span><input type="url" id="f-mapsUrl"></label>
+          <h3>Delivery</h3>
+          <label class="adm-field"><span>Deliveroo</span><input type="url" id="f-deliveroo"></label>
+          <label class="adm-field"><span>Uber Eats</span><input type="url" id="f-ubereats"></label>
+          <label class="adm-field"><span>Just Eat</span><input type="url" id="f-justeat"></label>
+        </div>
+        <div class="adm-card">
+          <h3>Company (footer)</h3>
+          <label class="adm-field"><span>Company name</span><input type="text" id="f-companyName"></label>
+          <label class="adm-field"><span>Company number</span><input type="text" id="f-companyNumber"></label>
+          <label class="adm-field"><span>VAT number</span><input type="text" id="f-vatNumber"></label>
+        </div>
+        <div class="adm-card">
+          <h3>Allergens</h3>
+          <label class="adm-field"><span>Statement shown on the menu</span><textarea id="f-allergens" rows="4" placeholder="For allergen information, ask a member of the team or call …"></textarea></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="adm-sec" data-sec="history" hidden>
+      <p class="sec__kicker">History</p>
+      <h2>Every version</h2>
+      <p class="adm-lede">A copy is kept each time you save or publish. Restoring one brings its content back; publish afterwards to put it on the site.</p>
+      <ul class="adm-versions" id="versions"></ul>
+    </section>
+
+    <section class="adm-sec" data-sec="settings" hidden>
+      <p class="sec__kicker">Settings</p>
+      <h2>Password</h2>
+      <form class="adm-card adm-narrow" id="password-form">
+        <label class="adm-field"><span>Current password</span><input type="password" id="pw-current" autocomplete="current-password" required></label>
+        <label class="adm-field"><span>New password (10+ characters)</span><input type="password" id="pw-next" autocomplete="new-password" minlength="10" required></label>
+        <button class="btn btn--primary" type="submit">Change password</button>
+        <p class="adm-muted" id="pw-status" aria-live="polite"></p>
+      </form>
+      <p><button class="btn btn--ghost" type="button" id="logout">Sign out</button></p>
+    </section>
+
+  </main>
+
+  <div class="adm-toast" id="toast" role="status" aria-live="polite" hidden></div>
+</div>
+
+<script src="/admin/ui/admin.js" defer></script>
+</body>
+</html>

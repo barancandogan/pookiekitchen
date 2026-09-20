@@ -62,6 +62,12 @@ const site = {
 
   instagram: 'thepookiechicken',
   instagramUrl: 'https://instagram.com/thepookiechicken',
+
+  // A line for the ribbon at the top of every page — "Closed 25 December",
+  // "Half-price wings this Friday". null renders the ribbon's usual status
+  // line. The panel owns this; it is the one piece of free text the owner can
+  // put on every page without touching a template.
+  announcement: null,
 };
 
 /* ---------------------------------------------------------------- status */
@@ -623,6 +629,77 @@ const hero = {
   ],
 };
 
+/* ----------------------------------------------------------- the panel */
+
+/**
+ * THE OWNER'S CONTENT OVERRIDES THE VALUES ABOVE.
+ *
+ * Everything in this file is the schema and the seed. The restaurant's own
+ * edits — made in the admin panel — live in content.json, in a directory
+ * outside the repository (POOKIE_CONTENT_DIR, /srv/pookie-content on the
+ * server, ./content locally) so that a code deploy's `git reset --hard`
+ * cannot touch them and a panel edit cannot dirty the repository.
+ *
+ * When the file exists, the keys it carries replace the ones here. When it
+ * does not, the site builds from this file exactly as it always did, so the
+ * repository stands on its own. The panel seeds content.json from this file
+ * the first time it runs, so the two start identical.
+ *
+ * Menu items the owner has hidden (`hidden: true`) are dropped here, at the
+ * source, so no template has to know the flag exists. Photographs the owner
+ * uploaded are registered under `photos` with their dimensions and merged
+ * into photoDims the same way.
+ */
+const CONTENT_DIR = process.env.POOKIE_CONTENT_DIR
+  || require('path').join(__dirname, '..', 'content');
+const CONTENT_FILE = require('path').join(CONTENT_DIR, 'content.json');
+
+// What the panel may override, by key. Anything not listed here is code.
+const EDITABLE = ['status', 'contact', 'delivery', 'company', 'menu', 'lunchDeal', 'allergens'];
+
+function applyContent() {
+  let c;
+  try { c = JSON.parse(require('fs').readFileSync(CONTENT_FILE, 'utf8')); }
+  catch (e) { return false; }                                   // no file: the seed is the site
+  if (!c || typeof c !== 'object') return false;
+
+  if (c.status) Object.assign(status, c.status);
+  if (c.contact) {
+    const { address, hours, lunchDeal: ld, ...rest } = c.contact;
+    Object.assign(contact, rest);
+    if (address) Object.assign(contact.address, address);
+    if (hours) Object.assign(contact.hours, hours);
+    if (ld) Object.assign(contact.lunchDeal, ld);
+  }
+  if (Array.isArray(c.delivery)) {
+    for (const d of c.delivery) {
+      const mine = delivery.find(x => x.id === d.id);
+      if (mine) mine.url = d.url || null;
+    }
+  }
+  if (c.company) Object.assign(company, c.company);
+  if (c.lunchDeal) Object.assign(lunchDeal, c.lunchDeal);
+  if (c.allergens) Object.assign(allergens, c.allergens);
+  if (typeof c.announcement === 'string' || c.announcement === null) site.announcement = c.announcement;
+
+  if (Array.isArray(c.menu)) {
+    menu.length = 0;
+    for (const ch of c.menu) {
+      menu.push({
+        ...ch,
+        items: (ch.items || []).filter(i => !i.hidden).map(i => ({ ...i, price: i.price == null ? null : Number(i.price) })),
+      });
+    }
+  }
+  if (c.photos && typeof c.photos === 'object') {
+    for (const [slug, ph] of Object.entries(c.photos)) {
+      if (ph && ph.width && ph.height) photoDims[slug] = [ph.width, ph.height];
+    }
+  }
+  return true;
+}
+const contentApplied = applyContent();
+
 /* ------------------------------------------------------------- derived */
 
 function isFilled(v) {
@@ -665,5 +742,6 @@ function derive() {
 module.exports = {
   site, status, contact, delivery, company, brand,
   sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero, mapView, privacy,
-  derive, isFilled,
+  derive, isFilled, hasAddress, hasHours,
+  EDITABLE, CONTENT_DIR, CONTENT_FILE, contentApplied,
 };

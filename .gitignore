@@ -5,3 +5,6 @@ preview/
 
 # python bytecode from tools/photos
 __pycache__/
+
+# the panel's content directory when run locally — never committed
+/content/

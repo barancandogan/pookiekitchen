@@ -48,6 +48,18 @@ PYEOF
 }
 
 [ "$(id -u)" -eq 0 ] || { echo "remote.sh must run as root" >&2; exit 1; }
+
+# The owner's panel (README → The panel) keeps its edits and photographs
+# outside git, and deploy.sh builds the site with them. The build that
+# arrived in $STAGE was made on GitHub and knows nothing of them, so once
+# the panel is installed it must not be published over the owner's: this
+# hands over to deploy.sh, which fetches this same commit into its clone,
+# builds with the owner's content, audits and publishes.
+PANEL_REPO="/srv/pookiekitchen"
+if [ -f /etc/systemd/system/pookie-admin.service ] && [ -f "$PANEL_REPO/deploy.sh" ]; then
+  echo "→ the panel is installed: deploying through $PANEL_REPO/deploy.sh so the owner's edits survive"
+  exec bash "$PANEL_REPO/deploy.sh"
+fi
 [ -f "$STAGE/dist/index.html" ] || { echo "no build in $STAGE/dist" >&2; exit 1; }
 command -v nginx >/dev/null || { echo "nginx is not installed" >&2; exit 1; }
 command -v rsync >/dev/null || { echo "rsync is not installed" >&2; exit 1; }

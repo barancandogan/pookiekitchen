@@ -554,6 +554,71 @@ moment the site claims to be open — plus a check that the brand hex values in
 
 ---
 
+## The panel
+
+`/admin/` is the owner's panel: sign in, edit, publish. It is `admin/server.js`,
+one Node file with no dependencies, behind nginx on `127.0.0.1:8787`, and
+`admin/ui/`, one page of vanilla JavaScript set in the site's own stylesheet.
+It edits **content, never code**: the menu, the photographs, the hours, the
+opening date and the "we are open" switch, contact details, delivery links,
+the company line, the allergen statement, and one announcement line for the
+ribbon.
+
+**Where the edits live.** Not in the repository. `content.json` sits in
+`POOKIE_CONTENT_DIR` — `/srv/pookie-content` on the server, `./content`
+locally (gitignored) — beside `photos/`, `versions/` and the password file.
+`src/data.js` is the schema and the seed: when `content.json` exists its keys
+replace the values in `data.js`; when it does not, the site builds from
+`data.js` exactly as before, so the repository stands on its own. The panel
+seeds `content.json` from `data.js` the first time it runs, and a code deploy's
+`git reset --hard` cannot touch it. `EDITABLE` in `data.js` lists what the
+panel may override; everything else is code.
+
+**Publish is the same gate as a deploy.** It runs `build.js` and `audit.js
+--json` into a build directory of its own (`POOKIE_DIST_DIR`), and copies the
+result to the web root only if the audit has no errors. The audit's warnings
+— the launch list, unconfirmed prices — come back to the panel and show on
+the Overview, so the owner sees the same "before you can say open" list a
+developer would. A refused publish leaves the live site untouched and says
+why.
+
+**Photographs** are sized in the owner's browser, not on the server: a 3:2
+canvas on `--photo-ground`, the picture fitted inside with a margin, exported
+at 1200/800/400 in WebP and JPEG — the same six files the site's own
+photographs ship in — and uploaded one at a time, each checked by its first
+bytes and capped at 3 MB. Nothing to install on the server. The studio
+cut-out treatment in `tools/photos/` remains the better result for a plain
+backdrop shot; run it by hand when a batch of studio photographs arrives.
+
+**Every save and every publish is a version** (`versions/`, the last sixty).
+History lists them; Restore brings one back as the draft; Publish puts it on
+the site.
+
+**Security.** Bound to localhost, so only nginx reaches it, over TLS. One
+password, scrypt-hashed in `admin.json`; eight failures in fifteen minutes
+lock that address out for fifteen. The session is an HttpOnly,
+SameSite=Strict, Secure cookie; every write also needs the
+`X-Requested-With` header, which a cross-site form cannot send. Everything
+typed is validated by shape on the server and again by the audit; slugs and
+filenames match a fixed pattern before they touch disk. The systemd unit runs
+it as `www-data` with `ProtectSystem=strict` and write access to the content
+directory and the web root only.
+
+**Setting it up** is part of `deploy.sh`: it creates the content directory,
+installs the nginx location (one `include` line inserted into certbot's
+vhost, once), installs and restarts the systemd unit, and — until a password
+exists — prints the command to set one:
+
+```bash
+sudo -u www-data POOKIE_CONTENT_DIR=/srv/pookie-content node /srv/pookiekitchen/admin/server.js --set-password
+```
+
+Locally: `node admin/server.js --set-password`, then `node admin/server.js`,
+and open http://127.0.0.1:8787/admin/. Without `POOKIE_WEB_ROOT` a publish
+builds and audits but copies nowhere.
+
+---
+
 ## Deployment
 
 The site is served from a VPS as plain static files behind nginx, alongside the
@@ -604,6 +669,13 @@ nginx vhost from `deploy/nginx.conf` if it is missing, publishes the build,
 reloads nginx only after `nginx -t` passes, and asks certbot for a certificate
 once — and only when the domain already resolves to that machine, because a
 failed validation counts against Let's Encrypt's rate limit.
+
+Once the owner's panel is installed on the server (README → The panel), a
+build made on GitHub knows nothing of the owner's edits and photographs, so
+`remote.sh` no longer publishes it: it hands over to `/srv/pookiekitchen/deploy.sh`,
+which fetches the same commit, builds with the owner's content, audits and
+publishes. The Actions run still builds and audits the repository first, so a
+broken commit is caught before the server is touched at all.
 
 Without the secrets below the workflow is a plain CI check: build and audit
 run on every push, the deploy job is skipped, and the run carries a warning
