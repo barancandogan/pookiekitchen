@@ -370,10 +370,19 @@ function isImage(buf, ext) {
 async function handle(req, res) {
   const url = new URL(req.url, 'http://x');
   let p = url.pathname;
+  const method = req.method;
   if (p === '/admin') { res.writeHead(302, { location: '/admin/' }); return res.end(); }
+  // The panel's stylesheet is the site's own, and it names fonts and images
+  // by their site paths. In production nginx serves those from the web root
+  // and never routes them here; this is for running the panel on its own.
+  if (method === 'GET' && p.startsWith('/assets/')) {
+    const base = path.join(ROOT, 'assets');
+    const file = path.resolve(base, p.slice('/assets/'.length));
+    if (!file.startsWith(base + path.sep)) return send(res, 404, 'Not found');
+    return serveFile(res, file, 'public, max-age=86400');
+  }
   if (!p.startsWith('/admin/')) return send(res, 404, 'Not found');
   p = p.slice('/admin'.length);
-  const method = req.method;
 
   // ---- static: the panel itself, no login needed to see the login screen
   if (method === 'GET' && p === '/') return serveFile(res, path.join(__dirname, 'ui', 'index.html'));
