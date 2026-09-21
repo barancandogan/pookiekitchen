@@ -197,20 +197,20 @@ jobs:
 
       - name: Smoke test
         run: |
-          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 -H 'Host: pookie.nileapps.co.uk' "http://$HOST/" || echo 000)
-          echo "http://$HOST/ (Host: pookie.nileapps.co.uk) -> $code"
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 -H 'Host: pookiechicken.com' "http://$HOST/" || echo 000)
+          echo "http://$HOST/ (Host: pookiechicken.com) -> $code"
           case "$code" in
             200|301|302) ;;
             *) echo "::error::unexpected status $code from the server"; exit 1 ;;
           esac
-          tls=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://pookie.nileapps.co.uk/ || echo 000)
-          echo "https://pookie.nileapps.co.uk/ -> $tls"
+          tls=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://pookiechicken.com/ || echo 000)
+          echo "https://pookiechicken.com/ -> $tls"
           {
             echo "### Deployed \`${GITHUB_SHA::7}\` to $HOST"
             echo ""
             echo "| Check | Status |"
             echo "|---|---|"
             echo "| http://$HOST/ with Host header | $code |"
-            echo "| https://pookie.nileapps.co.uk/ | $tls |"
+            echo "| https://pookiechicken.com/ | $tls |"
           } >> "$GITHUB_STEP_SUMMARY"
           [ "$tls" = 200 ] || echo "::warning::https is not answering 200 yet — see the certificate notes in deploy/remote.sh"

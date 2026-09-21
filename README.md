@@ -626,11 +626,40 @@ other sites on that host.
 
 | | |
 |---|---|
-| URL | `https://pookie.nileapps.co.uk` |
+| URL | `https://pookiechicken.com` — `www.pookiechicken.com` and the staging host `pookie.nileapps.co.uk` redirect to it |
+| DNS | GoDaddy: `A @ → 187.127.84.93`, `CNAME www → @`. No AAAA — the server has no IPv6 |
 | Host | `187.127.84.93` (Hostinger, Ubuntu 24.04 — the box that serves regnum.nileapps.co.uk) |
 | Web root | `/var/www/pookie` |
 | nginx vhost | `/etc/nginx/sites-available/pookie` (from `deploy/nginx.conf`) |
 | TLS | Let's Encrypt via certbot, auto-renewed |
+
+### The domain
+
+The site is `pookiechicken.com`. nginx answers for three names — that one,
+`www.pookiechicken.com`, and `pookie.nileapps.co.uk`, the staging host the
+site lived on first — and sends the other two to the site with a 301. One
+certificate covers all three; it is the lineage certbot first made for the
+staging host, expanded in place, which is why it is still called
+`pookie.nileapps.co.uk` under `/etc/letsencrypt/live/`.
+
+`deploy.sh` keeps all of that, and does it in an order that cannot leave a
+broken state behind:
+
+1. the `server_name` line from `deploy/nginx.conf` is copied into both
+   server blocks of the live vhost, so nginx answers for every name;
+2. if the certificate does not yet cover every name, and every name resolves
+   to this machine, certbot is asked to expand it — and not before, because a
+   failed validation counts against Let's Encrypt's rate limit;
+3. only once the certificate covers every name are the redirects written:
+   `if ($host != pookiechicken.com)` in the https block, and one
+   `if ($host = …)` per name in certbot's port-80 block, each to
+   `https://pookiechicken.com`. A redirect into a name the certificate does
+   not cover would be a browser warning where there was a working page.
+
+So the order for a new name is: DNS first, then a deploy; if DNS has not
+propagated, the deploy says which name is not ready and the site stays where
+it was. `curl -sI https://www.pookiechicken.com/ | head -3` shows the 301 once
+it is done.
 
 ### Two things the live server learned the hard way
 
@@ -782,8 +811,8 @@ The same thing spelled out, if you would rather do it by hand than run the
 script above.
 
 ```bash
-# 1. DNS: point an A record for pookie.nileapps.co.uk at this server first.
-#    Everything below fails until it resolves.
+# 1. DNS: point pookiechicken.com (A record) and www (CNAME to @) at this
+#    server first. Everything below fails until they resolve.
 
 # 2. Deploy key, on the server
 ssh-keygen -t ed25519 -C "pookie-deploy" -f /root/.ssh/pookie_deploy -N ""
@@ -816,8 +845,10 @@ nginx -t && systemctl reload nginx
 #    certificate paths and the SSL includes to the block from step 4, and
 #    writes a separate port-80 server that redirects to https. So it must
 #    run after step 4, and every directive in the vhost is carried over
-#    without being written twice.
-certbot --nginx -d pookie.nileapps.co.uk
+#    without being written twice. The lineage name matches CERT_NAME in
+#    deploy.sh, which expands it whenever the names change.
+certbot --nginx --cert-name pookie.nileapps.co.uk \
+  -d pookiechicken.com -d www.pookiechicken.com -d pookie.nileapps.co.uk
 
 # 6. First deploy
 /srv/pookiekitchen/deploy.sh
@@ -828,26 +859,28 @@ needs it, so it is almost certainly there — `node --version` to confirm.
 
 ### Before the vhost exists
 
-A subdomain that resolves to the server but has no matching `server_name`
-falls through to whatever nginx has as its default server — on this box, some
-other site entirely. Seeing an unrelated app at `pookie.nileapps.co.uk` before
-step 4 is therefore the **correct** behaviour and confirms DNS is working; it
-is not a sign that anything is broken.
+A name that resolves to the server but has no matching `server_name` falls
+through to whatever nginx has as its default server — on this box, some other
+site entirely. Seeing an unrelated app at `pookiechicken.com` before step 4 is
+therefore the **correct** behaviour and confirms DNS is working; it is not a
+sign that anything is broken.
 
 This vhost carries no `default_server` on either listen line, so it answers
 for its own name only and cannot capture traffic meant for the other sites.
 
-### This host is not indexed
+### Indexing
 
-`site.indexable` is `false` in `src/data.js`, so every page carries
-`noindex, nofollow`, `robots.txt` disallows everything, and the sitemap is
-empty.
+`site.indexable` is `true` in `src/data.js`: pages carry no robots meta,
+`robots.txt` allows everything and points at the sitemap, and every canonical
+is on `https://pookiechicken.com`.
 
-That is deliberate. `pookie.nileapps.co.uk` is a staging subdomain of somebody
-else's domain. If it gets indexed now, that URL is what ranks for the brand —
-and when the real domain is bought the two compete, splitting the signal and
-leaving a stale copy in the results. Nothing is hidden: the site is a link away
-as it always was.
+It was `false` while the site lived only on `pookie.nileapps.co.uk`, a staging
+subdomain of somebody else's domain: had that been indexed, it is what would
+have ranked for the brand, and once the real domain arrived the two would
+have competed, leaving a stale copy in the results. The staging host now
+redirects to the site, so there is nothing stale left to index. Setting the
+flag back to `false` restores `noindex, nofollow` on every page, a
+disallow-all `robots.txt` and an empty sitemap.
 
 On the day the real domain goes live, change `site.url` to it and flip
 `site.indexable` to `true`. Nothing else needs touching — canonicals, Open

@@ -19,7 +19,10 @@
 # ------------------------------------------------------------------
 set -euo pipefail
 
-DOMAIN="pookie.nileapps.co.uk"
+DOMAIN="pookiechicken.com"
+STAGING_HOST="pookie.nileapps.co.uk"
+NAMES="$DOMAIN www.$DOMAIN $STAGING_HOST"   # every name the vhost answers for
+CERT_NAME="$STAGING_HOST"                   # certbot's lineage, as in deploy.sh
 STAGE="/srv/pookie-deploy"
 WEB_ROOT="/var/www/pookie"
 VHOST="/etc/nginx/sites-available/pookie"
@@ -83,8 +86,9 @@ echo "→ reloading nginx"
 nginx -t
 systemctl reload nginx
 
-# 4. TLS, once
-if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+# 4. TLS, once. deploy.sh (the panel path above) is what keeps the certificate
+#    in step with the names afterwards.
+if [ ! -d "/etc/letsencrypt/live/$CERT_NAME" ]; then
   resolved="$(getent ahostsv4 "$DOMAIN" 2>/dev/null | awk '{ print $1; exit }' || true)"
   if [ -z "$resolved" ]; then
     echo "::warning::$DOMAIN does not resolve yet; skipping the certificate (http only)"
@@ -96,7 +100,8 @@ if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
     echo "→ requesting a certificate for $DOMAIN"
     # Reuses the account certbot already has on this box (the other sites
     # use it). --redirect makes certbot write the port-80 → https server.
-    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --redirect \
+    ds=(); for n in $NAMES; do ds+=(-d "$n"); done
+    certbot --nginx --cert-name "$CERT_NAME" "${ds[@]}" --non-interactive --agree-tos --redirect \
       || echo "::warning::certbot failed; the site is up on http only. See /var/log/letsencrypt/letsencrypt.log"
   fi
 fi

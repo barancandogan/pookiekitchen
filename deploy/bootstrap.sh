@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------------
-# One-time setup for pookie.nileapps.co.uk, meant to be pasted into the
+# One-time setup for pookiechicken.com, meant to be pasted into the
 # Hostinger browser terminal and run as root. Safe to run again: every step
 # checks before it acts, and a second run is simply a deploy.
 #
@@ -20,7 +20,10 @@ set -euo pipefail
 REPO_SSH="git@github-pookie:barancandogan/pookiekitchen.git"
 REPO_DIR="/srv/pookiekitchen"
 WEB_ROOT="/var/www/pookie"
-DOMAIN="pookie.nileapps.co.uk"
+DOMAIN="pookiechicken.com"
+STAGING_HOST="pookie.nileapps.co.uk"
+NAMES="$DOMAIN www.$DOMAIN $STAGING_HOST"   # every name the vhost answers for
+CERT_NAME="$STAGING_HOST"                   # certbot's lineage, as in deploy.sh
 KEY="/root/.ssh/pookie_deploy"
 VHOST="/etc/nginx/sites-available/pookie"
 
@@ -129,7 +132,9 @@ say "building and publishing"
 "$REPO_DIR/deploy.sh"
 
 # --------------------------------------------------------------------- TLS
-if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+# deploy.sh above already asks for the certificate when DNS allows; this is
+# the same request again for a server where that did not happen yet.
+if [ ! -d "/etc/letsencrypt/live/$CERT_NAME" ]; then
   resolved="$(getent ahostsv4 "$DOMAIN" 2>/dev/null | awk '{print $1; exit}' || true)"
   if [ -z "$resolved" ]; then
     echo "  $DOMAIN does not resolve yet — skipping the certificate, http only"
@@ -143,7 +148,8 @@ if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
       echo "  (add one later with: certbot update_account -m you@example.com)"
       reg=(--register-unsafely-without-email)
     fi
-    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos "${reg[@]+"${reg[@]}"}" --redirect \
+    ds=(); for n in $NAMES; do ds+=(-d "$n"); done
+    certbot --nginx --cert-name "$CERT_NAME" "${ds[@]}" --non-interactive --agree-tos "${reg[@]+"${reg[@]}"}" --redirect \
       || echo "  certbot failed; the site is up on http. See /var/log/letsencrypt/letsencrypt.log"
   fi
 fi

@@ -21,19 +21,22 @@ const site = {
 
   // The production hostname. Feeds canonicals, Open Graph and the sitemap.
   // Until this is set the build emits relative canonicals and omits og:url.
-  // This is the staging host; change it when the real domain is bought, and
-  // nothing else needs touching.
-  url: 'https://pookie.nileapps.co.uk',
+  // The domain is at GoDaddy and points at the server; nginx also answers
+  // for www. and for the staging host, pookie.nileapps.co.uk, and sends both
+  // here (deploy.sh keeps those redirects). The site was on the staging host
+  // alone until 21 September 2026.
+  url: 'https://pookiechicken.com',
 
   // Whether search engines may index this host.
   //
-  // FALSE while the site lives on a staging subdomain of somebody else's
-  // domain. If Google indexes pookie.nileapps.co.uk now, that URL is what
-  // ranks for "pookie chicken" — and when the real domain is bought the two
-  // compete, splitting the signal and leaving a stale staging copy in the
-  // results. Nothing about the site is hidden by this; it is a link away as
-  // always. Flip to true on the day the real domain goes live.
-  indexable: false,
+  // TRUE now that the site is on its own domain. It was false while the site
+  // lived only on the staging subdomain of somebody else's domain: had Google
+  // indexed that, it is what would have ranked for "pookie chicken", and the
+  // two hosts would then have competed, leaving a stale staging copy in the
+  // results. The staging host redirects here now, so there is nothing stale
+  // left to index. Set it back to false and every page carries noindex,
+  // robots.txt disallows everything and the sitemap empties.
+  indexable: true,
 
   locale: 'en-GB',
   currency: 'GBP',
