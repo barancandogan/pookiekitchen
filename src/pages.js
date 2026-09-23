@@ -1,15 +1,9 @@
 'use strict';
 
 const D = require('./data');
-const { esc, money, when } = require('./layout');
+const { esc, money, when, formatDate } = require('./layout');
 
 /* ---------------------------------------------------- shared components */
-
-function sauceDot(family) {
-  if (!family) return '';
-  const label = D.sauceFamilies[family].label;
-  return `<span class="dot dot--${family}"></span><span class="visually-hidden">${esc(label)} sauce.</span>`;
-}
 
 /**
  * A dish photograph. WebP with a JPEG fallback, two widths, always lazy and
@@ -62,62 +56,6 @@ function heatMeter(level) {
     `<span class="heat__pip${i < level ? ' is-on' : ''}"></span>`).join('');
   return `<span class="heat"><span class="visually-hidden">Heat ${level} out of 5.</span>` +
     `<span class="heat__pips" aria-hidden="true">${pips}</span></span>`;
-}
-
-function row(item, opts = {}) {
-  // A price whose mapping we could not read is not printed. Ditto a calorie
-  // figure. Silence is recoverable; a wrong price on a menu is not.
-  const priceOut = item.priceConfirmed === false
-    ? `<span class="row__price" aria-label="Price to be confirmed">—</span>`
-    : `<span class="row__price">${money(item.price)}</span>`;
-
-  // Calories and heat share one meta line so a dish that has both does not
-  // grow a second right-aligned row for the sake of five dots.
-  const meta = [
-    (item.kcal && item.kcalConfirmed) ? `${item.kcal} kcal` : '',
-    heatMeter(item.heat),
-  ].filter(Boolean);
-  const kcal = meta.length
-    ? `<span class="row__meta">${meta.join('<span class="row__meta-sep">·</span>')}</span>`
-    : '';
-
-  // Alignment is a property of the CHAPTER, not the row. Where any dish in a
-  // chapter has a photograph, the photo-less rows in it reserve the same
-  // column so every dish name starts on the same line. Where no dish in a
-  // chapter has one, nothing is reserved and the chapter sits flush left.
-  // The reserved slot is empty space, never a placeholder image.
-  const thumb = item.photo
-    ? dishPhoto(item.photo, '(max-width: 640px) 80px, 140px', [400, 800], 'row__thumb')
-    : (opts.reserveThumb ? '<span class="row__thumb row__thumb--empty" aria-hidden="true"></span>' : '');
-
-  return `<div class="row${item.photo ? ' row--photo' : ''}">
-  ${thumb}
-  <div class="row__body">
-    <span class="row__name">${sauceDot(item.sauce)}${esc(item.name)}</span>
-    ${priceOut}
-    ${when(item.desc, () => `<p class="row__desc">${esc(item.desc)}</p>`)}
-    ${kcal}
-  </div>
-</div>`;
-}
-
-function chapter(ch) {
-  const reserveThumb = ch.items.some(i => i.photo);
-
-  // h2: a chapter is a top-level division of the menu page, not a subsection.
-  return `<section class="menu__chapter" aria-labelledby="ch-${ch.id}">
-  <div class="menu__head">
-    <h2 id="ch-${ch.id}">${esc(ch.name)}</h2>
-    ${when(ch.priceStatement, () => `<span class="menu__price-statement">${esc(ch.priceStatement)}</span>`)}
-  </div>
-  ${when(ch.lede, () => `<p class="menu__lede">${esc(ch.lede)}</p>`)}
-  ${ch.items.map(i => row(i, { reserveThumb })).join('\n')}
-  ${when(ch.extras && ch.extras.length, () => `<div class="menu__extras"><ul>${
-    ch.extras.map(e => `<li>${esc(e.name)} — ${
-      e.priceConfirmed === false ? 'price to confirm' : money(e.price)
-    }</li>`).join('')
-  }</ul></div>`)}
-</section>`;
 }
 
 function allergenNotice(d) {
@@ -324,8 +262,9 @@ function mapBlock(d, opts = {}) {
     <div class="where__text">
       <address class="where__address">${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}</address>
       ${when(D.contact.transit, () => `<p class="where__note">${esc(D.contact.transit)}</p>`)}
-      ${when(!d.isOpen, () => `<p class="where__note">The door is not open yet — the date goes up here and on
-      Instagram the moment it is fixed.</p>`)}
+      ${when(!d.isOpen, () => `<p class="where__note">${d.dateKnown
+        ? `We open on ${esc(formatDate(D.status.openingDate))}.`
+        : 'The door is not open yet — the date goes up here and on Instagram the moment it is fixed.'}</p>`)}
       <div class="hero__actions">
         ${when(a.mapsUrl, () => `<a class="btn btn--primary" href="${esc(a.mapsUrl)}" rel="noopener">Open in Maps</a>`)}
         ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
@@ -405,7 +344,9 @@ ${galleryPhotos()}
   <h2>${d.isOpen ? esc(D.copy.lines.tasteTheDifference) : 'We are not open yet.'}</h2>
   <p class="sec__lede">${d.isOpen
     ? 'Come in, or order for delivery.'
-    : 'The date is not fixed yet. Instagram is where it will be announced first — no email list, no forms, nothing to unsubscribe from.'}</p>
+    : d.dateKnown
+      ? `We open on ${esc(formatDate(D.status.openingDate))}. Instagram is where news goes first — no email list, no forms, nothing to unsubscribe from.`
+      : 'The date is not fixed yet. Instagram is where it will be announced first — no email list, no forms, nothing to unsubscribe from.'}</p>
   ${deliveryButtons(d)}
   <div class="follow">
     <a class="btn ${d.deliveryLive.length ? 'btn--ghost' : 'btn--primary'}" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
@@ -421,33 +362,176 @@ ${bannerBlock()}`;
 
 /* ----------------------------------------------------------------- menu */
 
+/*
+ * The menu page is the home page's two menu devices and nothing else, in the
+ * order of appetite. Every chapter that has photographs opens with one row of
+ * the home gallery's tiles — the same 3:2 canvas on --photo-ground, the name
+ * rising on a white band on hover or tap — and the whole chapter follows
+ * underneath as the home listing's lines: the dish name in the sans face, the
+ * price in Anton and --brand, a --rule hairline closing each line, with the
+ * description beneath. A dish without a photograph is simply a line, so there
+ * is never an empty slot. A sticky bar of chapter links sits under the header
+ * (main.js marks the chapter being read; without it the links still jump).
+ */
+
+/**
+ * The price, or a dash when it is not confirmed. An unconfirmed price is
+ * never printed: silence is recoverable, a wrong price on a menu is not. The
+ * dash is hidden from screen readers and replaced by words.
+ */
+function dishPrice(item) {
+  return item.priceConfirmed === false || item.price == null
+    ? '<span class="dish__price"><span aria-hidden="true">—</span><span class="visually-hidden">Price to be confirmed</span></span>'
+    : `<span class="dish__price">${money(item.price)}</span>`;
+}
+
+/**
+ * The description, then any confirmed facts on the same line — a calorie
+ * figure only when it is confirmed, heat only where the menu card states it —
+ * so a dish is one short block: name and price, one line of words, a
+ * hairline. The facts never break apart, and the dot that leads into them is
+ * glued to the description, so a line can break after it but never before.
+ */
+function dishWords(item) {
+  const facts = [
+    (item.kcal && item.kcalConfirmed) ? `${item.kcal} kcal` : '',
+    heatMeter(item.heat),
+  ].filter(Boolean);
+  if (!item.desc && !facts.length) return '';
+  const sep = '<span class="dish__sep" aria-hidden="true">·</span>';
+  const tail = facts.length
+    ? `${item.desc ? `&#160;${sep} ` : ''}<span class="dish__facts">${facts.join(sep)}</span>`
+    : '';
+  return `<p class="dish__desc">${item.desc ? esc(item.desc) : ''}${tail}</p>`;
+}
+
+function dishLine(item) {
+  return `<li class="dish">
+      <div class="dish__row">
+        <h3 class="dish__name">${esc(item.name)}</h3>
+        ${dishPrice(item)}
+      </div>
+      ${dishWords(item)}
+    </li>`;
+}
+
+/**
+ * One home-gallery cell. The name is the figcaption, so it is in the document
+ * whether or not the band is up, and the alt stays empty rather than say it
+ * twice; the price lives on the dish's line below. `sizes` follows the row:
+ * four or more tiles share a row, three share it, one or two take half each.
+ */
+function dishTile(item, count) {
+  const sizes = [
+    `(max-width: 640px) ${count === 2 ? '46vw' : '62vw'}`,
+    `(max-width: 900px) ${count >= 4 ? '22vw' : count === 3 ? '30vw' : '46vw'}`,
+    count >= 4 ? '250px' : count === 3 ? '340px' : '510px',
+  ].join(', ');
+  return `<li><figure class="gallery__cell">
+      ${dishPhoto(item.photo, sizes, [400, 800, 1200], 'gallery__img')}
+      <figcaption class="gallery__name">${esc(item.name)}</figcaption>
+    </figure></li>`;
+}
+
+function chapterExtras(ch) {
+  if (!ch.extras || !ch.extras.length) return '';
+  return `<li class="extras">
+      <h3 class="extras__title">Extras</h3>
+      <ul class="extras__list" role="list">${ch.extras.map(x => `<li class="extras__item">
+        <span class="extras__name">${esc(x.name)}</span>
+        ${x.priceConfirmed !== false && x.price != null
+          ? `<span class="dish__price">${money(x.price)}</span>`
+          : '<span class="extras__tbc">price to confirm</span>'}
+      </li>`).join('')}</ul>
+    </li>`;
+}
+
+/** "Everything here is £4.90" + "Never fried, never held." → one quiet line. */
+function sentence(text) {
+  const t = String(text).trim();
+  return /[.!?]$/.test(t) ? t : `${t}.`;
+}
+
+function chapterBlock(ch) {
+  const photos = ch.items.filter(i => i.photo);
+  const said = [ch.priceStatement, ch.lede].filter(x => D.isFilled(x)).map(sentence).join(' ');
+  const allTbc = ch.items.every(i => i.priceConfirmed === false || i.price == null);
+  const note = said
+    ? `<p class="chapter__note">${esc(said)}</p>`
+    : (allTbc ? '<p class="chapter__note">Prices to confirm</p>' : '');
+  const id = `ch-${esc(ch.id)}`;
+  return `<section class="chapter" id="${id}" aria-labelledby="${id}-h" data-chapter>
+  <div class="wrap">
+    <div class="chapter__head">
+      <h2 class="chapter__name" id="${id}-h">${esc(ch.name)}</h2>
+      ${note}
+    </div>
+    ${when(photos.length, () => `<ul class="gallery chapter__tiles chapter__tiles--${Math.min(photos.length, 4)}" role="list" aria-label="${esc(ch.name)}, photographed">${
+      photos.map(i => dishTile(i, photos.length)).join('')}</ul>`)}
+    <ul class="dishes" role="list">${ch.items.map(dishLine).join('')}${chapterExtras(ch)}</ul>
+  </div>
+</section>`;
+}
+
+/**
+ * Said only while a wing price is unconfirmed, and about the wings only: a
+ * drink without a price is not a wing without one. The range is read from the
+ * wing prices the menu card gives, so it moves with the data.
+ */
+function wingsNote() {
+  const wings = D.menu.find(c => c.id === 'wings');
+  if (!wings || !wings.items.some(i => i.priceConfirmed === false)) return '';
+  const known = wings.items.map(i => i.price).filter(p => typeof p === 'number');
+  const lo = Math.min(...known), hi = Math.max(...known);
+  const range = known.length && lo !== hi
+    ? `The wing prices sit between ${money(lo)} and ${money(hi)} and the per-item mapping is being confirmed with the kitchen.`
+    : 'The per-item wing prices are being confirmed with the kitchen.';
+  return `<div class="notice"><strong>A note on the wings.</strong> ${range} Rather than print
+  a price that might be wrong, we have left it out until it is checked.</div>`;
+}
+
+/** The plate price, when every plate shares one confirmed price. */
+function platePrice() {
+  const plates = D.menu.find(c => c.id === 'plates');
+  if (!plates || !plates.items.length) return null;
+  const p = plates.items[0].price;
+  return plates.items.every(i => i.priceConfirmed !== false && i.price === p) ? p : null;
+}
+
 const menuPage = {
   path: '/menu/',
   title: 'Menu',
-  description: 'The full Pookie Chicken menu — chicken plates at £12.90 with pasta and salad, wings, boneless thigh, wraps, sirloin steak and a children’s menu.',
+  description: `The full Pookie Chicken menu — chicken plates${
+    platePrice() ? ` at ${money(platePrice())}` : ''} with pasta and salad, wings, boneless thigh, wraps, sirloin steak and a children’s menu.`,
   body(d) {
+    // A chapter the owner has emptied in the panel (every dish hidden) is not
+    // a chapter on the page, nor a link in the bar.
+    const chapters = D.menu.filter(ch => ch.items.length);
+    const price = platePrice();
     return `
-<section class="hero wrap">
-  <p class="hero__eyebrow">Menu</p>
-  <h1>Everything we cook.</h1>
-  <p class="hero__lede">Chicken thigh, marinated in our own blend and seared to order. The plates
-  arrive complete — chicken, pasta and a fresh salad on one plate for ${money(12.90)}.</p>
-</section>
-
-<section class="interstitial" aria-label="A composed plate">
-  ${dishPhoto('feature-plate', '100vw', [900, 1600], 'interstitial__img')}
-</section>
-
-<section class="wrap sec--tail">
-  <div class="menu">
-    ${D.menu.map(chapter).join('\n')}
+<section class="menu-top" aria-labelledby="menu-title">
+  <div class="wrap menu-top__in">
+    <div>
+      <p class="sec__kicker">The menu</p>
+      <h1 class="hx menu-top__title" id="menu-title"><span>Everything we cook.</span> <em>Every price we can confirm.</em></h1>
+      <p class="menu-top__lede">Chicken thigh, marinated in our own blend and seared to order. The plates
+      arrive complete — chicken, pasta and a fresh salad on one plate${price ? ` for ${money(price)}` : ''}.</p>
+    </div>
+    <div class="menu-top__plate">${dishPhoto('feature-plate', '(max-width: 900px) 100vw, 480px', [900, 1600], 'menu-top__img')}</div>
   </div>
-  ${allergenNotice(d)}
-  ${when(!D.menu.every(c => c.items.every(i => i.priceConfirmed !== false)), () =>
-    `<div class="notice"><strong>A note on the wings.</strong> The wing prices sit between
-    ${money(8.90)} and ${money(9.90)} and the per-item mapping is being confirmed with the
-    kitchen. Rather than print a price that might be wrong, we have left it out until it is checked.</div>`)}
-  ${deliveryButtons(d)}
+</section>
+
+<nav class="chapter-nav" aria-label="Menu chapters" data-chapter-nav>
+  <div class="wrap chapter-nav__in">
+    <ul class="chapter-nav__list" role="list">${chapters.map(ch =>
+      `<li><a class="chapter-nav__link" href="#ch-${esc(ch.id)}">${esc(ch.name)}</a></li>`).join('')}</ul>
+  </div>
+</nav>
+
+${chapters.map(chapterBlock).join('\n')}
+
+<section class="menu-notes" aria-label="Allergens and notes">
+  <div class="wrap"><div class="menu-notes__in">${allergenNotice(d)}${wingsNote()}${deliveryButtons(d)}</div></div>
 </section>`;
   },
 };

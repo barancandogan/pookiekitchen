@@ -163,26 +163,13 @@ function hoursToSchema() {
 /* -------------------------------------------------------------- ribbon */
 
 function ribbon(d) {
-  // The owner's own line, from the panel, wins over the status line while it
-  // is set: it is the one thing they can say to every visitor on every page.
-  if (D.isFilled(D.site.announcement)) {
-    return `<div class="ribbon${d.isOpen ? ' ribbon--open' : ''}">${esc(D.site.announcement)}</div>`;
-  }
-  if (d.isOpen) {
-    return `<div class="ribbon ribbon--open">Open today${
-      when(d.addressKnown, () => ` · ${esc(D.contact.address.locality)}`)}</div>`;
-  }
-  // Pre-opening. Says only what is true: we are not open yet. A date appears
-  // only once there is one, and the neighbourhood only once the brand has
-  // named one in its own materials. Neither is a postal address and neither
-  // opens the site — see contact.neighbourhood in data.js.
-  const where = D.isFilled(D.contact.neighbourhood)
-    ? `${esc(D.contact.neighbourhood)} · `
-    : '';
-  const tail = d.dateKnown
-    ? `Opening ${esc(formatDate(D.status.openingDate))}.`
-    : 'Not open yet. Follow along for the opening date.';
-  return `<div class="ribbon">${where}${tail}</div>`;
+  // The strip across the top of every page belongs to the owner. It shows the
+  // one line they set in the panel ("Closed 25 December") and nothing else:
+  // the site no longer writes a status line of its own there — neither the
+  // pre-opening "Not open yet" nor an automatic "Open today" — at the owner's
+  // request. With no announcement set there is no strip at all.
+  if (!D.isFilled(D.site.announcement)) return '';
+  return `<div class="ribbon${d.isOpen ? ' ribbon--open' : ''}">${esc(D.site.announcement)}</div>`;
 }
 
 function formatDate(iso) {

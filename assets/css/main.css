@@ -149,9 +149,9 @@ h1, h2, h3, h4 {
   /* The display face carries the brand colour; body copy stays --ink.
      Which orange depends on size, because size is what sets the contrast
      threshold: h1 and h2 are 28px and up, so they clear large-text (3:1)
-     on --display-orange. h3/h4 and dish names are 20-24px semibold, which
-     is too close to the 18.66px-bold boundary to rely on, so they take
-     --brand, which clears 4.5:1 at any size. */
+     on --display-orange. h3/h4 are 20-24px, which is too close to the
+     18.66px-bold boundary to rely on, so they take --brand, which clears
+     4.5:1 at any size. */
   color: var(--brand);
 }
 
@@ -295,124 +295,6 @@ a:hover { text-decoration-thickness: 2px; }
   letter-spacing: .04em; color: var(--brand); background: var(--sunken);
 }
 
-/* ----------------------------------------------------------- menu block */
-
-.menu { margin-top: var(--s6); border: 1px solid var(--rule);
-        border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
-
-.menu__chapter + .menu__chapter { border-top: 1px solid var(--rule); }
-
-.menu__head {
-  background: var(--sunken); padding: var(--s3) var(--s5);
-  border-bottom: 1px solid var(--rule);
-  display: flex; flex-wrap: wrap; align-items: baseline;
-  justify-content: space-between; gap: var(--s3);
-}
-.menu__head h2 { font-size: var(--t-lg); color: var(--brand); }
-.menu__price-statement { font-size: var(--t-sm); color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.menu__lede { padding: var(--s4) var(--s5) 0; color: var(--ink-2); font-size: var(--t-sm); max-width: 60ch; }
-
-.row {
-  padding: var(--s4) var(--s5);
-  display: flex; gap: var(--s4); align-items: flex-start;
-}
-.row + .row { border-top: 1px solid var(--rule); }
-
-/* The photograph leads the row when there is one. Everything below is scoped
-   to .row__body, so a row without a photo is not a degraded card — the flex
-   simply has one child instead of two. */
-.row__body {
-  flex: 1; min-width: 0;
-  /* minmax(0, 1fr), not 1fr: a bare 1fr track cannot shrink below its
-     min-content, so a long dish name pushes the price past the row edge on a
-     narrow screen and .menu's overflow clips it. */
-  display: grid; grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--s1) var(--s5); align-items: baseline;
-}
-.row__thumb {
-  width: 180px; height: 120px; flex: none;
-  /* Every dish photograph is the same 3:2 canvas — the plate cut out and set
-     on --photo-ground with one soft shadow — so a 3:2 box shows all of it
-     with nothing to letterbox. The box carries the same ground, so contain
-     (kept as a guard for a photo in another proportion) never shows a seam. */
-  object-fit: contain; background: var(--photo-ground);
-  border-radius: var(--r-md);
-}
-/* The reserved slot in a photo-less row is empty space, never a grey box:
-   this must come after .row__thumb to win. Height 0, because the slot exists
-   to reserve the WIDTH that keeps every dish name on the same left edge —
-   given a height it would also set the row's, and a short row would be left
-   with a box of nothing under its text. */
-.row__thumb--empty { background: none; height: 0; }
-
-.row__name {
-  /* Anton has one weight: asking for 600 made the browser synthesise a bold,
-     which smears a condensed face into a puffy outline. 400, uppercase, the
-     same voice as every other heading on the site. */
-  font-family: var(--display); font-size: var(--t-lg); font-weight: 400;
-  text-transform: uppercase; letter-spacing: .02em;
-  color: var(--brand);
-  line-height: var(--lh-snug);
-  /* block, not flex: as a flex container the dot became its own wrap item and
-     was left stranded on line one whenever the name wrapped. Inline flow keeps
-     it glued to the first word. */
-  display: block;
-}
-.row__price {
-  font-variant-numeric: tabular-nums lining;
-  font-weight: 700; font-size: var(--t-md); text-align: right; white-space: nowrap;
-  /* deliberately --ink, not the brand colour: a price is data, and it has to
-     be the most legible thing on the row */
-  color: var(--ink);
-}
-.row__desc { grid-column: 1; font-size: var(--t-sm); color: var(--ink-2); max-width: 56ch; }
-.row__meta {
-  grid-column: 2; text-align: right; font-size: var(--t-xs);
-  color: var(--ink-3); font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.row__meta-sep { margin-inline: 6px; color: var(--rule); }
-
-/* Heat, on the brand's own five-chilli scale. The pips are aria-hidden and
-   redundant: the row already carries "Heat 3 out of 5" for a screen reader,
-   so colour is never the only carrier here. The unfilled pips keep a --line
-   ring (5.15:1) so the denominator is visible, not implied. */
-.heat { display: inline-block; vertical-align: -1px; }
-.heat__pips { display: inline-flex; gap: 3px; }
-.heat__pip {
-  width: 7px; height: 7px; border-radius: 50%;
-  border: 1px solid var(--line); background: none;
-}
-.heat__pip.is-on { background: var(--sauce-chilli); border-color: var(--sauce-chilli); }
-
-/* Every dot carries a ring, so its boundary clears 3:1 whatever the fill —
-   --sauce-cream is 1.25:1 against the surface and invisible without it. */
-.dot {
-  display: inline-block; vertical-align: baseline;
-  width: 10px; height: 10px; border-radius: 50%;
-  border: 1.5px solid var(--ink-3); flex: none;
-  margin-right: var(--s2);
-}
-.dot--chilli { background: var(--sauce-chilli); }
-.dot--glaze  { background: var(--sauce-glaze); }
-.dot--smoke  { background: var(--sauce-smoke); }
-.dot--cream  { background: var(--sauce-cream); }
-
-.menu__extras { padding: var(--s4) var(--s5); border-top: 1px solid var(--rule);
-                background: var(--sunken); font-size: var(--t-sm); color: var(--ink-2); }
-.menu__extras ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
-.menu__extras li { font-variant-numeric: tabular-nums; }
-
-/* ---------------------------------------------------------- interstitial */
-
-/* Full-bleed appetite counterweight to the cream paper and the serif. One
-   image, no text over it — so there is no scrim to get wrong. */
-.interstitial { margin-block: clamp(32px, 5vw, 56px); }
-.interstitial__img {
-  width: 100%; height: clamp(220px, 34vw, 420px);
-  object-fit: cover; display: block;
-}
-
 /* ------------------------------------------------------------ price index */
 
 .prices { margin-top: var(--s6); display: grid; gap: 2px;
@@ -506,7 +388,6 @@ a:hover { text-decoration-thickness: 2px; }
    that was one is a class now, so what the build previews is what ships. */
 .stack { display: flex; flex-direction: column; gap: var(--s4); }
 .hero__actions--after { margin-top: var(--s6); }
-.sec--tail { padding-bottom: clamp(40px, 6vw, 72px); }
 .prices--after { margin-top: var(--s5); }
 .prices__big { font-size: var(--t-lg); }
 .foot__hours { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; }
@@ -737,6 +618,219 @@ code { font-size: .92em; background: var(--sunken); border: 1px solid var(--rule
                 align-items: baseline; justify-content: space-between; gap: var(--s3); }
 .prices__cell dd { font-size: var(--t-md); }
 
+/* ------------------------------------------------------------ menu page */
+
+/* The home page's two menu devices and nothing else. The chapter photographs
+   are the home gallery's own cells (.gallery__cell and friends, untouched, so
+   the hover and tap name reveal come with them); the words are the home
+   listing's line — the sans name, the Anton price in --brand, a --rule
+   hairline closing the line — with the description beneath. No boxes, no
+   tinted bands, no empty image slots.
+
+   --head-h is the sticky site header's height and --chapter-nav-h the chapter
+   bar's. main.js measures the header and sets --head-h; these are its
+   measured values, for when the script has not run. */
+:root { --head-h: 77px; --chapter-nav-h: 52px; }
+@media (max-width: 640px) { :root { --head-h: 65px; --chapter-nav-h: 48px; } }
+
+/* The top: the home "All in one" split — words left, one plate right. */
+.menu-top { padding-block: clamp(28px, 4.5vw, 56px) clamp(24px, 3.5vw, 40px); }
+.menu-top__in {
+  display: grid; gap: var(--s5) var(--s7); align-items: center;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+}
+.menu-top__title { font-size: clamp(2.25rem, 1.4rem + 2.2vw, 3rem); line-height: .98; }
+.menu-top__lede { margin-top: var(--s4); color: var(--ink-2); font-size: var(--t-base); max-width: 46ch; }
+.menu-top__plate { border-radius: 12px; overflow: hidden; background: var(--paper); }
+.menu-top__img { display: block; width: 100%; height: auto; aspect-ratio: 1472 / 704; object-fit: cover; }
+@media (max-width: 900px) {
+  .menu-top__in { grid-template-columns: 1fr; }
+  .menu-top__plate { max-width: 560px; }
+}
+
+/* The chapter bar: the header's own vocabulary — plain sans links, the
+   current one in --brand with a 2px underline, one hairline under the bar.
+   It sticks under the sticky header. */
+.chapter-nav {
+  position: sticky; top: var(--head-h); z-index: 30;
+  background: var(--paper);                 /* where color-mix is unknown */
+  background: color-mix(in srgb, var(--paper) 95%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+}
+.chapter-nav__list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; gap: var(--s5); align-items: stretch;
+  overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.chapter-nav__list::-webkit-scrollbar { display: none; }
+.chapter-nav__list li { flex: none; display: flex; }
+.chapter-nav__link {
+  display: inline-flex; align-items: center; min-height: calc(var(--chapter-nav-h) - 1px);
+  font-size: var(--t-sm); font-weight: 500; color: var(--ink-2);
+  text-decoration: none; white-space: nowrap;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: color 160ms ease, box-shadow 160ms ease;
+}
+.chapter-nav__link:hover { color: var(--brand); }
+.chapter-nav__link[aria-current] { color: var(--brand); box-shadow: inset 0 -2px 0 var(--brand); }
+.chapter-nav__link:focus-visible { outline-offset: -3px; }
+@media (max-width: 1100px) { .chapter-nav__list { gap: var(--s4); } }
+@media (max-width: 1060px) {
+  /* The strip scrolls in its own box, edge to edge, and fades where it runs
+     out so there is visibly more of it. The page itself never moves sideways. */
+  .chapter-nav__in { padding-inline: 0; }
+  .chapter-nav__list {
+    gap: var(--s5);
+    padding-inline: clamp(20px, 5vw, 48px);
+    scroll-padding-inline: clamp(20px, 5vw, 48px);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 28px), transparent);
+            mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 28px), transparent);
+  }
+}
+
+/* A chapter. The link lands the chapter name just under the chapter bar:
+   html's scroll-padding-top (88px, in the motion section) applies on top of
+   this margin, and the section's own top padding comes off it. */
+.chapter {
+  --chapter-pad: clamp(36px, 5vw, 56px);
+  padding-top: var(--chapter-pad);
+  scroll-margin-top: calc(var(--head-h) + var(--chapter-nav-h) + 20px - 88px - var(--chapter-pad));
+}
+.chapter__head { margin-bottom: var(--s4); }
+.chapter__name { font-size: var(--t-xl); color: var(--brand); }
+.chapter__note { margin-top: var(--s1); font-size: var(--t-sm); color: var(--ink-3); max-width: 72ch; }
+
+/* The chapter's photographs: the home gallery, one row per chapter — as many
+   tracks as plates up to four, so a row fills its width. Five or more wrap
+   into rows of four. .gallery.chapter__tiles outranks .gallery wherever the
+   two disagree. */
+.gallery.chapter__tiles { margin: var(--s2) 0 var(--s4); gap: var(--s4); grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.gallery.chapter__tiles--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gallery.chapter__tiles--2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.chapter__tiles--2 li { grid-column: span 2; }
+.gallery.chapter__tiles--1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* The dishes: the home listing's line with the description under it, two
+   columns on the same two edges in every chapter. Rows align across the
+   gutter, so the hairlines of a row sit level. */
+.dishes {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 0 var(--s7);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.dish { margin: 0; padding: var(--s3) 0; border-bottom: 1px solid var(--rule); }
+.dish__row { display: flex; align-items: baseline; gap: var(--s4); }
+/* An h3 for the outline, set as the listing's plain sans name. */
+.dish__name {
+  flex: 1; min-width: 0;
+  font-family: var(--sans); font-size: var(--t-sm); font-weight: 500;
+  text-transform: none; letter-spacing: 0; line-height: var(--lh-snug);
+  color: var(--ink);
+}
+/* The display face and --brand, as on the home listing: 5.10:1 on white. */
+.dish__price {
+  flex: none; font-family: var(--display); font-weight: 400;
+  font-size: var(--t-md); line-height: 1; color: var(--brand);
+  font-variant-numeric: lining-nums; white-space: nowrap;
+}
+.dish__desc {
+  margin-top: var(--s1); font-size: var(--t-sm); line-height: 1.5; color: var(--ink-3);
+  max-width: 60ch; font-variant-numeric: tabular-nums;
+}
+.dish__sep { margin-inline: 2px; color: var(--ink-3); }
+.dish__facts { white-space: nowrap; }
+.dish__facts .dish__sep { margin-inline: var(--s2); }
+.dish__desc .heat { vertical-align: middle; }
+
+/* Heat, on the brand's own five-chilli scale. The pips are aria-hidden and
+   redundant: the line already carries "Heat 3 out of 5" for a screen reader,
+   so colour is never the only carrier here. The unfilled pips keep a --line
+   ring (5.15:1) so the denominator is visible, not implied. */
+.heat { display: inline-block; vertical-align: -1px; }
+.heat__pips { display: inline-flex; gap: 3px; }
+.heat__pip {
+  width: 7px; height: 7px; border-radius: 50%;
+  border: 1px solid var(--line); background: none;
+}
+.heat__pip.is-on { background: var(--sauce-chilli); border-color: var(--sauce-chilli); }
+
+/* Extras: a small chapter inside Sides, the chapter-name style one size down. */
+.extras { margin: 0; padding-top: var(--s5); grid-column: 1 / -1; }
+.extras__title { font-size: var(--t-md); color: var(--brand); margin-bottom: var(--s1); }
+.extras__list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 0 var(--s7); grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.extras__item {
+  display: flex; align-items: baseline; gap: var(--s4);
+  padding: 7px 0; border-bottom: 1px solid var(--rule);
+}
+.extras__name { flex: 1; min-width: 0; font-size: var(--t-sm); color: var(--ink); }
+.extras__tbc { font-size: var(--t-sm); color: var(--ink-3); white-space: nowrap; }
+
+/* The notes: the allergen notice (legally required) and the wings note, as
+   plain text under one hairline rather than boxed. */
+.menu-notes { padding-block: clamp(48px, 7vw, 80px) clamp(40px, 6vw, 72px); }
+.menu-notes__in {
+  display: grid; gap: var(--s5) var(--s7);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  border-top: 1px solid var(--rule); padding-top: var(--s5);
+}
+.menu-notes .notice {
+  margin: 0; border: 0; border-radius: 0; padding: 0; background: none;
+  font-size: var(--t-sm); color: var(--ink-2); max-width: 60ch;
+}
+.menu-notes .notice strong { display: block; color: var(--ink); margin-bottom: var(--s1); }
+.menu-notes .follow { grid-column: 1 / -1; margin: 0; }
+
+@media (max-width: 900px) {
+  .gallery.chapter__tiles { gap: var(--s3); }   /* four, three or two across */
+  .gallery.chapter__tiles--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chapter__tiles--2 li { grid-column: auto; }
+  .dishes, .extras__list { column-gap: var(--s5); }
+}
+
+@media (max-width: 640px) {
+  .menu-top { padding-top: var(--s5); }
+  .menu-top .sec__kicker { font-size: var(--t-sm); }    /* 14px is the phone floor */
+  .menu-top__lede { margin-top: var(--s3); }
+  .chapter-nav__link { min-height: 48px; }
+  .chapter { --chapter-pad: 36px; }
+  .chapter__name { font-size: 1.75rem; }
+  /* The plates swipe in their own strip, one and a half in view, instead of
+     a column of big images. */
+  .gallery.chapter__tiles {
+    display: flex; gap: var(--s3);
+    margin-inline: calc(-1 * clamp(20px, 5vw, 48px));
+    padding-inline: clamp(20px, 5vw, 48px);
+    scroll-padding-inline: clamp(20px, 5vw, 48px);
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .chapter__tiles::-webkit-scrollbar { display: none; }
+  .chapter__tiles li { flex: 0 0 62%; scroll-snap-align: start; }
+  .chapter__tiles--2 li { flex-basis: calc(50% - var(--s3) / 2); }
+  .dishes, .extras__list { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-nav__link { transition: none; }
+  .chapter__tiles .gallery__img, .chapter__tiles .gallery__name, .chapter__tiles .gallery__cell { transition: none; }
+  .chapter__tiles .gallery__cell:hover .gallery__img,
+  .chapter__tiles .gallery__cell.is-open .gallery__img { transform: none; }
+}
+
+/* A printed menu is the words: every chapter, every line, no bars. */
+@media print {
+  .chapter-nav, .chapter__tiles, .menu-top__plate { display: none !important; }
+  .menu-top__in { grid-template-columns: 1fr; }
+  .chapter { padding-top: 20px; }
+  .chapter__head { break-after: avoid; }
+  .dish, .extras { break-inside: avoid; }
+}
+
 /* --------------------------------------------------------- dark footer */
 
 .foot { background: var(--dark); color: rgba(255,255,255,.78); border-top: 0; }
@@ -777,13 +871,6 @@ code { font-size: .92em; background: var(--sunken); border: 1px solid var(--rule
   .nav__link--secondary { display: none; }
   .brandmark img { height: 40px; }
   .head__in { gap: var(--s3); }
-  .row { padding-inline: var(--s4); gap: var(--s3); }
-  .row__thumb { width: 96px; height: 64px; }
-  /* narrow screens cannot spare 96px of reserved whitespace */
-  .row__thumb--empty { display: none; }
-  .row__body { grid-template-columns: minmax(0, 1fr) auto; gap: var(--s1) var(--s3); }
-  .row__desc { grid-column: 1 / -1; }
-  .row__meta { grid-column: 1 / -1; text-align: left; margin-top: var(--s1); }
 }
 
 /* ----------------------------------------------------------- video hero */
@@ -823,9 +910,9 @@ code { font-size: .92em; background: var(--sunken); border: 1px solid var(--rule
 
 /* --------------------------------------------------------------- motion */
 
-/* No global smooth scrolling. The only in-page link on the site is the skip
-   link, and a skip link that glides is a skip link that fails: a keyboard user
-   pressing it wants to be at the content, now. scroll-padding-top is the fix
+/* No global smooth scrolling. The in-page links on the site are the skip
+   link and the menu's chapter bar, and a jump that glides is a jump that
+   fails: a keyboard user pressing it wants to be at the content, now. scroll-padding-top is the fix
    that is actually needed here — it keeps the sticky header from covering
    whatever an anchor lands on. */
 html { scroll-padding-top: 88px; }

@@ -1,12 +1,13 @@
 'use strict';
 
 /**
- * Every block below is one independent enhancement — the video hero, the
- * scroll reveal, the back-to-top button. None of them needs another, and none
- * of them is the page: the page is complete before this file loads. So an
- * error in one must not take the others with it, which is what a bare
- * exception at the top level of a script does — it stops the file. guard()
- * runs each block on its own and reports rather than aborts.
+ * Every block below is one independent enhancement — the gallery taps, the
+ * menu's chapter bar, the video hero, the scroll reveal, the back-to-top
+ * button. None of them needs another, and none of them is the page: the page
+ * is complete before this file loads. So an error in one must not take the
+ * others with it, which is what a bare exception at the top level of a script
+ * does — it stops the file. guard() runs each block on its own and reports
+ * rather than aborts.
  */
 function guard(fn) {
   try { fn(); }
@@ -37,6 +38,79 @@ guard(function () {
     cell.classList.add('is-open');
     open = cell;
   });
+});
+
+/**
+ * The menu's chapter bar. Without this block it is a row of plain in-page
+ * links under the sticky header, and it works: each jumps to its chapter, and
+ * the stylesheet's scroll-margin lands the chapter name just under the bar.
+ * With it, two things are added. The header's real height is measured into
+ * --head-h, so the bar sticks flush under the header whatever the header's
+ * height turns out to be. And the chapter being read is marked
+ * (aria-current="location"), and on a narrow screen kept in view inside the
+ * horizontally scrolling strip.
+ */
+guard(function () {
+  var nav = document.querySelector('[data-chapter-nav]');
+  if (!nav) return;
+  var list = nav.querySelector('.chapter-nav__list');
+  var links = nav.querySelectorAll('.chapter-nav__link');
+  var chapters = document.querySelectorAll('[data-chapter]');
+  var head = document.querySelector('.head');
+  if (!list || !links.length || !chapters.length) return;
+
+  var root = document.documentElement;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = -1, ticking = false;
+
+  function measureHead() {
+    var h = head ? head.getBoundingClientRect().height : 0;
+    if (h) root.style.setProperty('--head-h', Math.round(h) + 'px');
+  }
+
+  function mark(i) {
+    if (i === current) return;
+    if (current > -1 && links[current]) links[current].removeAttribute('aria-current');
+    current = i;
+    if (i < 0 || !links[i]) return;
+    var a = links[i];
+    a.setAttribute('aria-current', 'location');
+    // keep the marked link inside the visible part of the strip
+    if (list.scrollWidth > list.clientWidth + 1) {
+      var x = a.getBoundingClientRect().left - list.getBoundingClientRect().left + list.scrollLeft;
+      var left = x - 24;
+      var right = x + a.getBoundingClientRect().width - list.clientWidth + 24;
+      var target = left < list.scrollLeft ? left : (right > list.scrollLeft ? right : null);
+      if (target !== null) {
+        if (list.scrollTo && !reduce) list.scrollTo({ left: target, behavior: 'smooth' });
+        else list.scrollLeft = target;
+      }
+    }
+  }
+
+  function sweep() {
+    ticking = false;
+    var line = nav.getBoundingClientRect().bottom + 24;
+    var idx = 0;                       // above the first chapter, it is the next one
+    for (var i = 0; i < chapters.length; i++) {
+      if (chapters[i].getBoundingClientRect().top <= line) idx = i; else break;
+    }
+    // at the very foot of the page the last chapter is the one being read
+    if (window.innerHeight + window.pageYOffset >= root.scrollHeight - 2) idx = chapters.length - 1;
+    mark(idx);
+  }
+
+  function request() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(sweep);
+  }
+
+  if (!window.requestAnimationFrame) return;
+  measureHead();
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', function () { measureHead(); request(); }, { passive: true });
+  sweep();
 });
 
 /**

@@ -160,7 +160,7 @@ const js = `
 (function () {
   var pages = [].slice.call(document.querySelectorAll('.pv-page'));
   var navs  = [].slice.call(document.querySelectorAll('[data-nav]'));
-  function show(id){
+  function show(id, keepScroll){
     var found = false;
     pages.forEach(function(p){
       var on = p.getAttribute('data-page') === id;
@@ -172,11 +172,21 @@ const js = `
       if (a.getAttribute('data-nav') === id) a.setAttribute('aria-current','page');
       else a.removeAttribute('aria-current');
     });
-    window.scrollTo(0, 0);
+    if (!keepScroll) window.scrollTo(0, 0);
   }
   function fromHash(){ return (location.hash || '#home').slice(1); }
-  window.addEventListener('hashchange', function(){ show(fromHash()); });
-  show(fromHash());
+  /* A hash is either a page (#menu) or a place on one (#ch-wings, from the
+     menu's chapter bar). A place shows its page and scrolls to itself. */
+  function route(){
+    var id = fromHash();
+    var isPage = pages.some(function(p){ return p.getAttribute('data-page') === id; });
+    var el = isPage ? null : document.getElementById(id);
+    var page = el && el.closest && el.closest('.pv-page');
+    if (page) { show(page.getAttribute('data-page'), true); el.scrollIntoView(); return; }
+    show(id);
+  }
+  window.addEventListener('hashchange', route);
+  route();
 
   /* Links the real site would navigate with become section swaps here. */
   document.addEventListener('click', function (ev) {

@@ -76,8 +76,8 @@ hours does not open the site — it fails the audit instead.
 | `contact.email` | Footer link |
 | `contact.cateringEmail` | `/catering/` becomes buildable |
 | `contact.jobsEmail` | Hiring block |
-| `status.openingDate` | The date in the pre-opening ribbon |
-| `status.announcedOpen: true` | Green "Open today" ribbon, order-led copy — **but only with address and hours** |
+| `status.openingDate` | "We open on …" in the home page's not-open-yet section and on the map block |
+| `status.announcedOpen: true` | Open-for-business copy ("Open now", order-led sections) — **but only with address and hours** |
 | `delivery[].url` | That platform's order button, and it takes over the mobile action bar |
 | `company.companyName` + `companyNumber` | The legally required footer line |
 | `allergens.statement` or `perItem: true` | Replaces the interim allergen notice |
@@ -89,7 +89,7 @@ a number we also do not have, so the whole table waits until every day is decide
 `contact.neighbourhood` sits *beside* this table rather than in it. It is
 "Chapel Market, Angel", off the brand's own poster: a district, not an address.
 It is not a fallback for `contact.address` and never renders as one — it is the
-short human "where" for the ribbon and for headings, because the postal
+short human "where" for headings, because the postal
 locality is "London", which tells a Londoner precisely nothing. It never
 appears inside an `<address>` element or in the JSON-LD.
 
@@ -363,8 +363,9 @@ because there is no ordering channel.
 The display face is **Anton** (SIL OFL, self-hosted at
 `assets/fonts/anton-latin-400-normal.woff2`, 18.6 kB, one weight), preloaded
 and `font-display: swap`, with Impact and a condensed system stack behind it.
-Headings and dish names are uppercase in it; body copy stays on the system
-sans. Nothing typesets the brand name: the header carries the logo artwork
+Headings, chapter names and prices are set in it, uppercase, as are the dish
+names that rise over the gallery photographs; the dish names in the listings
+and all body copy stay on the system sans. Nothing typesets the brand name: the header carries the logo artwork
 itself, the lockup from the brand's own PDF — the rooster mark, then "Pookie"
 over "Chicken" — as a single SVG at a fixed height, with the brand name as its
 alt text. The `--dark`
@@ -374,12 +375,13 @@ so on dark surfaces the untouched logo orange is text-safe.
 The middle of the page is two blocks rather than a row of cards. First the
 **whole menu as words** — chapter, dish, price, nothing else — in a grid that
 takes as many columns as the width allows. Then a **gallery of the
-photographs**, with no caption, price or link on any of them. The split is the
+photographs**, with no price or link on any of them. The split is the
 point: one block to read, one to look at, neither repeating the other.
 
-Because nothing beside a gallery photograph names it, those images carry the
-dish name as their alt text. Every other photograph on the site keeps an empty
-alt, since the name is already there in the markup next to it.
+Each gallery photograph names its dish in a figcaption that rises on a white
+band on hover, or on a tap where nothing can hover (main.js). The name is in
+the markup either way, so the image's alt stays empty, as on every other
+photograph on the site.
 
 Unconfirmed prices print a dash in the listing exactly as they do on the menu
 page.
@@ -387,6 +389,24 @@ page.
 The gallery carries no headline of its own: the pictures are the block, so the
 section is named for screen readers with `aria-label` rather than a heading
 nobody needs to read.
+
+### The menu page
+
+`/menu/` is built from the same two devices, so it reads as the same hand as
+the home page — it was chosen from three mocks (the sources are in
+`design/pookie-menu-mocks/` on the development branch). Under the heading, the
+kicker and one plate, a **chapter bar** sticks under the header: plain links,
+the chapter being read marked in `--brand` by main.js, a strip that scrolls
+sideways on a phone. Each chapter opens with **one row of the home gallery's
+tiles** for the dishes that have photographs, then the **whole chapter as the
+home listing's lines** in two columns: the sans name, the Anton price in
+`--brand`, the description beneath with any confirmed kcal and heat, a hairline
+under each. A dish without a photograph is simply a line — there is never an
+empty image slot. The allergen notice and the wings note close the page.
+
+Tiles take as many columns as the chapter has photographs, up to four; five or
+more wrap into rows of four. A chapter the owner empties in the panel drops
+out of the page and the bar. Printed, the page is the words only.
 
 ---
 
@@ -414,24 +434,24 @@ each step is the most orange value that clears its own threshold:
 2. **`--display-orange`** — `#E06E00`, 3.28:1. Headings of 28px and up, where
    the large-text threshold is 3:1. `h1` and section `h2`s.
 3. **`--brand`** — `#B45100`. Everything else: links, small UI, button fills
-   under white text, and the 20–24px semibold headings and dish names that sit
+   under white text, and the 20–24px headings that sit
    too near the large-text boundary to gamble on.
 
-`--brand` is `#B45100` rather than a brighter `#B85400` for one reason: the
-chapter headers sit on `--sunken`, and on that band the brighter value measures
+`--brand` is `#B45100` rather than a brighter `#B85400` for one reason: some
+brand text sits on `--sunken` (the lunch band's kicker, the claim chips), and on
+that tint the brighter value measures
 **4.48:1** — under AA by two hundredths. Every colour here is checked against
 *both* grounds, not just the page.
 
 ### What is orange and what is not
 
 The display face carries the brand colour; the body face stays `--ink`.
-Headings and dish names are orange, descriptions are dark. Two deliberate
+Headings and prices are orange; dish names and descriptions are dark. Two deliberate
 exceptions:
 
-- **Prices on the menu are `--ink`.** A price in a list is data, not branding,
-  and it has to be the most legible thing on the row. The home page is the
-  exception: its cards and the price index below them set prices in `--brand`
-  (5.10:1), because there a price is a headline rather than a column.
+- **Dish names in the listings are `--ink`**, in the sans face, so the eye
+  finds the price: the price is the orange thing on each line, set in Anton
+  and `--brand` (5.10:1), on the home listing and the menu page alike.
 - **The wordmark is the logo artwork**, so it keeps the logo's own
   red-and-orange pairing. It is the lockup, not a heading, and it is never
   recoloured.
@@ -496,7 +516,7 @@ The menu was transcribed from a PDF whose text order was scrambled. Two things
 could not be read reliably:
 
 - **Wing prices.** They are £8.90 or £9.90, but the per-item mapping was not
-  legible. Every wing carries `priceConfirmed: false`, the row renders an em
+  legible. Every wing carries `priceConfirmed: false`, the line renders an em
   dash, and the menu page explains why in one sentence.
 - **Calorie figures.** The composed-plate block has eight numbers for six
   dishes. Those carry `kcalConfirmed: false` and are suppressed entirely.
@@ -561,8 +581,8 @@ one Node file with no dependencies, behind nginx on `127.0.0.1:8787`, and
 `admin/ui/`, one page of vanilla JavaScript set in the site's own stylesheet.
 It edits **content, never code**: the menu, the photographs, the hours, the
 opening date and the "we are open" switch, contact details, delivery links,
-the company line, the allergen statement, and one announcement line for the
-ribbon.
+the company line, the allergen statement, and one announcement line — the
+only thing that ever shows in the strip across the top of every page.
 
 **Where the edits live.** Not in the repository. `content.json` sits in
 `POOKIE_CONTENT_DIR` — `/srv/pookie-content` on the server, `./content`
