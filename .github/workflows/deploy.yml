@@ -36,8 +36,8 @@ jobs:
         run: node build.js
 
       # The audit is the gate, not a report: it exits non-zero on a structural
-      # or accessibility failure and on any launch-gate breach, and a failed
-      # step here means nothing reaches the server.
+      # or accessibility failure (missing facts are warnings, never failures),
+      # and a failed step here means nothing reaches the server.
       - name: Audit
         run: node audit.js
 

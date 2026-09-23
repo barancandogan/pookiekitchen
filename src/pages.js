@@ -65,9 +65,8 @@ function allergenNotice(d) {
   if (D.allergens.statement) {
     return `<div class="notice"><strong>Allergens.</strong> ${esc(D.allergens.statement)}</div>`;
   }
-  return `<div class="notice"><strong>Allergens.</strong> Full allergen information for every
-dish will be published here. Until then, if you have a food allergy or intolerance,
-please speak to a member of the team before you order.</div>`;
+  return `<div class="notice"><strong>Allergens.</strong> If you have a food allergy or
+intolerance, please speak to a member of the team before you order.</div>`;
 }
 
 function deliveryButtons(d) {
@@ -182,7 +181,7 @@ function menuListing() {
     <ul>
 ${ch.items.map(it => `      <li><span class="listing__name">${esc(it.name)}</span>${
     it.priceConfirmed === false
-      ? '<span class="listing__price" aria-label="Price to be confirmed">—</span>'
+      ? '<span class="listing__price"><span aria-hidden="true">—</span><span class="visually-hidden">Ask in store for the price</span></span>'
       : `<span class="listing__price">${money(it.price)}</span>`
   }</li>`).join('\n')}
     </ul>
@@ -296,7 +295,7 @@ ${heroBlock(d)}
 
 <section class="sec wrap">
   <p class="sec__kicker">The menu</p>
-  <h2 class="hx"><span>Everything we cook.</span> <em>Every price we can confirm.</em></h2>
+  <h2 class="hx"><span>Everything we cook.</span> <em>${esc(D.copy.lines.brighterDays)}</em></h2>
   <div class="listing">
 ${menuListing()}
   </div>
@@ -323,7 +322,7 @@ ${galleryPhotos()}
     <p class="band__prices">${
       D.lunchDeal.priceConfirmed
         ? D.lunchDeal.prices.map(money).join(' · ')
-        : 'Lunch pricing to be confirmed'
+        : 'Ask in store for prices'
     }</p>
   </div>
 </section>
@@ -337,11 +336,9 @@ ${galleryPhotos()}
 </section>
 
 <section class="sec wrap">
-  <p class="sec__kicker">${d.deliveryLive.length ? 'Order' : 'Follow along'}</p>
-  <h2>${esc(D.copy.lines.tasteTheDifference)}</h2>
-  <p class="sec__lede">${d.deliveryLive.length
-    ? 'Come in, or order for delivery.'
-    : 'News goes on Instagram first — no email list, no forms, nothing to unsubscribe from.'}</p>
+  <p class="sec__kicker">${d.deliveryLive.length ? 'Order' : 'Instagram'}</p>
+  <h2>${d.deliveryLive.length ? 'Come in, or order for delivery.' : 'Follow along.'}</h2>
+  <p class="sec__lede">News goes on Instagram first — no email list, no forms, nothing to unsubscribe from.</p>
   ${deliveryButtons(d)}
   <div class="follow">
     <a class="btn ${d.deliveryLive.length ? 'btn--ghost' : 'btn--primary'}" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
@@ -349,7 +346,7 @@ ${galleryPhotos()}
   </div>
 </section>
 
-${mapBlock(d, { heading: D.contact.neighbourhood })}
+${mapBlock(d, { heading: D.copy.lines.tasteTheDifference })}
 
 ${bannerBlock()}`;
   },
@@ -376,7 +373,7 @@ ${bannerBlock()}`;
  */
 function dishPrice(item) {
   return item.priceConfirmed === false || item.price == null
-    ? '<span class="dish__price"><span aria-hidden="true">—</span><span class="visually-hidden">Price to be confirmed</span></span>'
+    ? '<span class="dish__price"><span aria-hidden="true">—</span><span class="visually-hidden">Ask in store for the price</span></span>'
     : `<span class="dish__price">${money(item.price)}</span>`;
 }
 
@@ -436,7 +433,7 @@ function chapterExtras(ch) {
         <span class="extras__name">${esc(x.name)}</span>
         ${x.priceConfirmed !== false && x.price != null
           ? `<span class="dish__price">${money(x.price)}</span>`
-          : '<span class="extras__tbc">price to confirm</span>'}
+          : '<span class="extras__tbc">ask in store</span>'}
       </li>`).join('')}</ul>
     </li>`;
 }
@@ -453,7 +450,7 @@ function chapterBlock(ch) {
   const allTbc = ch.items.every(i => i.priceConfirmed === false || i.price == null);
   const note = said
     ? `<p class="chapter__note">${esc(said)}</p>`
-    : (allTbc ? '<p class="chapter__note">Prices to confirm</p>' : '');
+    : (allTbc ? '<p class="chapter__note">Ask in store for prices.</p>' : '');
   const id = `ch-${esc(ch.id)}`;
   return `<section class="chapter" id="${id}" aria-labelledby="${id}-h" data-chapter>
   <div class="wrap">
@@ -466,23 +463,6 @@ function chapterBlock(ch) {
     <ul class="dishes" role="list">${ch.items.map(dishLine).join('')}${chapterExtras(ch)}</ul>
   </div>
 </section>`;
-}
-
-/**
- * Said only while a wing price is unconfirmed, and about the wings only: a
- * drink without a price is not a wing without one. The range is read from the
- * wing prices the menu card gives, so it moves with the data.
- */
-function wingsNote() {
-  const wings = D.menu.find(c => c.id === 'wings');
-  if (!wings || !wings.items.some(i => i.priceConfirmed === false)) return '';
-  const known = wings.items.map(i => i.price).filter(p => typeof p === 'number');
-  const lo = Math.min(...known), hi = Math.max(...known);
-  const range = known.length && lo !== hi
-    ? `The wing prices sit between ${money(lo)} and ${money(hi)} and the per-item mapping is being confirmed with the kitchen.`
-    : 'The per-item wing prices are being confirmed with the kitchen.';
-  return `<div class="notice"><strong>A note on the wings.</strong> ${range} Rather than print
-  a price that might be wrong, we have left it out until it is checked.</div>`;
 }
 
 /** The plate price, when every plate shares one confirmed price. */
@@ -508,7 +488,7 @@ const menuPage = {
   <div class="wrap menu-top__in">
     <div>
       <p class="sec__kicker">The menu</p>
-      <h1 class="hx menu-top__title" id="menu-title"><span>Everything we cook.</span> <em>Every price we can confirm.</em></h1>
+      <h1 class="hx menu-top__title" id="menu-title"><span>Everything we cook.</span> <em>${esc(D.copy.lines.brighterDays)}</em></h1>
       <p class="menu-top__lede">Chicken thigh, marinated in our own blend and seared to order. The plates
       arrive complete — chicken, pasta and a fresh salad on one plate${price ? ` for ${money(price)}` : ''}.</p>
     </div>
@@ -526,7 +506,7 @@ const menuPage = {
 ${chapters.map(chapterBlock).join('\n')}
 
 <section class="menu-notes" aria-label="Allergens and notes">
-  <div class="wrap"><div class="menu-notes__in">${allergenNotice(d)}${wingsNote()}${deliveryButtons(d)}</div></div>
+  <div class="wrap"><div class="menu-notes__in">${allergenNotice(d)}${deliveryButtons(d)}</div></div>
 </section>`;
   },
 };
@@ -580,8 +560,8 @@ const findUs = {
       return `
 <section class="hero wrap">
   <p class="hero__eyebrow">Find us</p>
-  <h1>${hood ? `On <em>${esc(D.contact.neighbourhood)}</em>.` : 'Find us'}</h1>
-  <p class="hero__lede">The street address will be published here. Instagram has the latest in the meantime.</p>
+  <h1>${hood ? `<em>${esc(D.contact.neighbourhood)}</em>.` : 'Where we are.'}</h1>
+  <p class="hero__lede">Follow us on Instagram for the latest.</p>
   <div class="hero__actions">
     <a class="btn btn--primary" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
     <a class="btn btn--ghost" href="/menu/">Read the menu</a>
@@ -656,7 +636,7 @@ const cookies = {
     have no access to what Google collects.</p>
     <p>So the map does not load until you say so — on the banner when you first arrive, or here.
     Rejecting it costs you nothing: the address is written on the page, and the “Open in Maps”
-    button takes you to Google in a new page, which is a visit you chose to make.</p>
+    button takes you to Google Maps, which is a visit you chose to make.</p>
 
     <h2>Your choice</h2>
     <div class="consent__page" data-consent-page>

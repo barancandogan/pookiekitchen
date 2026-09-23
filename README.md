@@ -77,7 +77,7 @@ then may still carry a `status` block; it is ignored.
 | `contact.cateringEmail` | `/catering/` becomes buildable |
 | `contact.jobsEmail` | Hiring block |
 | `delivery[].url` | That platform's order button, and it takes over the mobile action bar (until then the bar offers directions) |
-| `company.companyName` + `companyNumber` | The legally required footer line |
+| `company.companyName` + `companyNumber` | The company line in the footer (a limited company must show its name, number and registered office on its website) |
 | `allergens.statement` or `perItem: true` | Replaces the interim allergen notice |
 | `site.url` | Canonicals, `og:url`, and a real `sitemap.xml` |
 
@@ -164,7 +164,7 @@ whether or not anyone thinks of them as cookies. Confirm the figure against
 `/etc/logrotate.d/nginx` on the server; Ubuntu's stock rotation keeps 14. The
 notice names the company and a contact address only once `company.*` and
 `contact.email` exist in `data.js` — and a privacy notice legally needs a
-contact route, so `contact.email` is now on the launch list twice over.
+contact route, so `contact.email` is on the "Still to fill in" list twice over.
 
 ---
 
@@ -515,7 +515,9 @@ could not be read reliably:
 
 - **Wing prices.** They are £8.90 or £9.90, but the per-item mapping was not
   legible. Every wing carries `priceConfirmed: false`, the line renders an em
-  dash, and the menu page explains why in one sentence.
+  dash (read aloud as "Ask in store for the price"), and the chapter says "Ask
+  in store for prices." — true of a restaurant that is trading, and it promises
+  nothing.
 - **Calorie figures.** The composed-plate block has eight numbers for six
   dishes. Those carry `kcalConfirmed: false` and are suppressed entirely.
 
@@ -548,9 +550,9 @@ placeholder or leaked value (`TBC`, `undefined`, `[object Object]`) reaching the
 output.
 
 Globally: a warning for each fact the site still lacks — opening hours, a
-phone number or email, the company line and allergen information, the last two
-legally required — plus a check that the brand hex values in
-`assets/css/main.css` still match `src/data.js`. These are warnings, not
+phone number or email, the company line and an allergen statement — plus a
+check that the brand hex values in `assets/css/main.css` still match
+`src/data.js`. These are warnings, not
 errors: the restaurant is open, and refusing to publish would not supply a
 missing fact, only freeze the site as it is. The panel shows them after every
 publish.
@@ -598,9 +600,9 @@ panel may override; everything else is code.
 **Publish is the same gate as a deploy.** It runs `build.js` and `audit.js
 --json` into a build directory of its own (`POOKIE_DIST_DIR`), and copies the
 result to the web root only if the audit has no errors. The audit's warnings
-— the launch list, unconfirmed prices — come back to the panel and show on
-the Overview, so the owner sees the same "before you can say open" list a
-developer would. A refused publish leaves the live site untouched and says
+— facts still missing, unconfirmed prices — come back to the panel and show on
+the Overview, beside a "Still to fill in" list of the same facts, so the owner
+sees what a developer would. A refused publish leaves the live site untouched and says
 why.
 
 **Photographs** are sized in the owner's browser, not on the server: a 3:2

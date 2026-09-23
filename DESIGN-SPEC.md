@@ -1,6 +1,12 @@
 # POOKIE CHICKEN — DESIGN SPECIFICATION v1.0
 
 **Status:** approved for build. Every value here is final unless flagged `[CONFIRM]`.
+
+> **Superseded in part (September 2026).** The restaurant has opened, and the
+> pre-opening mode described below — the `status` block, the "Opening soon"
+> eyebrow and its escalation, the countdown, the "not open yet" copy, the
+> pre-opening hiring block and the `audit.js` launch gate — was retired. See
+> README, "There is no pre-opening mode any more". The rest stands.
 **Build target:** dependency-free static site, Node build script, modelled on `/home/user/regnum-website`.
 
 ---

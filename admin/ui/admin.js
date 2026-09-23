@@ -78,14 +78,18 @@
     const hoursOk = DAYS.every(([k]) => c.contact.hours[k] === 'closed' || Array.isArray(c.contact.hours[k]));
     const checks = [
       ['Address', addressOk], ['Hours for every day', hoursOk], ['Phone or email', !!(c.contact.phone || c.contact.email)],
-      ['Company name and number (required by law)', !!(c.company.companyName && c.company.companyNumber)],
-      ['Allergen statement (required by law)', !!(c.allergens.statement || c.allergens.perItem)],
+      ['Company details (a limited company must show them)', !!(c.company.companyName && c.company.companyNumber)],
+      ['Allergen statement', !!(c.allergens.statement || c.allergens.perItem)],
     ];
-    const missing = checks.filter(([, ok]) => !ok).length;
-    $('#ov-lede').textContent = missing
-      ? `The site is live. ${missing === 1 ? 'One thing is' : `${missing} things are`} still missing from it — each appears on the site the moment you fill it in.`
-      : 'The site is live, and everything it needs is filled in.';
-    $('#ov-checks').innerHTML = checks.map(([l, ok]) => `<li class="${ok ? 'is-ok' : ''}">${esc(l)}</li>`).join('');
+    const todo = checks.filter(([, ok]) => !ok);
+    $('#ov-lede').textContent = !todo.length
+      ? 'Everything the site needs is filled in.'
+      : todo.length === 1
+        ? 'One thing is still missing from the site. Fill it in and press Publish, and it appears there.'
+        : `${todo.length} things are still missing from the site. Each appears there once you fill it in and press Publish.`;
+    $('#ov-checks').innerHTML = todo.length
+      ? todo.map(([l]) => `<li>${esc(l)}</li>`).join('')
+      : '<li class="is-ok">Nothing left to fill in.</li>';
     const dishes = c.menu.reduce((n, ch) => n + ch.items.length, 0);
     const hidden = c.menu.reduce((n, ch) => n + ch.items.filter(i => i.hidden).length, 0);
     const noPrice = c.menu.reduce((n, ch) => n + ch.items.filter(i => i.price == null || i.priceConfirmed === false).length, 0);

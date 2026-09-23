@@ -156,8 +156,8 @@ echo "→ building"
 node build.js
 
 # The audit is the gate, not a report. It exits non-zero on a structural or
-# accessibility failure and on any launch-gate breach — and `set -e` means a
-# broken build never reaches the web root.
+# accessibility failure (missing facts are warnings, never failures) — and
+# `set -e` means a broken build never reaches the web root.
 echo "→ auditing"
 node audit.js
 

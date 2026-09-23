@@ -142,14 +142,13 @@ const d = D.derive();
 // What the site still lacks. The restaurant is open, so these no longer gate
 // anything: refusing to publish would not supply a missing phone number, it
 // would only freeze the site as it is. They are warnings, printed on every
-// run and shown in the panel after every publish, until each is filled in —
-// two of them are legal requirements, and say so.
+// run and shown in the panel after every publish, until each is filled in.
 const gate = [
   [d.addressKnown, 'street address'],
   [d.hoursKnown, 'opening hours'],
   [d.phoneKnown || d.emailKnown, 'a phone number or an email address'],
-  [d.companyKnown, 'company name and number (legally required in the footer)'],
-  [d.allergensPublishable, 'allergen information (legally required)'],
+  [d.companyKnown, 'company details (a limited company must show its name, number and registered office on its website)'],
+  [d.allergensPublishable, 'an allergen statement (the menu asks customers to speak to the team; a full statement is better)'],
   [Boolean(D.site.url), 'site.url (canonicals, Open Graph, sitemap)'],
 ];
 
