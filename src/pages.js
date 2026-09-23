@@ -1,7 +1,7 @@
 'use strict';
 
 const D = require('./data');
-const { esc, money, when, formatDate } = require('./layout');
+const { esc, money, when } = require('./layout');
 
 /* ---------------------------------------------------- shared components */
 
@@ -66,8 +66,8 @@ function allergenNotice(d) {
     return `<div class="notice"><strong>Allergens.</strong> ${esc(D.allergens.statement)}</div>`;
   }
   return `<div class="notice"><strong>Allergens.</strong> Full allergen information for every
-dish will be published here before we open, and will be available in the restaurant.
-If you have an allergy, please ask a member of the team before ordering.</div>`;
+dish will be published here. Until then, if you have a food allergy or intolerance,
+please speak to a member of the team before you order.</div>`;
 }
 
 function deliveryButtons(d) {
@@ -94,7 +94,7 @@ function deliveryButtons(d) {
  */
 function heroBlock(d) {
   const inner = `
-  <p class="hero__eyebrow">${d.isOpen ? 'Open now' : 'Opening soon'}</p>
+  ${when(D.isFilled(D.contact.neighbourhood), () => `<p class="hero__eyebrow">${esc(D.contact.neighbourhood)}</p>`)}
   <h1>A whole meal for <em>${money(D.menu.find(c => c.id === 'plates').items[0].price)}</em>.</h1>
   <div class="hero__actions">
     <a class="btn btn--primary" href="/menu/">See the menu</a>
@@ -262,9 +262,6 @@ function mapBlock(d, opts = {}) {
     <div class="where__text">
       <address class="where__address">${esc(a.line1)}<br>${esc(a.locality)}<br>${esc(a.postcode)}</address>
       ${when(D.contact.transit, () => `<p class="where__note">${esc(D.contact.transit)}</p>`)}
-      ${when(!d.isOpen, () => `<p class="where__note">${d.dateKnown
-        ? `We open on ${esc(formatDate(D.status.openingDate))}.`
-        : 'The door is not open yet — the date goes up here and on Instagram the moment it is fixed.'}</p>`)}
       <div class="hero__actions">
         ${when(a.mapsUrl, () => `<a class="btn btn--primary" href="${esc(a.mapsUrl)}" rel="noopener">Open in Maps</a>`)}
         ${when(d.phoneKnown, () => `<a class="btn btn--ghost" href="tel:${esc(D.contact.phone)}">${esc(D.contact.phone)}</a>`)}
@@ -340,13 +337,11 @@ ${galleryPhotos()}
 </section>
 
 <section class="sec wrap">
-  <p class="sec__kicker">${d.isOpen ? 'Order' : 'Be first to know'}</p>
-  <h2>${d.isOpen ? esc(D.copy.lines.tasteTheDifference) : 'We are not open yet.'}</h2>
-  <p class="sec__lede">${d.isOpen
+  <p class="sec__kicker">${d.deliveryLive.length ? 'Order' : 'Follow along'}</p>
+  <h2>${esc(D.copy.lines.tasteTheDifference)}</h2>
+  <p class="sec__lede">${d.deliveryLive.length
     ? 'Come in, or order for delivery.'
-    : d.dateKnown
-      ? `We open on ${esc(formatDate(D.status.openingDate))}. Instagram is where news goes first — no email list, no forms, nothing to unsubscribe from.`
-      : 'The date is not fixed yet. Instagram is where it will be announced first — no email list, no forms, nothing to unsubscribe from.'}</p>
+    : 'News goes on Instagram first — no email list, no forms, nothing to unsubscribe from.'}</p>
   ${deliveryButtons(d)}
   <div class="follow">
     <a class="btn ${d.deliveryLive.length ? 'btn--ghost' : 'btn--primary'}" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
@@ -575,21 +570,18 @@ ${when(D.copy.sauceStory.verified, () => `
 const findUs = {
   path: '/find-us/',
   title: 'Find us',
-  description: 'Where to find Pookie Chicken, the hours we are open, and how to reach the restaurant by phone or email once we have opened our doors.',
+  description: 'Where to find Pookie Chicken on Chapel Market, near Angel station in London, and how to get there.',
   body(d) {
-    // No address yet. If the brand has named a neighbourhood, say that and be
-    // explicit that it is all we have — a visitor who reads "Chapel Market"
-    // and turns up looking for a door has been misled, so the page says in as
-    // many words that there is not a door to find yet.
+    // Without a full street address the page says what it has — the
+    // neighbourhood, if the brand has named one — and points to Instagram,
+    // rather than print half an address.
     if (!d.addressKnown) {
       const hood = D.isFilled(D.contact.neighbourhood);
       return `
 <section class="hero wrap">
   <p class="hero__eyebrow">Find us</p>
-  <h1>${hood ? `We are coming to <em>${esc(D.contact.neighbourhood)}</em>.` : 'We do not have a door to point you at yet.'}</h1>
-  <p class="hero__lede">${hood
-    ? 'That is the whole of what we can tell you today — the neighbourhood, not the number on the door. The street address and the opening date are published here the moment they are fixed, and announced on Instagram the same day.'
-    : 'The site is up before the restaurant is. When the address and the opening date are fixed they will be published here first, and announced on Instagram the same day.'}</p>
+  <h1>${hood ? `On <em>${esc(D.contact.neighbourhood)}</em>.` : 'Find us'}</h1>
+  <p class="hero__lede">The street address will be published here. Instagram has the latest in the meantime.</p>
   <div class="hero__actions">
     <a class="btn btn--primary" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>
     <a class="btn btn--ghost" href="/menu/">Read the menu</a>

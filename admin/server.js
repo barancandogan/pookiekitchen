@@ -146,7 +146,6 @@ function seedContent() {
   const D = require(path.join(ROOT, 'src', 'data.js'));
   const c = D.contact;
   return {
-    status: { ...D.status },
     announcement: D.site.announcement,
     contact: {
       phone: c.phone, email: c.email, cateringEmail: c.cateringEmail, jobsEmail: c.jobsEmail,
@@ -213,11 +212,9 @@ function validate(c, families, knownPhotos) {
   const bad = msg => { throw new Error(msg); };
   if (!c || typeof c !== 'object') bad('content must be an object');
 
+  // A `status` block (opening date, "we are open") from before the restaurant
+  // opened is dropped here rather than refused, so older versions restore.
   const out = {};
-  out.status = {
-    openingDate: (c.status && c.status.openingDate) ? (/^\d{4}-\d\d-\d\d$/.test(c.status.openingDate) ? c.status.openingDate : bad('opening date must be YYYY-MM-DD')) : null,
-    announcedOpen: B(c.status && c.status.announcedOpen),
-  };
   out.announcement = S(c.announcement, 140);
 
   const ct = c.contact || {};

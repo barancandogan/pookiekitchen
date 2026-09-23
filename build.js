@@ -153,14 +153,12 @@ if (require.main === module) {
 
   console.log(`\n  Pookie Chicken — built in ${ms}ms`);
   console.log(`  ${pages.length} pages, ${assets} assets → dist/`);
-  console.log(`  mode: ${d.isOpen ? 'OPEN' : 'PRE-OPENING'}`);
 
   const unknown = [];
   if (!d.addressKnown) unknown.push('address');
   if (!d.hoursKnown) unknown.push('hours');
   if (!d.phoneKnown) unknown.push('phone');
   if (!d.emailKnown) unknown.push('email');
-  if (!d.dateKnown) unknown.push('opening date');
   if (!d.companyKnown) unknown.push('company details');
   if (!d.deliveryLive.length) unknown.push('delivery links');
   if (!D.site.url) unknown.push('site.url');

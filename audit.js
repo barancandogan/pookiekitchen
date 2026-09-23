@@ -2,12 +2,12 @@
 'use strict';
 
 /**
- * Structural, accessibility and launch-readiness checks over ./dist.
+ * Structural, accessibility and completeness checks over ./dist.
  *
  *   node audit.js
  *
  * Exit 1 on any ERROR. WARNs are printed and do not fail the build — they are
- * the things that must be true before launch but need not be true today.
+ * facts the site still lacks, and figures it holds back until confirmed.
  */
 
 const fs = require('fs');
@@ -139,8 +139,11 @@ for (const file of htmlFiles) {
 
 const d = D.derive();
 
-// The launch gate. These are warnings while the site is pre-opening and
-// become errors the moment it claims to be open.
+// What the site still lacks. The restaurant is open, so these no longer gate
+// anything: refusing to publish would not supply a missing phone number, it
+// would only freeze the site as it is. They are warnings, printed on every
+// run and shown in the panel after every publish, until each is filled in —
+// two of them are legal requirements, and say so.
 const gate = [
   [d.addressKnown, 'street address'],
   [d.hoursKnown, 'opening hours'],
@@ -151,9 +154,7 @@ const gate = [
 ];
 
 for (const [ok, what] of gate) {
-  if (ok) continue;
-  if (d.isOpen) err('launch gate', `site is in OPEN mode without ${what}`);
-  else warn('launch gate', `missing before launch: ${what}`);
+  if (!ok) warn('missing', what);
 }
 
 // Unconfirmed figures are fine to carry, but not silently — they must be

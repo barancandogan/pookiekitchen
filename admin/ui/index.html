@@ -30,7 +30,7 @@
       <a href="#overview" data-nav="overview">Overview</a>
       <a href="#menu" data-nav="menu">Menu</a>
       <a href="#photos" data-nav="photos">Photos</a>
-      <a href="#opening" data-nav="opening">Opening &amp; hours</a>
+      <a href="#opening" data-nav="opening">Hours</a>
       <a href="#contact" data-nav="contact">Contact</a>
       <a href="#history" data-nav="history">History</a>
       <a href="#settings" data-nav="settings">Settings</a>
@@ -46,7 +46,7 @@
 
     <section class="adm-sec" data-sec="overview">
       <p class="sec__kicker">Overview</p>
-      <h2 id="ov-title">Not open yet</h2>
+      <h2 id="ov-title">Your site</h2>
       <p class="adm-lede" id="ov-lede"></p>
       <div class="adm-cards">
         <div class="adm-card">
@@ -55,7 +55,7 @@
           <p class="adm-muted" id="ov-result"></p>
         </div>
         <div class="adm-card">
-          <h3>Before the site can say “open”</h3>
+          <h3>Still to fill in</h3>
           <ul class="adm-checks" id="ov-checks"></ul>
         </div>
         <div class="adm-card">
@@ -93,15 +93,14 @@
     </section>
 
     <section class="adm-sec" data-sec="opening" hidden>
-      <p class="sec__kicker">Opening &amp; hours</p>
-      <h2>When</h2>
+      <p class="sec__kicker">Hours</p>
+      <h2>When you are open</h2>
+      <div class="adm-card">
+        <h3>Hours</h3>
+        <p class="adm-muted">Every day must be decided — a time or “closed” — before the hours appear on the site.</p>
+        <table class="adm-hours" id="hours"></table>
+      </div>
       <div class="adm-grid2">
-        <div class="adm-card">
-          <h3>Opening</h3>
-          <label class="adm-field"><span>Opening date</span><input type="date" id="f-openingDate"></label>
-          <label class="adm-check"><input type="checkbox" id="f-announcedOpen"> <span>We are open for business</span></label>
-          <p class="adm-muted">The site only says “open” once this is ticked <em>and</em> the address and every day’s hours are filled in.</p>
-        </div>
         <div class="adm-card">
           <h3>Lunch deal</h3>
           <label class="adm-field"><span>Name</span><input type="text" id="f-lunchName"></label>
@@ -113,11 +112,6 @@
           <label class="adm-field"><span>Prices (comma-separated)</span><input type="text" id="f-lunchPrices" placeholder="12.90, 15.90"></label>
           <label class="adm-check"><input type="checkbox" id="f-lunchConfirmed"> <span>Prices confirmed</span></label>
         </div>
-      </div>
-      <div class="adm-card">
-        <h3>Hours</h3>
-        <p class="adm-muted">Every day must be decided — a time or “closed” — before the hours appear on the site.</p>
-        <table class="adm-hours" id="hours"></table>
       </div>
     </section>
 

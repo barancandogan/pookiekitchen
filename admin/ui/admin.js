@@ -76,16 +76,15 @@
     const c = content;
     const addressOk = !!(c.contact.address.line1 && c.contact.address.locality && c.contact.address.postcode);
     const hoursOk = DAYS.every(([k]) => c.contact.hours[k] === 'closed' || Array.isArray(c.contact.hours[k]));
-    const isOpen = c.status.announcedOpen && addressOk && hoursOk;
-    $('#ov-title').textContent = isOpen ? 'Open' : 'Not open yet';
-    $('#ov-lede').textContent = isOpen
-      ? 'The site says you are open, with your hours and address on every page.'
-      : 'The site is in its pre-opening form: menu and address shown, hours and ordering held back until they are decided.';
     const checks = [
       ['Address', addressOk], ['Hours for every day', hoursOk], ['Phone or email', !!(c.contact.phone || c.contact.email)],
-      ['Company name and number', !!(c.company.companyName && c.company.companyNumber)],
-      ['Allergen statement', !!c.allergens.statement], ['“We are open” ticked', !!c.status.announcedOpen],
+      ['Company name and number (required by law)', !!(c.company.companyName && c.company.companyNumber)],
+      ['Allergen statement (required by law)', !!(c.allergens.statement || c.allergens.perItem)],
     ];
+    const missing = checks.filter(([, ok]) => !ok).length;
+    $('#ov-lede').textContent = missing
+      ? `The site is live. ${missing === 1 ? 'One thing is' : `${missing} things are`} still missing from it — each appears on the site the moment you fill it in.`
+      : 'The site is live, and everything it needs is filled in.';
     $('#ov-checks').innerHTML = checks.map(([l, ok]) => `<li class="${ok ? 'is-ok' : ''}">${esc(l)}</li>`).join('');
     const dishes = c.menu.reduce((n, ch) => n + ch.items.length, 0);
     const hidden = c.menu.reduce((n, ch) => n + ch.items.filter(i => i.hidden).length, 0);
@@ -260,8 +259,6 @@
   const bind = (id, get, set) => { const el = $(id); el.addEventListener('input', () => { set(el.type === 'checkbox' ? el.checked : el.value); setDirty(true); }); return el; };
   function renderOpening() {
     const c = content;
-    $('#f-openingDate').value = c.status.openingDate || '';
-    $('#f-announcedOpen').checked = !!c.status.announcedOpen;
     $('#f-lunchName').value = c.lunchDeal.name || ''; $('#f-lunchClaim').value = c.lunchDeal.claim || '';
     $('#f-lunchFrom').value = c.contact.lunchDeal.from || ''; $('#f-lunchTo').value = c.contact.lunchDeal.to || '';
     $('#f-lunchPrices').value = (c.lunchDeal.prices || []).join(', '); $('#f-lunchConfirmed').checked = !!c.lunchDeal.priceConfirmed;
@@ -271,8 +268,6 @@
         <td><input type="time" data-h="open" value="${o}" ${closed ? 'disabled' : ''}></td><td><input type="time" data-h="close" value="${cl}" ${closed ? 'disabled' : ''}></td></tr>`;
     }).join('');
   }
-  bind('#f-openingDate', null, v => { content.status.openingDate = v || null; renderOverview(); });
-  bind('#f-announcedOpen', null, v => { content.status.announcedOpen = v; renderOverview(); });
   bind('#f-lunchName', null, v => { content.lunchDeal.name = v; });
   bind('#f-lunchClaim', null, v => { content.lunchDeal.claim = v; });
   bind('#f-lunchFrom', null, v => { content.contact.lunchDeal.from = v; content.lunchDeal.from = v; });

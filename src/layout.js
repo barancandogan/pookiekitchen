@@ -165,18 +165,10 @@ function hoursToSchema() {
 function ribbon(d) {
   // The strip across the top of every page belongs to the owner. It shows the
   // one line they set in the panel ("Closed 25 December") and nothing else:
-  // the site no longer writes a status line of its own there — neither the
-  // pre-opening "Not open yet" nor an automatic "Open today" — at the owner's
-  // request. With no announcement set there is no strip at all.
+  // the site writes no status line of its own there, at the owner's request.
+  // With no announcement set there is no strip at all.
   if (!D.isFilled(D.site.announcement)) return '';
-  return `<div class="ribbon${d.isOpen ? ' ribbon--open' : ''}">${esc(D.site.announcement)}</div>`;
-}
-
-function formatDate(iso) {
-  const [y, m, day] = iso.split('-').map(Number);
-  const months = ['January','February','March','April','May','June',
-                  'July','August','September','October','November','December'];
-  return `${day} ${months[m - 1]} ${y}`;
+  return `<div class="ribbon">${esc(D.site.announcement)}</div>`;
 }
 
 /* -------------------------------------------------------------- header */
@@ -306,10 +298,16 @@ function consentBanner() {
 
 /* --------------------------------------------------------- action bar */
 
+// The phone's bottom bar: the menu, and the one thing a visitor on a phone
+// most likely wants next — to order, once there is somewhere to order from;
+// otherwise to walk here.
 function actionBar(d) {
+  const a = D.contact.address;
   const primary = d.deliveryLive.length
     ? `<a class="btn btn--primary" href="${esc(d.deliveryLive[0].url)}" rel="noopener">Order on ${esc(d.deliveryLive[0].name)}</a>`
-    : `<a class="btn btn--primary" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow for the opening</a>`;
+    : (d.addressKnown && D.isFilled(a.mapsUrl))
+      ? `<a class="btn btn--primary" href="${esc(a.mapsUrl)}" rel="noopener">Directions</a>`
+      : `<a class="btn btn--primary" href="${esc(D.site.instagramUrl)}" rel="noopener">Follow @${esc(D.site.instagram)}</a>`;
   return `<div class="actionbar"><div class="wrap">
     <a class="btn btn--ghost" href="/menu/">Menu</a>
     ${primary}
@@ -341,4 +339,4 @@ ${actionBar(d)}
 `;
 }
 
-module.exports = { document_, esc, money, when, formatDate, DAY_ORDER, DAY_LABEL };
+module.exports = { document_, esc, money, when, DAY_ORDER, DAY_LABEL };

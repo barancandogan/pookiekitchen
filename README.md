@@ -1,11 +1,12 @@
 # Pookie Chicken — website
 
-A dependency-free static site for a UK chicken restaurant that has not opened yet.
+A dependency-free static site for Pookie Chicken, a chicken restaurant at 61
+Chapel Market, London. The restaurant opened in September 2026.
 
 ```bash
 node build.js            # write ./dist
 node build.js --serve    # write ./dist and serve it on http://localhost:4173
-node audit.js            # structural, accessibility and launch-readiness checks
+node audit.js            # structural, accessibility and completeness checks
 node preview.js          # bundle the whole site into one shareable HTML file
 ```
 
@@ -20,7 +21,7 @@ src/data.js      all content and every unknown fact — the single source of tru
 src/layout.js    document shell: head, JSON-LD, ribbon, header, footer, action bar
 src/pages.js     one object per page
 build.js         renders src/ → dist/, plus sitemap.xml and robots.txt
-audit.js         per-page checks plus the launch gate
+audit.js         per-page checks plus a list of what the site still lacks
 preview.js       bundles the built site into one self-contained HTML file
 .github/         the Deploy workflow: build + audit on every push, shipped to the
                  VPS over SSH once the secrets exist
@@ -45,10 +46,10 @@ sitemap come from `build.js`, and nothing in the bundle is ever deployed.
 
 ## The central idea: null is a real value
 
-The restaurant has no confirmed address, phone, opening date, hours, delivery
-links or company number. The site is built to be genuinely useful while all of
-that is unknown, and to become a full restaurant site **as a content edit, not
-a rebuild**.
+The site went up before the restaurant had a confirmed address, phone, hours,
+delivery links or company number, and some of that is still unknown. It is
+built to be genuinely useful while facts are missing, and to fill in **as a
+content edit, not a rebuild**.
 
 Every unknown is `null` in `src/data.js`, and every template renders **nothing
 at all** rather than a placeholder. There is no "TBC", no greyed-out button, no
@@ -56,17 +57,16 @@ at all** rather than a placeholder. There is no "TBC", no greyed-out button, no
 less than say something untrue.
 
 `derive()` at the bottom of `data.js` turns those nulls into the flags the
-templates read. The one that matters:
+templates read (`addressKnown`, `hoursKnown`, `deliveryLive` and so on).
 
-```js
-const isOpen = status.announcedOpen && addressKnown && hoursKnown;
-```
+There is no pre-opening mode any more. Until the restaurant opened, a
+`status` switch held the site in a "not open yet" form — the "Opening soon"
+badge, a "We are not open yet" section, "Follow for the opening" on the phone
+bar. It was retired when the restaurant opened: the site has one state, and
+each fact appears the moment it is filled in. A `content.json` from before
+then may still carry a `status` block; it is ignored.
 
-Open is not a mood. You are open when a stranger can find you and knows when to
-turn up. Setting `announcedOpen: true` without an address and a full week of
-hours does not open the site — it fails the audit instead.
-
-### Launch day
+### Filling in the gaps
 
 | Set this in `src/data.js` | And this appears |
 |---|---|
@@ -76,9 +76,7 @@ hours does not open the site — it fails the audit instead.
 | `contact.email` | Footer link |
 | `contact.cateringEmail` | `/catering/` becomes buildable |
 | `contact.jobsEmail` | Hiring block |
-| `status.openingDate` | "We open on …" in the home page's not-open-yet section and on the map block |
-| `status.announcedOpen: true` | Open-for-business copy ("Open now", order-led sections) — **but only with address and hours** |
-| `delivery[].url` | That platform's order button, and it takes over the mobile action bar |
+| `delivery[].url` | That platform's order button, and it takes over the mobile action bar (until then the bar offers directions) |
 | `company.companyName` + `companyNumber` | The legally required footer line |
 | `allergens.statement` or `perItem: true` | Replaces the interim allergen notice |
 | `site.url` | Canonicals, `og:url`, and a real `sitemap.xml` |
@@ -549,16 +547,19 @@ ampersands, valid JSON-LD, no broken internal links or missing assets, and no
 placeholder or leaked value (`TBC`, `undefined`, `[object Object]`) reaching the
 output.
 
-Globally: the launch gate above — warnings while pre-opening, **errors** the
-moment the site claims to be open — plus a check that the brand hex values in
-`assets/css/main.css` still match `src/data.js`.
+Globally: a warning for each fact the site still lacks — opening hours, a
+phone number or email, the company line and allergen information, the last two
+legally required — plus a check that the brand hex values in
+`assets/css/main.css` still match `src/data.js`. These are warnings, not
+errors: the restaurant is open, and refusing to publish would not supply a
+missing fact, only freeze the site as it is. The panel shows them after every
+publish.
 
 ---
 
-## Before this goes live
+## Still to do
 
 - [ ] **Allergen information.** Legally required, and the hardest to retrofit.
-- [ ] Street address, and the opening date
 - [ ] Full week of opening hours
 - [ ] Phone number and enquiries email
 - [ ] Limited company name and number for the footer; VAT number if registered
@@ -580,9 +581,9 @@ moment the site claims to be open — plus a check that the brand hex values in
 one Node file with no dependencies, behind nginx on `127.0.0.1:8787`, and
 `admin/ui/`, one page of vanilla JavaScript set in the site's own stylesheet.
 It edits **content, never code**: the menu, the photographs, the hours, the
-opening date and the "we are open" switch, contact details, delivery links,
-the company line, the allergen statement, and one announcement line — the
-only thing that ever shows in the strip across the top of every page.
+contact details, delivery links, the company line, the allergen statement,
+and one announcement line — the only thing that ever shows in the strip
+across the top of every page.
 
 **Where the edits live.** Not in the repository. `content.json` sits in
 `POOKIE_CONTENT_DIR` — `/srv/pookie-content` on the server, `./content`

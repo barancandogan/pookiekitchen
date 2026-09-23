@@ -4,8 +4,10 @@
  * Pookie Chicken — single source of truth.
  *
  * Everything the site renders comes from this file. Nothing in dist/ is written
- * by hand. See README.md "Launch day" for the exact fields that flip the site
- * from pre-opening to open.
+ * by hand. The restaurant is open (since September 2026), so the site has one
+ * state: there is no pre-opening mode and no switch to flip. Each fact below
+ * appears on the site the moment it is filled in — see README.md "Filling in
+ * the gaps".
  *
  * NULL IS A FIRST-CLASS VALUE HERE. A null field means "we do not know this
  * yet", and every template is required to render nothing at all rather than a
@@ -66,25 +68,11 @@ const site = {
   instagram: 'thepookiechicken',
   instagramUrl: 'https://instagram.com/thepookiechicken',
 
-  // A line for the ribbon at the top of every page — "Closed 25 December",
-  // "Half-price wings this Friday". null renders the ribbon's usual status
-  // line. The panel owns this; it is the one piece of free text the owner can
-  // put on every page without touching a template.
+  // A line for the strip at the top of every page — "Closed 25 December",
+  // "Half-price wings this Friday". null means no strip at all. The panel owns
+  // this; it is the one piece of free text the owner can put on every page
+  // without touching a template.
   announcement: null,
-};
-
-/* ---------------------------------------------------------------- status */
-
-/**
- * The single switch that drives pre-opening vs open.
- *
- * `openingState` is DERIVED, never hand-set — see derive() at the bottom. The
- * site is "open" only when it can actually answer the questions an open
- * restaurant must answer: where are you, and when are you there.
- */
-const status = {
-  openingDate: null,          // ISO date, e.g. '2026-10-14'. null = date unannounced.
-  announcedOpen: false,       // set true on the morning you actually open.
 };
 
 /* --------------------------------------------------------------- contact */
@@ -658,7 +646,7 @@ const CONTENT_DIR = process.env.POOKIE_CONTENT_DIR
 const CONTENT_FILE = require('path').join(CONTENT_DIR, 'content.json');
 
 // What the panel may override, by key. Anything not listed here is code.
-const EDITABLE = ['status', 'contact', 'delivery', 'company', 'menu', 'lunchDeal', 'allergens'];
+const EDITABLE = ['contact', 'delivery', 'company', 'menu', 'lunchDeal', 'allergens'];
 
 function applyContent() {
   let c;
@@ -666,7 +654,9 @@ function applyContent() {
   catch (e) { return false; }                                   // no file: the seed is the site
   if (!c || typeof c !== 'object') return false;
 
-  if (c.status) Object.assign(status, c.status);
+  // A content.json saved before the restaurant opened may still carry a
+  // `status` block (the opening date and the "we are open" switch). The site
+  // has no pre-opening mode any more, so it is ignored.
   if (c.contact) {
     const { address, hours, lunchDeal: ld, ...rest } = c.contact;
     Object.assign(contact, rest);
@@ -723,18 +713,11 @@ function derive() {
   const addressKnown = hasAddress(contact.address);
   const hoursKnown = hasHours(contact.hours);
 
-  // "Open" is not a mood. You are open when a stranger can find you and knows
-  // when to turn up.
-  const isOpen = status.announcedOpen && addressKnown && hoursKnown;
-
   return {
-    isOpen,
-    isPreOpening: !isOpen,
     addressKnown,
     hoursKnown,
     phoneKnown: isFilled(contact.phone),
     emailKnown: isFilled(contact.email),
-    dateKnown: isFilled(status.openingDate),
     companyKnown: isFilled(company.companyName) && isFilled(company.companyNumber),
     deliveryLive: delivery.filter(d => isFilled(d.url)),
     allergensPublishable: allergens.perItem || isFilled(allergens.statement),
@@ -743,7 +726,7 @@ function derive() {
 }
 
 module.exports = {
-  site, status, contact, delivery, company, brand,
+  site, contact, delivery, company, brand,
   sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero, mapView, privacy,
   derive, isFilled, hasAddress, hasHours,
   EDITABLE, CONTENT_DIR, CONTENT_FILE, contentApplied,

@@ -197,7 +197,6 @@ a:hover { text-decoration-thickness: 2px; }
   text-align: center;
   padding: var(--s2) var(--s4);
 }
-.ribbon--open { background: var(--herb); color: var(--paper); }
 
 /* --------------------------------------------------------------- header */
 
