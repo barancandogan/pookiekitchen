@@ -773,6 +773,12 @@ only, and deploying is a deliberate act. Once a run has gone green, set the
 repository **Variable** `AUTO_DEPLOY` to `true` and every push to `main`
 deploys again.
 
+**Or say so in the commit.** A commit whose message contains `[deploy]` deploys
+that one push, whatever `AUTO_DEPLOY` says. It is the same deliberate act as
+Run workflow, made from wherever the commit is made. The run's summary then
+says whether the live home page is that commit's build, by comparing the
+stylesheet hash the page links to with the one the build produced.
+
 The run's summary shows the HTTP status the server answered with.
 
 ### Deploying from the server instead

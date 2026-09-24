@@ -101,13 +101,15 @@ jobs:
   # that on every push and fail2ban, which most servers run, eventually bans
   # the runner. So while the credential is unproven the push path builds and
   # audits only, and a deploy is a deliberate act — Actions → Deploy → Run
-  # workflow. Set the repository Variable AUTO_DEPLOY to true once a run has
-  # gone green, and every push deploys again.
+  # workflow, or a commit whose message says [deploy], which deploys that one
+  # push. Set the repository Variable AUTO_DEPLOY to true once a run has gone
+  # green, and every push deploys again.
   deploy:
     needs: build
     if: >-
       needs.build.outputs.ready == 'true' &&
-      (github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true')
+      (github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true' ||
+       contains(github.event.head_commit.message, '[deploy]'))
     runs-on: ubuntu-latest
     env:
       HOST: ${{ secrets.VPS_HOST || vars.VPS_HOST || '187.127.84.93' }}
@@ -205,6 +207,15 @@ jobs:
           esac
           tls=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://pookiechicken.com/ || echo 000)
           echo "https://pookiechicken.com/ -> $tls"
+          # Is the live page this commit's build? The stylesheet URL carries a
+          # hash of main.css, which is the same whether the server built with
+          # the owner's panel content or not, so it identifies the commit.
+          page=$(curl -sS --max-time 20 https://pookiechicken.com/ || true)
+          want=$(grep -o 'main\.css?v=[a-f0-9]*' dist/index.html | head -1)
+          have=$(printf '%s' "$page" | grep -o 'main\.css?v=[a-f0-9]*' | head -1)
+          stale=$(printf '%s' "$page" | grep -c -i 'opening soon' || true)
+          echo "stylesheet: this build ${want:-?}, live ${have:-?}"
+          echo "'Opening soon' on the live home page: ${stale:-?}"
           {
             echo "### Deployed \`${GITHUB_SHA::7}\` to $HOST"
             echo ""
@@ -212,5 +223,8 @@ jobs:
             echo "|---|---|"
             echo "| http://$HOST/ with Host header | $code |"
             echo "| https://pookiechicken.com/ | $tls |"
+            echo "| live page is this build (stylesheet hash) | $([ -n "$want" ] && [ "$want" = "$have" ] && echo yes || echo NO) |"
+            echo "| 'Opening soon' on the live home page | ${stale:-?} |"
           } >> "$GITHUB_STEP_SUMMARY"
+          [ -n "$want" ] && [ "$want" = "$have" ] || echo "::warning::the live page is not serving this commit's build (stylesheet ${have:-none} vs ${want:-none})"
           [ "$tls" = 200 ] || echo "::warning::https is not answering 200 yet — see the certificate notes in deploy/remote.sh"
