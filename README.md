@@ -612,6 +612,15 @@ seeds `content.json` from `data.js` the first time it runs, and a code deploy's
 `git reset --hard` cannot touch it. `EDITABLE` in `data.js` lists what the
 panel may override; everything else is code.
 
+**Correcting the seed.** The panel saves the whole menu, including text the
+owner never touched. So when a seed sentence in `data.js` is corrected (the
+plates are chicken breast, not thigh), a `content.json` saved earlier still
+holds the old words. `SEED_CORRECTIONS` in `data.js` lists each old sentence
+with its correction. `correctSeed()` applies it wherever a value still reads
+exactly as the old seed did, both when the site is built and when the panel
+loads. Anything the owner has edited is left alone. Each chapter's line
+("Never fried, never held.") has its own field in the panel's menu editor.
+
 **Publish is the same gate as a deploy.** It runs `build.js` and `audit.js
 --json` into a build directory of its own (`POOKIE_DIST_DIR`), and copies the
 result to the web root only if the audit has no errors. The audit's warnings

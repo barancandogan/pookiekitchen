@@ -68,6 +68,7 @@
                            border: 1px solid transparent; background: transparent; padding: 4px 6px; border-radius: var(--r-md); min-width: 180px; }
 .adm-chapter__head input:hover, .adm-chapter__head input:focus { border-color: var(--line); background: var(--paper); }
 .adm-chapter__head .adm-statement { font-family: var(--sans); font-size: var(--t-sm); text-transform: none; color: var(--ink-3); flex: 1; min-width: 200px; }
+.adm-chapter__head .adm-chapter__lede { flex-basis: 100%; order: 10; }   /* its own line, under the name and price line */
 .adm-chapter__tools { margin-left: auto; display: flex; gap: 4px; }
 .adm-item { display: grid; grid-template-columns: 1fr 110px 150px 90px auto; gap: var(--s2) var(--s3); align-items: start;
             padding: var(--s3) var(--s4); border-bottom: 1px solid var(--rule); }

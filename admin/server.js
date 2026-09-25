@@ -162,6 +162,9 @@ function seedContent() {
 function loadContent() {
   let c = readJSON(CONTENT_FILE, null);
   if (!c) { c = seedContent(); writeJSON(CONTENT_FILE, c); snapshot(c, 'seeded'); }
+  // Show the owner what the site will print: seed text corrected since this
+  // file was saved (see correctSeed in src/data.js). The next save keeps it.
+  else if (Array.isArray(c.menu)) require(path.join(ROOT, 'src', 'data.js')).correctSeed(c.menu);
   return c;
 }
 function snapshot(content, note) {

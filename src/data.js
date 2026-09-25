@@ -286,7 +286,7 @@ const menu = [
     id: 'plates',
     name: 'Chicken plates',
     priceStatement: 'Every plate £12.90 — and that is with pasta and a fresh salad',
-    lede: 'Marinated thigh, pan-seared to order. Never fried, never held.',
+    lede: 'Marinated breast, pan-seared to order. Never fried, never held.',
     items: [
       { name: 'Teriyaki Chicken', price: 12.90, photo: 'teriyaki', photoConfirmed: false, sauce: 'glaze', kcal: 860, kcalConfirmed: false,
         desc: 'Marinated fillet, teriyaki glaze, toasted sesame, basil pesto pasta, mixed salad.' },
@@ -478,7 +478,7 @@ const copy = {
     heading: ['Real ingredients.', 'Real balance.'],
     parts: [
       { title: 'Chicken', amount: '250g',
-        body: 'Thigh, marinated in our own blend and seared in a pan to order. Not fried, not held under a lamp.' },
+        body: 'Breast, marinated in our own blend and seared in a pan to order. Not fried, not held under a lamp.' },
       { title: 'Pasta', amount: '180g',
         body: 'Cooked weight. Tossed in homemade basil pesto, or swapped for wedges or fries depending on the plate.' },
       { title: 'Salad', amount: 'Fresh mix',
@@ -652,6 +652,26 @@ const CONTENT_FILE = require('path').join(CONTENT_DIR, 'content.json');
 // What the panel may override, by key. Anything not listed here is code.
 const EDITABLE = ['contact', 'delivery', 'company', 'menu', 'lunchDeal', 'allergens'];
 
+/**
+ * Corrections to the seed's own words. The panel saves the whole menu,
+ * including text the owner never touched, so a content.json written before a
+ * correction still carries the old seed. Where a value still reads exactly as
+ * that old seed did, nobody chose it, and the correction applies; anything the
+ * owner has edited is left alone. Used here when the site is built and by the
+ * panel when it loads, so the two never disagree.
+ */
+const SEED_CORRECTIONS = [
+  // The composed plates are chicken breast, not thigh (the owner, 25 September 2026).
+  ['Marinated thigh, pan-seared to order. Never fried, never held.', 'Marinated breast, pan-seared to order. Never fried, never held.'],
+];
+function correctSeed(chapters) {
+  for (const ch of chapters || []) {
+    if (!ch) continue;
+    for (const [was, now] of SEED_CORRECTIONS) if (ch.lede === was) ch.lede = now;
+  }
+  return chapters;
+}
+
 function applyContent() {
   let c;
   try { c = JSON.parse(require('fs').readFileSync(CONTENT_FILE, 'utf8')); }
@@ -687,6 +707,7 @@ function applyContent() {
         items: (ch.items || []).filter(i => !i.hidden).map(i => ({ ...i, price: i.price == null ? null : Number(i.price) })),
       });
     }
+    correctSeed(menu);
   }
   if (c.photos && typeof c.photos === 'object') {
     for (const [slug, ph] of Object.entries(c.photos)) {
@@ -732,6 +753,6 @@ function derive() {
 module.exports = {
   site, contact, delivery, company, brand,
   sauceFamilies, menu, lunchDeal, allergens, copy, photoDims, hero, mapView, privacy,
-  derive, isFilled, hasAddress, hasHours,
+  derive, isFilled, hasAddress, hasHours, correctSeed,
   EDITABLE, CONTENT_DIR, CONTENT_FILE, contentApplied,
 };

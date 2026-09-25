@@ -119,6 +119,7 @@
         <div class="adm-chapter__head">
           <input type="text" value="${esc(ch.name)}" data-f="name" aria-label="Chapter name">
           <input type="text" class="adm-statement" value="${esc(ch.priceStatement || '')}" data-f="priceStatement" placeholder="Price line, e.g. Everything here is £3.90" aria-label="Price line">
+          <input type="text" class="adm-statement adm-chapter__lede" value="${esc(ch.lede || '')}" data-f="lede" placeholder="A line about the chapter (optional), e.g. Never fried, never held." aria-label="Chapter line">
           <div class="adm-chapter__tools">
             <button class="adm-mini" type="button" data-act="ch-up" title="Move up">↑</button>
             <button class="adm-mini" type="button" data-act="ch-down" title="Move down">↓</button>

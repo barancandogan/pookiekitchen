@@ -275,7 +275,7 @@ function mapBlock(d, opts = {}) {
 const home = {
   path: '/',
   title: 'Home',
-  description: 'Marinated chicken thigh, pan-seared to order and served with pasta, a fresh salad and our own sauces. A whole meal, not a portion of meat.',
+  description: 'Marinated chicken breast, pan-seared to order and served with pasta, a fresh salad and our own sauces. A whole meal, not a portion of meat.',
   body(d) {
     return `
 ${heroBlock(d)}
@@ -492,7 +492,7 @@ const menuPage = {
     <div>
       <p class="sec__kicker">The menu</p>
       <h1 class="hx menu-top__title" id="menu-title"><span>Everything we cook.</span> <em>${esc(D.copy.lines.brighterDays)}</em></h1>
-      <p class="menu-top__lede">Chicken thigh, marinated in our own blend and seared to order. The plates
+      <p class="menu-top__lede">Chicken breast, marinated in our own blend and seared to order. The plates
       arrive complete — chicken, pasta and a fresh salad on one plate${price ? ` for ${money(price)}` : ''}.</p>
     </div>
     <div class="menu-top__plate">${dishPhoto('feature-plate', '(max-width: 900px) 100vw, 480px', [900, 1600], 'menu-top__img')}</div>
