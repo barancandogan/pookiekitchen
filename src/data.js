@@ -289,17 +289,17 @@ const menu = [
     lede: 'Marinated breast, pan-seared to order. Never fried, never held.',
     items: [
       { name: 'Teriyaki Chicken', price: 12.90, photo: 'teriyaki', photoConfirmed: false, sauce: 'glaze', kcal: 860, kcalConfirmed: false,
-        desc: 'Marinated fillet, teriyaki glaze, toasted sesame, basil pesto pasta, mixed salad.' },
+        desc: 'Marinated breast, teriyaki glaze, toasted sesame, basil pesto pasta, mixed salad.' },
       { name: 'Smoky Tomato Chicken', price: 12.90, sauce: 'smoke', kcal: 980, kcalConfirmed: false,
-        desc: 'Marinated fillet, roasted pepper and tomato sauce, pesto pasta, mixed salad.' },
+        desc: 'Marinated breast, roasted pepper and tomato sauce, pesto pasta, mixed salad.' },
       { name: 'Sriracha Fire Chicken', price: 12.90, sauce: 'chilli', kcal: 820, kcalConfirmed: false,
-        desc: 'Marinated fillet, our own hot sauce, pasta, mixed salad.' },
+        desc: 'Marinated breast, our own hot sauce, pasta, mixed salad.' },
       { name: 'Cheesy Triple Blast Chicken', price: 12.90, photo: 'cheesy-triple-blast', photoConfirmed: false, sauce: 'cream', kcal: 920, kcalConfirmed: false,
-        desc: 'Pan-seared fillet, homemade cheese sauce, potato wedges, mixed salad.' },
+        desc: 'Pan-seared breast, homemade cheese sauce, potato wedges, mixed salad.' },
       { name: 'Sweet Chilli Chicken', price: 12.90, photo: 'sweet-chilli', photoConfirmed: false, sauce: 'glaze', kcal: 890, kcalConfirmed: false,
-        desc: 'Fillet, sweet chilli glaze, toasted sesame, pasta, mixed salad.' },
+        desc: 'Breast, sweet chilli glaze, toasted sesame, pasta, mixed salad.' },
       { name: 'Creamy Curry Chicken', price: 12.90, photo: 'creamy-curry', photoConfirmed: false, sauce: 'cream', kcal: 840, kcalConfirmed: false,
-        desc: 'Fillet, aromatic curry sauce, pasta, mixed salad.' },
+        desc: 'Breast, aromatic curry sauce, pasta, mixed salad.' },
     ],
   },
 
@@ -661,13 +661,22 @@ const EDITABLE = ['contact', 'delivery', 'company', 'menu', 'lunchDeal', 'allerg
  * panel when it loads, so the two never disagree.
  */
 const SEED_CORRECTIONS = [
-  // The composed plates are chicken breast, not thigh (the owner, 25 September 2026).
+  // The composed plates are chicken breast, not thigh (the owner, 25 September 2026),
+  // so the chapter's line and every plate's own line say so.
   ['Marinated thigh, pan-seared to order. Never fried, never held.', 'Marinated breast, pan-seared to order. Never fried, never held.'],
+  ['Marinated fillet, teriyaki glaze, toasted sesame, basil pesto pasta, mixed salad.', 'Marinated breast, teriyaki glaze, toasted sesame, basil pesto pasta, mixed salad.'],
+  ['Marinated fillet, roasted pepper and tomato sauce, pesto pasta, mixed salad.', 'Marinated breast, roasted pepper and tomato sauce, pesto pasta, mixed salad.'],
+  ['Marinated fillet, our own hot sauce, pasta, mixed salad.', 'Marinated breast, our own hot sauce, pasta, mixed salad.'],
+  ['Pan-seared fillet, homemade cheese sauce, potato wedges, mixed salad.', 'Pan-seared breast, homemade cheese sauce, potato wedges, mixed salad.'],
+  ['Fillet, sweet chilli glaze, toasted sesame, pasta, mixed salad.', 'Breast, sweet chilli glaze, toasted sesame, pasta, mixed salad.'],
+  ['Fillet, aromatic curry sauce, pasta, mixed salad.', 'Breast, aromatic curry sauce, pasta, mixed salad.'],
 ];
 function correctSeed(chapters) {
+  const fix = (o, key) => { for (const [was, now] of SEED_CORRECTIONS) if (o[key] === was) o[key] = now; };
   for (const ch of chapters || []) {
     if (!ch) continue;
-    for (const [was, now] of SEED_CORRECTIONS) if (ch.lede === was) ch.lede = now;
+    fix(ch, 'lede');
+    for (const item of ch.items || []) if (item) fix(item, 'desc');
   }
   return chapters;
 }
