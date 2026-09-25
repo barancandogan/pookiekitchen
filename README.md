@@ -260,6 +260,21 @@ ground, those two straight edges read exactly as what they are: a sliced plate.
 Filled, they fall outside the canvas and the picture reads as the close crop it
 honestly is, with all the food whole inside it.
 
+**One photograph sits on white.** The home page's "All in one" feature shows
+the long plate (the teriyaki source) with no ground at all, at the owner's
+request: the plate on the page's own white, bigger, cropped to the plate and
+its shadow. `tools/photos/on_white.py` makes it from the same source, mask,
+silhouette and shadow as `plate.py`, only on `#FFFFFF` and without the 3:2
+frame, and every edge of the file is pure white so no box shows on the page:
+
+```bash
+python3 tools/photos/on_white.py <originals-dir> <work-dir> teriyaki long-plate
+```
+
+`long-plate` is not offered for dishes in the panel. In a gallery cell it would
+be a white box on the ground. Its name is still reserved, so an upload cannot
+be copied over it.
+
 Nothing is painted back in. Extending pasta and fries that were never
 photographed would be inventing a portion, and portion size is a claim this
 site makes in grams two sections above. The fix is a crop, not a retouch — and

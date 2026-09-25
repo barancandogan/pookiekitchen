@@ -289,10 +289,11 @@ ${heroBlock(d)}
     ${balanceBlock()}
   </div>
   <!-- The long plate: chicken, pasta and salad side by side, which is exactly
-       what the three figures beside it describe. 1200 as well as 400/800:
-       this one renders at 520 CSS px, which is 1040 device pixels on the
-       retina screen most people will read it on. -->
-  <div>${dishPhoto('teriyaki', '(max-width: 900px) 100vw, 520px', [400, 800, 1200], 'split__img')}</div>
+       what the three figures beside it describe. On white, cropped to the
+       plate (tools/photos/on_white.py), so it sits on the page with no ground
+       of its own. 1200 as well as 400/800: it renders at up to 560 CSS px,
+       1120 device pixels on the retina screen most people will read it on. -->
+  <div>${dishPhoto('long-plate', '(max-width: 900px) 100vw, 560px', [400, 800, 1200], 'split__img')}</div>
 </section>
 
 <section class="sec wrap">

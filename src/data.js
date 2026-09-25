@@ -224,6 +224,9 @@ const photoDims = {
   'roasted-pepper-sirloin': [1200, 800],
   'sweet-chilli': [1200, 800],
   'teriyaki': [1200, 800],
+  // The same photograph on white, cropped to the plate, for the home page's
+  // "All in one" feature (tools/photos/on_white.py). Not a menu photograph.
+  'long-plate': [1200, 902],
   // Not on a menu item and not on the site: see the note beside Triple Cheese
   // Grilled Chicken Duo. Kept so the panel can still offer it as a photograph.
   'triple-cheese-duo': [1200, 800],

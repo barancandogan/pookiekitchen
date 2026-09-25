@@ -180,12 +180,20 @@ function listVersions() {
 }
 
 // Photograph slugs the repository ships, so an upload cannot shadow one.
-function repoSlugs() {
+// Every photograph the site ships, by name. Reserved: an upload may not take
+// one of these names, or it would be copied over the site's own file.
+function siteSlugs() {
   const dir = path.join(ROOT, 'assets', 'img', 'dish');
   const out = new Set();
   for (const f of fs.readdirSync(dir)) { const m = /^(.+)-400\.webp$/.exec(f); if (m) out.add(m[1]); }
   return [...out].sort();
 }
+// Photographs the site uses outside the menu, set on white rather than on the
+// photo ground (tools/photos/on_white.py). In a gallery cell one would show as
+// a white box on the ground, so they are not offered for dishes.
+const FEATURE_ONLY = new Set(['long-plate']);
+// The site's own photographs a dish may use.
+function repoSlugs() { return siteSlugs().filter(s => !FEATURE_ONLY.has(s)); }
 function uploadedPhotos(content) {
   const out = {};
   for (const f of fs.existsSync(PHOTOS) ? fs.readdirSync(PHOTOS) : []) {
@@ -457,7 +465,7 @@ async function handle(req, res) {
   const up = /^\/api\/photos\/([a-z0-9][a-z0-9-]{1,40})\/(400|800|1200)\.(webp|jpg)$/.exec(p);
   if (method === 'PUT' && up) {
     const [, slug, size, ext] = up;
-    if (repoSlugs().includes(slug)) return send(res, 409, { error: `"${slug}" is one of the site's own photographs; choose another name.` });
+    if (siteSlugs().includes(slug)) return send(res, 409, { error: `"${slug}" is one of the site's own photographs; choose another name.` });
     let buf;
     try { buf = await readBody(req, PHOTO_LIMIT); } catch (e) { return send(res, 413, { error: 'That file is too large (3 MB per size).' }); }
     if (!isImage(buf, ext)) return send(res, 415, { error: `That is not a ${ext} file.` });

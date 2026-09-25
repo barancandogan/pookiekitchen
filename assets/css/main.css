@@ -369,10 +369,16 @@ a:hover { text-decoration-thickness: 2px; }
 /* ------------------------------------------------------- home: split */
 
 .split { display: grid; gap: var(--s6); align-items: center;
-         grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
-/* The feature photograph is a dish on the photo ground, like the gallery's,
-   so it takes the gallery's corners. */
-.split__img { width: 100%; height: auto; border-radius: 12px; }
+         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+/* The feature photograph is the plate on the page's own white, cropped to
+   the plate: no ground, no box, no corners — the plate and its shadow are
+   the whole picture, and the column gives it half the width. */
+.split__img { width: 100%; height: auto; }
+/* Half the width for the plate leaves the words a narrower column, so the
+   three figures beside it take a tighter grid to stay on one row wherever the
+   split is side by side (down to 960 px; below 900 it stacks and they have
+   the full width). 128 px still holds "FRESH MIX" at its largest. */
+.split .balance { gap: var(--s4); grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); }
 @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
 
 /* Two-line headline: first line ink, second the display orange — the mock-up's
