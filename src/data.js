@@ -224,8 +224,8 @@ const photoDims = {
   'roasted-pepper-sirloin': [1200, 800],
   'sweet-chilli': [1200, 800],
   'teriyaki': [1200, 800],
-  // Not on a menu item — the home page's feature slot names it directly. See
-  // the note beside Triple Cheese Grilled Chicken Duo.
+  // Not on a menu item and not on the site: see the note beside Triple Cheese
+  // Grilled Chicken Duo. Kept so the panel can still offer it as a photograph.
   'triple-cheese-duo': [1200, 800],
 };
 
@@ -310,8 +310,9 @@ const menu = [
       // No `photo` on purpose, though triple-cheese-duo is this dish: its source
       // file is cropped, so it is composed to fill its frame (see sources.json)
       // while every gallery plate floats whole on the ground. One filled cell in
-      // a grid of floating plates reads as a mistake, so it sits in the home
-      // page's feature slot instead, where a close crop is the point.
+      // a grid of floating plates reads as a mistake. It used to fill the home
+      // page's feature slot; the long plate (teriyaki) has that slot now, at
+      // the owner's request.
       { name: 'Triple Cheese Grilled Chicken Duo', price: 15.90, sauce: 'cream', kcal: 1150, kcalConfirmed: true,
         desc: 'Two grilled thighs, triple cheese sauce, pasta, fries, mixed salad.' },
     ],

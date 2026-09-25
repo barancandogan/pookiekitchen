@@ -288,9 +288,11 @@ ${heroBlock(d)}
     portion of meat with sides sold separately.</p>
     ${balanceBlock()}
   </div>
-  <!-- 1200 as well as 400/800: this one renders at 520 CSS px, which is 1040
-       device pixels on the retina screen most people will read it on. -->
-  <div>${dishPhoto('triple-cheese-duo', '(max-width: 900px) 100vw, 520px', [400, 800, 1200], 'split__img')}</div>
+  <!-- The long plate: chicken, pasta and salad side by side, which is exactly
+       what the three figures beside it describe. 1200 as well as 400/800:
+       this one renders at 520 CSS px, which is 1040 device pixels on the
+       retina screen most people will read it on. -->
+  <div>${dishPhoto('teriyaki', '(max-width: 900px) 100vw, 520px', [400, 800, 1200], 'split__img')}</div>
 </section>
 
 <section class="sec wrap">
